@@ -25,7 +25,7 @@ export default class Ball {
   xAccel: number = 0;
   yAccel: number = 0;
   
-  gravity: number = 0.57;
+  gravity: number = 0.42;
   elasticity: number = 0.98;
   radius: number = 21;
   friction: number = 0.995
