@@ -25,10 +25,11 @@ export default class Ball {
   xAccel: number = 0;
   yAccel: number = 0;
   
-  gravity: number = 0.42;
+  gravity: number = 0.98;
   elasticity: number = 0.98;
   radius: number = 21;
-  friction: number = 0.995
+  friction: number = 0.995;
+  mass: number = 42;
 
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
@@ -66,8 +67,11 @@ export default class Ball {
     this.context = canvas.getContext('2d') as CanvasRenderingContext2D
 
     // init accelleration
-    this.xAccel = 50 + (Math.random() * 50) * (Math.random()>0.5 ? -1 : 1)
-    this.yAccel = 10 + (Math.random() * 50) * (Math.random()>0.5 ? -1 : 1)
+    // F/m
+    const initForceX = Math.random() * 2048 * (Math.random()<0.5?-1:1)
+    const initForceY = Math.random() * 2048 * (Math.random()<0.5?-1:1)
+    this.xAccel = initForceX / this.mass
+    this.yAccel = (initForceY / this.mass) + this.gravity
     
     this.boundingBox = boundingBox // screen
 
@@ -294,10 +298,10 @@ export default class Ball {
 
     this.x = typeof x === 'number'  ? x : this.x
     this.y = typeof y === 'number'  ? y : this.y
-
-    const scale =  0.3 //
-    this.xAccel = (this.x - this.slingShotX) * -1 * scale
-    this.yAccel = (this.y - this.slingShotY) * -1 * scale
+    
+    // F/m
+    this.xAccel = (this.x - this.slingShotX) * -16 / this.mass 
+    this.yAccel = (this.y - this.slingShotY) * -16 / this.mass
 
     // normalize slingShot positions
     this.slingShotX = INIT_SLINGSHOT
