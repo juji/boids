@@ -5,19 +5,19 @@ import { Renderer } from '@/renderer'
 
 export function registerEvents( 
   renderer: Renderer,
-  elm: HTMLElement
+  canvas: HTMLCanvasElement
 ){
 
   console.log(renderer) // comment this when used
 
   if(window.matchMedia("(any-hover: none)").matches) {
     
-    const touch = new TouchEvents(elm)
+    const touch = new TouchEvents(canvas)
     return () => touch.clear && touch.clear()
 
   }else{
 
-    const mouse = new MouseEvents(elm)
+    const mouse = new MouseEvents(canvas)
     return () => mouse.clear && mouse.clear()
 
   }

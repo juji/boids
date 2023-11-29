@@ -5,7 +5,7 @@ export default class MouseEvents {
   clear: null | (() => void) = null
 
   constructor(
-    elm: HTMLElement, 
+    canvas: HTMLCanvasElement,
     events?:{
       onMouseUp?: (e:MouseEvent) => void
       onMouseDown?: (e:MouseEvent) => void
@@ -21,7 +21,7 @@ export default class MouseEvents {
 
     let mouseMoveListener = (e:MouseEvent) => {
       if(e.currentTarget !== e.target) return;
-      if(e.currentTarget !== elm) return;
+      if(e.currentTarget !== canvas) return;
       e.preventDefault()
       onMouseMove && onMouseMove(e)
       return false
@@ -29,29 +29,29 @@ export default class MouseEvents {
 
     let mouseDownListener = (e:MouseEvent) => {
       if(e.currentTarget !== e.target) return;
-      if(e.currentTarget !== elm) return;
+      if(e.currentTarget !== canvas) return;
       e.preventDefault()
       onMouseDown && onMouseDown(e)
-      if(onMouseMove) elm.addEventListener('mousemove', mouseMoveListener)
+      if(onMouseMove) canvas.addEventListener('mousemove', mouseMoveListener)
       return false
     }
 
     let mouseUpListener = (e: MouseEvent) => {
       if(e.currentTarget !== e.target) return;
-      if(e.currentTarget !== elm) return;
+      if(e.currentTarget !== canvas) return;
       e.preventDefault()
       onMouseUp && onMouseUp(e)
-      if(onMouseMove) elm.removeEventListener('mousemove', mouseMoveListener)
+      if(onMouseMove) canvas.removeEventListener('mousemove', mouseMoveListener)
       return false
     }
 
-    elm.addEventListener('mousedown', mouseDownListener)
-    elm.addEventListener('mouseup', mouseUpListener)
+    canvas.addEventListener('mousedown', mouseDownListener)
+    canvas.addEventListener('mouseup', mouseUpListener)
 
     this.clear = () => {
-      elm.removeEventListener('mousedown', mouseDownListener)
-      elm.removeEventListener('mouseup', mouseUpListener)
-      elm.removeEventListener('mousemove', mouseMoveListener)
+      canvas.removeEventListener('mousedown', mouseDownListener)
+      canvas.removeEventListener('mouseup', mouseUpListener)
+      canvas.removeEventListener('mousemove', mouseMoveListener)
     }
 
   }
