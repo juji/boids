@@ -9,7 +9,6 @@ export default class Thing {
 
   anim: number = 0
 
-
   constructor(
     canvas: HTMLCanvasElement, 
     boundingBox: {width:number, height: number}
