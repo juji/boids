@@ -1,22 +1,24 @@
 
 
-export function ui(){
+export function infoButton(){
 
+  const revealTimeout = 5000
+  
   const button = document.querySelector('button.info-button')
   const content = document.querySelector('.info-content')
 
   let to: ReturnType<typeof setTimeout>
   button?.addEventListener('click', () => { 
     
+    to && clearTimeout(to)
     button.classList.toggle('on')
     content?.classList.toggle('on')
-    to && clearTimeout(to)
-    
+
     if(content?.classList.contains('on')) {
       to = setTimeout(() => {
         button.classList.remove('on')
         content?.classList.remove('on')
-      }, 5000)
+      }, revealTimeout)
     }
   })
 
