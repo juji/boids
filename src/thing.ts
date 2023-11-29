@@ -1,6 +1,4 @@
-import colors from './colors'
 
-const INIT_SLINGSHOT = -99
 
 export default class Thing {
 
