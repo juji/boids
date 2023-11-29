@@ -1,13 +1,13 @@
 import { infoButton } from "./info-button";
 import { registerEvents } from './events'
-import { Thing } from "@/thing";
+import { Renderer } from "@/renderer";
 
 export function ui(
-  thing: Thing, 
+  renderer: Renderer, 
   canvas: HTMLCanvasElement
 ){
 
-  registerEvents(thing, canvas)
+  registerEvents(renderer, canvas)
   infoButton()
 
 }

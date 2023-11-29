@@ -4,7 +4,7 @@ import './styles/index.css'
 import './styles/button.css'
 import './styles/info-button.css'
 
-import { Thing } from './thing'
+import { Renderer } from './renderer'
 import { ui } from './ui'
 
 
@@ -16,7 +16,7 @@ import { ui } from './ui'
   const footer = document.querySelector('footer') as HTMLElement
   const footerDim = footer.getBoundingClientRect()
   
-  const thing = new Thing(
+  const thing = new Renderer(
     canvas,
     {
       width: window.innerWidth,

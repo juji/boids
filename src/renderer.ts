@@ -1,6 +1,6 @@
 
 
-export class Thing {
+export class Renderer {
 
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;

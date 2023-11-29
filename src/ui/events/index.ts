@@ -1,14 +1,14 @@
 
 import MouseEvents from './mouse-events'
 import TouchEvents from './touch-events'
-import { Thing } from '@/thing'
+import { Renderer } from '@/renderer'
 
 export function registerEvents( 
-  thing: Thing,
+  renderer: Renderer,
   elm: HTMLElement
 ){
 
-  console.log(thing) // comment this when used
+  console.log(renderer) // comment this when used
 
   if(window.matchMedia("(any-hover: none)").matches) {
     
