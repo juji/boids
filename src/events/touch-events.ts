@@ -70,12 +70,17 @@ export default class TouchEvents {
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      onPointerUp && onPointerUp(e)
-      if(onPointerMove) elm.removeEventListener('touchmove', pointerMoveListener)
+      
       if(onScale && distance) {
         elm.removeEventListener('touchmove', onPinchMove);
         distance = 0;
       }
+
+      else if(!distance){
+        onPointerUp && onPointerUp(e)
+        if(onPointerMove) elm.removeEventListener('touchmove', pointerMoveListener)
+      }
+    
       return false
     }
 
