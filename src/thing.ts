@@ -19,6 +19,8 @@ export default class Thing {
     this.boundingBox = boundingBox // screen
     this.canvas.width = boundingBox.width
     this.canvas.height = boundingBox.height
+    this.canvas.style.width = `${boundingBox.width}px`
+    this.canvas.style.height = `${boundingBox.width}px`
 
     this.start()
 
@@ -30,6 +32,8 @@ export default class Thing {
     this.boundingBox = boundingBox
     this.canvas.width = boundingBox.width
     this.canvas.height = boundingBox.height
+    this.canvas.style.width = `${boundingBox.width}px`
+    this.canvas.style.height = `${boundingBox.width}px`
   }
 
   start(){
