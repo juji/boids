@@ -16,7 +16,7 @@ import { ui } from './ui'
   const footer = document.querySelector('footer') as HTMLElement
   const footerDim = footer.getBoundingClientRect()
   
-  const thing = new Renderer(
+  const renderer = new Renderer(
     canvas,
     {
       width: window.innerWidth,
@@ -25,10 +25,10 @@ import { ui } from './ui'
   )
   
   // start the ui handler
-  ui(thing, canvas)
+  ui(renderer, canvas)
   
   window.addEventListener('resize', () => {
-    thing.changeBoundingBox({
+    renderer.changeBoundingBox({
       width: window.innerWidth,
       height: window.innerHeight - footerDim.height
     })
