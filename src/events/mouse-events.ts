@@ -2,33 +2,28 @@
 
 export default class MouseEvents {
 
-  elm: HTMLElement
-  onMouseUp: null | ((e:MouseEvent) => void) = null
-  onMouseDown: null | ((e:MouseEvent) => void) = null
-  onMouseMove: null | ((e:MouseEvent) => void) = null
   clear: null | (() => void) = null
 
-  constructor(elm: HTMLElement, {
-    onMouseUp,
-    onMouseDown,
-    onMouseMove
-  }:{
-    onMouseUp: (e:MouseEvent) => void
-    onMouseDown: (e:MouseEvent) => void
-    onMouseMove: (e:MouseEvent) => void
-  }){
+  constructor(
+    elm: HTMLElement, 
+    events?:{
+      onMouseUp?: (e:MouseEvent) => void
+      onMouseDown?: (e:MouseEvent) => void
+      onMouseMove?: (e:MouseEvent) => void
+    }
+  ){
 
-    this.elm = elm
-    this.onMouseUp = onMouseUp
-    this.onMouseDown = onMouseDown
-    this.onMouseMove = onMouseMove
+    const {
+      onMouseUp,
+      onMouseDown,
+      onMouseMove,
+    } = events || {}
 
-    let t = this
     let mouseMoveListener = (e:MouseEvent) => {
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onMouseMove && t.onMouseMove(e)
+      onMouseMove && onMouseMove(e)
       return false
     }
 
@@ -36,8 +31,8 @@ export default class MouseEvents {
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onMouseDown && t.onMouseDown(e)
-      if(t.onMouseMove) elm.addEventListener('mousemove', mouseMoveListener)
+      onMouseDown && onMouseDown(e)
+      if(onMouseMove) elm.addEventListener('mousemove', mouseMoveListener)
       return false
     }
 
@@ -45,8 +40,8 @@ export default class MouseEvents {
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onMouseUp && t.onMouseUp(e)
-      if(t.onMouseMove) elm.removeEventListener('mousemove', mouseMoveListener)
+      onMouseUp && onMouseUp(e)
+      if(onMouseMove) elm.removeEventListener('mousemove', mouseMoveListener)
       return false
     }
 

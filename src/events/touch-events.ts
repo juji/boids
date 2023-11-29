@@ -2,63 +2,94 @@
 
 export default class TouchEvents {
 
-  elm: HTMLElement
-  onTouchUp: null | ((e:TouchEvent) => void) = null
-  onTouchDown: null | ((e:TouchEvent) => void) = null
-  onTouchMove: null | ((e:TouchEvent) => void) = null
   clear: null | (() => void) = null
 
-  constructor(elm: HTMLElement, {
-    onTouchUp,
-    onTouchDown,
-    onTouchMove
-  }:{
-    onTouchUp: (e:TouchEvent) => void
-    onTouchDown: (e:TouchEvent) => void
-    onTouchMove: (e:TouchEvent) => void
-  }){
+  constructor(
+    elm: HTMLElement, 
+    events?: {
+      onPointerUp?: (e:TouchEvent) => void
+      onPointerDown?: (e:TouchEvent) => void
+      onPointerMove?: (e:TouchEvent) => void
+      onScale?: (scale: number) => void
+    }
+  ){
 
-    this.elm = elm
-    this.onTouchUp = onTouchUp
-    this.onTouchDown = onTouchDown
-    this.onTouchMove = onTouchMove
+    const {
+      onPointerUp,
+      onPointerDown,
+      onPointerMove,
+      onScale,
+    } = events || {}
 
-    let t = this
-    let mouseMoveListener = (e:TouchEvent) => {
+    function pointerMoveListener(e:TouchEvent){
+      if(e.touches.length > 1) return;
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onTouchMove && t.onTouchMove(e)
+      onPointerMove && onPointerMove(e)
       return false
     }
 
-    let mouseDownListener = (e:TouchEvent) => {
+    function pointerDownListener(e:TouchEvent){
+      if(e.touches.length > 1) return;
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onTouchDown && t.onTouchDown(e)
-      if(t.onTouchMove) elm.addEventListener('touchmove', mouseMoveListener)
+      onPointerDown && onPointerDown(e)
+      if(onPointerMove) elm.addEventListener('touchmove', pointerMoveListener)
       return false
     }
 
-    let mouseUpListener = (e: TouchEvent) => {
+    function calcDistance(e: TouchEvent){
+      return Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX, 
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+    }
+
+    let distance = 0
+    function onPinchStart(e: TouchEvent){
+      if(e.touches.length < 2) return;
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()
-      t.onTouchUp && t.onTouchUp(e)
-      if(t.onTouchMove) elm.removeEventListener('touchmove', mouseMoveListener)
+      distance = calcDistance(e);
+      elm.addEventListener('touchmove', onPinchMove)
+    }
+
+    function onPinchMove(e: TouchEvent){
+      if(e.touches.length < 2) return;
+      if(e.currentTarget !== e.target) return;
+      if(e.currentTarget !== elm) return;
+      e.preventDefault()
+      const deltaDistance = calcDistance(e);
+      onScale && onScale(deltaDistance / distance)
+    }
+
+    function pointerUpListener(e: TouchEvent){
+      if(e.currentTarget !== e.target) return;
+      if(e.currentTarget !== elm) return;
+      e.preventDefault()
+      onPointerUp && onPointerUp(e)
+      if(onPointerMove) elm.removeEventListener('touchmove', pointerMoveListener)
+      if(onScale && distance) {
+        elm.removeEventListener('touchmove', onPinchMove);
+        distance = 0;
+      }
       return false
     }
 
-    elm.addEventListener('touchstart', mouseDownListener)
-    elm.addEventListener('touchend', mouseUpListener)
-    elm.addEventListener('touchcancel', mouseUpListener)
+    elm.addEventListener('touchstart', pointerDownListener)
+    elm.addEventListener('touchend', pointerUpListener)
+    elm.addEventListener('touchcancel', pointerUpListener)
+    elm.addEventListener('touchstart', onPinchStart)
 
     this.clear = () => {
-      elm.removeEventListener('touchstart', mouseDownListener)
-      elm.removeEventListener('touchend', mouseUpListener)
-      elm.removeEventListener('touchcancel', mouseUpListener)
-      elm.removeEventListener('touchmove', mouseMoveListener)
+      elm.removeEventListener('touchstart', pointerDownListener)
+      elm.removeEventListener('touchend', pointerUpListener)
+      elm.removeEventListener('touchcancel', pointerUpListener)
+      elm.removeEventListener('touchmove', pointerMoveListener)
+      elm.removeEventListener('touchstart', onPinchStart)
     }
 
   }

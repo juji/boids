@@ -10,34 +10,12 @@ export function registerEvents(
 
   if(window.matchMedia("(any-hover: none)").matches) {
     
-    const touch = new TouchEvents(elm, {
-      onTouchDown: (e:TouchEvent) => {
-        
-      },
-      onTouchMove: (e:TouchEvent) => {
-        
-      },
-      onTouchUp: () => {
-        
-      },
-    })
-
+    const touch = new TouchEvents(elm)
     return () => touch.clear && touch.clear()
 
   }else{
 
-    const mouse = new MouseEvents(elm, {
-      onMouseDown: (e:MouseEvent) => {
-        
-      },
-      onMouseMove: (e:MouseEvent) => {
-        
-      },
-      onMouseUp: (e:MouseEvent) => {
-        
-      },
-    })
-
+    const mouse = new MouseEvents(elm)
     return () => mouse.clear && mouse.clear()
 
   }
