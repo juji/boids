@@ -33,8 +33,6 @@ export default class TouchEvents {
     }
 
     let mouseDownListener = (e:TouchEvent) => {
-      console.log(e.currentTarget)
-      console.log(e.target)
       if(e.currentTarget !== e.target) return;
       if(e.currentTarget !== elm) return;
       e.preventDefault()

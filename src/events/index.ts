@@ -1,10 +1,10 @@
 
 import MouseEvents from './mouse-events'
 import TouchEvents from './touch-events'
-import Ball from '../ball'
+import Thing from '../thing'
 
 export function registerEvents( 
-  ball: Ball,
+  thing: Thing,
   elm: HTMLElement 
 ){
 
@@ -12,19 +12,13 @@ export function registerEvents(
     
     const touch = new TouchEvents(elm, {
       onTouchDown: (e:TouchEvent) => {
-        ball.slingShotInit(
-          e.touches[0].pageX,
-          e.touches[0].pageY
-        )
+        
       },
       onTouchMove: (e:TouchEvent) => {
-        ball.slingShotPull(
-          e.touches[0].pageX,
-          e.touches[0].pageY
-        )
+        
       },
       onTouchUp: () => {
-        ball.slingShotRelease()
+        
       },
     })
 
@@ -34,22 +28,13 @@ export function registerEvents(
 
     const mouse = new MouseEvents(elm, {
       onMouseDown: (e:MouseEvent) => {
-        ball.slingShotInit(
-          e.pageX,
-          e.pageY
-        )
+        
       },
       onMouseMove: (e:MouseEvent) => {
-        ball.slingShotPull(
-          e.pageX,
-          e.pageY
-        )
+        
       },
       onMouseUp: (e:MouseEvent) => {
-        ball.slingShotRelease(
-          e.pageX,
-          e.pageY
-        )
+        
       },
     })
 

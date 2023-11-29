@@ -93,23 +93,25 @@ header svg{
   height: 89px;
 }
 
+.buttons{
+  position: fixed;
+  z-index: 31;
+  top: 21px;
+  right: 21px;
+
+  display: grid;
+  grid-gap: 21px;
+}
+
 .info{
   position: fixed;
   z-index: 30;
   top: 21px;
   right: 21px;
   
-  & > button{
-    padding: 8px 21px;
-    font-size: 1rem;
-    border-radius: 3px;
-    border: none;
-    cursor: pointer;
-  }
-  
   & > .info-content{
     background: rgba(0,0,0,0.4);
-    padding: 1rem 2rem;
+    padding: 2rem;
     position: fixed;
     z-index: 30;
     top: 79px;
@@ -119,6 +121,7 @@ header svg{
     opacity: 0;
     transition: opacity 500ms;
     will-change: right, opacity;
+    max-width: 300px;
 
     &.on{
       right: 21px;
@@ -147,7 +150,7 @@ header svg path.logo-fg{
 main{
   flex: 1 1 auto;
   position: relative;
-  z-index: 2;
+  z-index: 0;
   display: flex;
 }
 
