@@ -87,14 +87,14 @@ export default class TouchEvents {
     canvas.addEventListener('touchstart', pointerDownListener)
     canvas.addEventListener('touchend', pointerUpListener)
     canvas.addEventListener('touchcancel', pointerUpListener)
-    canvas.addEventListener('touchstart', onPinchStart)
+    onScale && canvas.addEventListener('touchstart', onPinchStart)
 
     this.clear = () => {
       canvas.removeEventListener('touchstart', pointerDownListener)
       canvas.removeEventListener('touchend', pointerUpListener)
       canvas.removeEventListener('touchcancel', pointerUpListener)
       canvas.removeEventListener('touchmove', pointerMoveListener)
-      canvas.removeEventListener('touchstart', onPinchStart)
+      onScale && canvas.removeEventListener('touchstart', onPinchStart)
     }
 
   }

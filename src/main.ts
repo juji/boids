@@ -10,10 +10,11 @@ import { ui } from './ui'
 
 (function(){
   
-  const canvas = document.querySelector('canvas')
-  if(!canvas) return;
-
+  const canvas = document.querySelector('canvas') as HTMLCanvasElement
   const footer = document.querySelector('footer') as HTMLElement
+  
+  if(!canvas || !footer) return;
+
   const footerDim = footer.getBoundingClientRect()
   
   const renderer = new Renderer(

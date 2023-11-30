@@ -3,7 +3,7 @@ import MouseEvents from './mouse-events'
 import TouchEvents from './touch-events'
 import { Renderer } from '@/renderer'
 
-export function registerEvents( 
+export function registerCanvasEvents( 
   renderer: Renderer,
   canvas: HTMLCanvasElement
 ){

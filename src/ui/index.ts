@@ -1,5 +1,5 @@
 import { infoButton } from "./info-button";
-import { registerEvents } from './canvas'
+import { registerCanvasEvents } from './canvas-events'
 import { Renderer } from "@/renderer";
 
 export function ui(
@@ -7,7 +7,7 @@ export function ui(
   canvas: HTMLCanvasElement
 ){
 
-  registerEvents(renderer, canvas)
+  registerCanvasEvents(renderer, canvas)
   infoButton()
 
 }
