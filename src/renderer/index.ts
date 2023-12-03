@@ -6,7 +6,6 @@ export class Renderer {
   context: CanvasRenderingContext2D;
   boundingBox: {width:number, height: number}
   stopped = false
-
   anim: number = 0
 
   constructor(
@@ -29,11 +28,13 @@ export class Renderer {
 
   // when resize happens
   changeBoundingBox(boundingBox: {width:number, height: number}){
+    
     this.boundingBox = boundingBox
     this.canvas.width = boundingBox.width
     this.canvas.height = boundingBox.height
     this.canvas.style.width = `${boundingBox.width}px`
     this.canvas.style.height = `${boundingBox.width}px`
+    
   }
 
   start(){
