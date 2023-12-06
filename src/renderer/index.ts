@@ -182,8 +182,8 @@ export class Renderer {
   }
 
   cohesion(){
-    const centeringfactor = 1
-    const visibleRange = 80
+    // const centeringfactor = 1
+    // const visibleRange = 80
   }
 
   loop(){
