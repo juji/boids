@@ -1,4 +1,4 @@
-import Boid, { BoidBox } from './boid'
+import Boid, { BoidBox } from '../boid'
 
 export class Renderer {
 
@@ -10,7 +10,7 @@ export class Renderer {
   anim: number = 0
 
   boids: Boid[];
-  boidNum = 1000
+  boidNum = 500
   boxGap = 200
   boidBox: BoidBox
 
@@ -38,9 +38,9 @@ export class Renderer {
     const smaller = Math.min(boundingBox.width/2, boundingBox.height/2)
     this.boxGap = 3 * smaller / 10
     this.boidBox = {
-      top: (-boundingBox.height/4) + this.boxGap,
+      top: (-boundingBox.height/2) + this.boxGap,
       left: (-boundingBox.width/2) + this.boxGap,
-      bottom: (boundingBox.height/4) - this.boxGap,
+      bottom: (boundingBox.height/2) - this.boxGap,
       right: (boundingBox.width/2) - this.boxGap,
       front: smaller - this.boxGap,
       back: -smaller + this.boxGap
@@ -58,9 +58,9 @@ export class Renderer {
 
         // give them initial velocity
         velocity: [
-          Math.random() * 2 * (Math.random()<.5?-1:1),
-          Math.random() * 2 * (Math.random()<.5?-1:1),
-          Math.random() * 2 * (Math.random()<.5?-1:1),
+          Math.random() * 7 * (Math.random()<.5?-1:1),
+          Math.random() * 7 * (Math.random()<.5?-1:1),
+          Math.random() * 7 * (Math.random()<.5?-1:1),
         ]
 
       })
@@ -113,90 +113,110 @@ export class Renderer {
 
   }
 
-  separation(){
-    const avoidFactor = 0.1
-    const protectedRange = 20
+  loop(){
+
+    const avoidFactor = 1
+    const matchingFactor = 0.1
+
     let i = this.boids.length
     while(i--) {
       let j = this.boids.length
-      let closeDx = 0
-      let closeDy = 0
-      let closeDz = 0
-      while(j--) {
+      this.boids[i].accelleration[0] = 0
+      this.boids[i].accelleration[1] = 0
+      this.boids[i].accelleration[2] = 0
 
-        if(j === i) continue; 
-        if(Math.sqrt(
-          (this.boids[j].position[0] - this.boids[i].position[0])**2 +
-          (this.boids[j].position[1] - this.boids[i].position[1])**2 +
-          (this.boids[j].position[2] - this.boids[i].position[2])**2
-        ) > protectedRange) continue;
+      // separation 
+      let distanceX = 0
+      let distanceY = 0
+      let distanceZ = 0
 
-        closeDx += this.boids[j].position[0] - this.boids[i].position[0]
-        closeDy += this.boids[j].position[1] - this.boids[i].position[1]
-        closeDz += this.boids[j].position[2] - this.boids[i].position[2]
-
-      }
-
-      this.boids[i].accelleration[0] += closeDx * avoidFactor
-      this.boids[i].accelleration[1] += closeDy * avoidFactor
-      this.boids[i].accelleration[2] += closeDz * avoidFactor
-    }
-  }
-
-  alignment(){
-
-    const matchingFactor = 0.1
-    const visibleRange = 70
-
-    let i = this.boids.length
-    while(i--){
-      let j = this.boids.length
+      // alignment
+      let friends = 0
       let xVelAvg = 0
       let yVelAvg = 0
       let zVelAvg = 0
-      let neighbour = 0
-      
-      while(j--){
-        if(j === i) continue;
-        if(Math.sqrt(
-          (this.boids[j].position[0] - this.boids[i].position[0])**2 +
-          (this.boids[j].position[1] - this.boids[i].position[1])**2 +
-          (this.boids[j].position[2] - this.boids[i].position[2])**2
-        ) > visibleRange) continue;
 
-        xVelAvg = this.boids[j].velocity[0]
-        yVelAvg = this.boids[j].velocity[1]
-        zVelAvg = this.boids[j].velocity[2]
-        neighbour += 1
+      while(j--) {
+        if(j === i) continue; 
+        
+        const separation = this.separation(this.boids[i], this.boids[j])
+        if(separation){
+          const [ distanceDx, distanceDy, distanceDz ] = separation 
+          distanceX += distanceDx
+          distanceY += distanceDy
+          distanceZ += distanceDz
+        }
+
+        const alignment = this.alignment(this.boids[i], this.boids[j])
+        if(alignment){
+          const [ xVelSun, yVelSum, zVelSum ] = alignment
+          xVelAvg += xVelSun 
+          yVelAvg += yVelSum 
+          zVelAvg += zVelSum
+          friends++
+        }
+        
+
+
       }
 
-      if(!neighbour) continue;
-      xVelAvg /= neighbour
-      yVelAvg /= neighbour
-      zVelAvg /= neighbour
-      this.boids[i].accelleration[0] += ( xVelAvg - this.boids[i].velocity[0] ) * matchingFactor
-      this.boids[i].accelleration[1] += ( yVelAvg - this.boids[i].velocity[1] ) * matchingFactor
-      this.boids[i].accelleration[2] += ( zVelAvg - this.boids[i].velocity[2] ) * matchingFactor
+      // separation 
+      this.boids[i].accelleration[0] = distanceX * avoidFactor
+      this.boids[i].accelleration[1] = distanceY * avoidFactor
+      this.boids[i].accelleration[2] = distanceZ * avoidFactor
+
+      // alignment
+      if(friends){
+        xVelAvg /= friends
+        yVelAvg /= friends
+        zVelAvg /= friends
+        this.boids[i].accelleration[0] += ( xVelAvg - this.boids[i].velocity[0] ) * matchingFactor
+        this.boids[i].accelleration[1] += ( yVelAvg - this.boids[i].velocity[1] ) * matchingFactor
+        this.boids[i].accelleration[2] += ( zVelAvg - this.boids[i].velocity[2] ) * matchingFactor
+      }
+
     }
+  }
+
+  separation( boid: Boid, friend: Boid ){
+
+    const protectedRange = 20
+        
+    if(Math.sqrt(
+      (friend.position[0] - boid.position[0])**2 +
+      (friend.position[1] - boid.position[1])**2 +
+      (friend.position[2] - boid.position[2])**2
+    ) > protectedRange) return null;
+    
+    return [
+      boid.position[0] - friend.position[0],
+      boid.position[1] - friend.position[1],
+      boid.position[2] - friend.position[2],
+    ]
+
+  }
+
+  alignment( boid: Boid, friend: Boid ){
+
+    const visibleRange = 80
+
+    if(Math.sqrt(
+      (friend.position[0] - boid.position[0])**2 +
+      (friend.position[1] - boid.position[1])**2 +
+      (friend.position[2] - boid.position[2])**2
+    ) > visibleRange) return null;
+    
+    return [
+      friend.velocity[0],
+      friend.velocity[1],
+      friend.velocity[2],
+    ]
 
   }
 
   cohesion(){
     const centeringfactor = 1
     const visibleRange = 80
-  }
-
-  loop(){
-
-    let i = this.boids.length
-    while(i--) {
-      this.boids[i].accelleration[0] = 0
-      this.boids[i].accelleration[1] = 0
-      this.boids[i].accelleration[2] = 0
-      
-
-
-    }
 
   }
 
@@ -207,18 +227,6 @@ export class Renderer {
     let i = this.boids.length
     while(i--) this.boids[i].calculate( this.boidBox )
 
-  }
-
-  drawBox(){
-    // draw boidBox
-    this.context.beginPath()
-    this.context.moveTo(this.boidBox.left, this.boidBox.top)
-    this.context.lineTo(this.boidBox.right, this.boidBox.top)
-    this.context.lineTo(this.boidBox.right, this.boidBox.bottom)
-    this.context.lineTo(this.boidBox.left, this.boidBox.bottom)
-    this.context.lineTo(this.boidBox.left, this.boidBox.top)
-    this.context.strokeStyle = "red";
-    this.context.stroke();
   }
 
   draw(){
@@ -233,7 +241,15 @@ export class Renderer {
     let i = this.boids.length
     while(i--) this.boids[i].draw( this.boidBox )
 
-    this.drawBox()
+    // draw boidBox
+    this.context.beginPath()
+    this.context.moveTo(this.boidBox.left, this.boidBox.top)
+    this.context.lineTo(this.boidBox.right, this.boidBox.top)
+    this.context.lineTo(this.boidBox.right, this.boidBox.bottom)
+    this.context.lineTo(this.boidBox.left, this.boidBox.bottom)
+    this.context.lineTo(this.boidBox.left, this.boidBox.top)
+    this.context.strokeStyle = "red";
+    this.context.stroke();
 
   }
 
