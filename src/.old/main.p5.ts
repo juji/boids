@@ -4,7 +4,7 @@ import './styles/index.css'
 import './styles/button.css'
 import './styles/info-button.css'
 
-import { Renderer } from './renderer/index.p5'
+import { Renderer } from '../renderer/.old/index.p5'
 // import { ui } from './ui'
 
 import P5 from 'p5'
