@@ -1,4 +1,5 @@
 import Boid, { BoidBox } from './boid'
+import { type Predator } from './predator'
 
 // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
 
@@ -12,7 +13,7 @@ export class Renderer {
   anim: number = 0
 
   boids: Boid[];
-  boidNum = 1500
+  boidNum = 2500
   boxGap = 200
   depth = 200
   boidBox: BoidBox = {
@@ -24,13 +25,22 @@ export class Renderer {
     back: 0,
   }
 
-  predator: ({x: number, y: number})|null = null
-  predatorSize: number = 20
+  predator: Predator = {
+    size: 40,
+    x: 0,
+    y: 0,
+    exists: false
+  }
+  worker: Worker
 
   constructor(
     canvas: HTMLCanvasElement, 
     boundingBox: {width:number, height: number}
   ){
+
+    // let window size set boidNum
+    this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 
+      1000 : 2000
 
     this.canvas = canvas
     this.context = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -40,7 +50,6 @@ export class Renderer {
     this.canvas.style.width = `${boundingBox.width}px`
     this.canvas.style.height = `${boundingBox.height}px`
 
-
     this.context.translate(
       boundingBox.width/2,
       boundingBox.height/2
@@ -48,9 +57,6 @@ export class Renderer {
 
     const { width, height, depth } = this.calculateBoidBox()
     
-    const velX = Math.random()<.5?1:-1
-    const velY = Math.random()<.5?1:-1
-    const velZ = Math.random()<.5?1:-1
     this.boids = [...new Array(this.boidNum)].map(() => {
       
       return new Boid({
@@ -62,29 +68,51 @@ export class Renderer {
         ],
 
         // give them initial velocity
-        velocity: [
-          Math.random() * 1 * velX,
-          Math.random() * 1 * velY,
-          Math.random() * 1 * velZ,
-        ]
+        velocity: [1,1,1]
 
       })
 
     })
+    
+    this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
+      type: 'module'
+    });
 
-    this.start()
+    this.worker.onmessage = (e: MessageEvent) => {
+      const data = JSON.parse(e.data)
+      if(data.positions){
+        let i = this.boids.length
+        while(i--) this.boids[i].setPosition(data.positions[i])
+        this.draw()
+      }
+    }
+
+    this.worker.postMessage(JSON.stringify({
+      boids: this.boids,
+      boidBox: this.boidBox,
+      predator: this.predator
+    }));
 
   }
 
   setPredator(x: number, y: number){
     this.predator = { 
+      size: this.predator.size,
+      exists: true,
       x: x - this.boundingBox.width/2, 
       y: y - this.boundingBox.height/2
     }
+
+    this.worker.postMessage(JSON.stringify({
+      predator: this.predator
+    }));
   }
 
   removePredator(){
-    this.predator = null
+    this.predator.exists = false
+    this.worker.postMessage(JSON.stringify({
+      predator: this.predator
+    }));
   }
 
   calculateBoidBox(){
@@ -102,6 +130,10 @@ export class Renderer {
       front: this.depth - this.boxGap,
       back: -this.depth + this.boxGap
     }
+
+    if(this.worker) this.worker.postMessage(JSON.stringify({
+      boidBox: this.boidBox
+    }));
 
     return { width, height, depth: this.depth }
   }
@@ -126,154 +158,6 @@ export class Renderer {
     this.calculateBoidBox()
   }
 
-  start(){
-
-    this.calculate()
-    
-    this.anim = requestAnimationFrame(() => {
-      this.draw()
-      this.anim = requestAnimationFrame(() => {
-        this.start()
-      })
-    })
-
-  }
-
-  loop(){
-
-    // visible range is a range
-    const visibleRange = 40 + Math.random() * 40
-
-    // Separation
-    const avoidFactor = 0.05
-    const protectedRange = 25
-
-    // Alignment
-    const matchingfactor = 0.05
-
-    // Cohesion
-    const centeringFactor = 0.0005
-
-    // Predator
-    const predatorturnfactor = 1
-    const predatoryRange = this.predatorSize * 3
-
-    let i = this.boids.length
-    while(i--) {
-
-      this.boids[i].accelleration[0] = 0
-      this.boids[i].accelleration[1] = 0
-      this.boids[i].accelleration[2] = 0
-
-      // Separation
-      let closeDx = 0
-      let closeDy = 0
-      let closeDz = 0
-
-      let neighboringBoids = 0
-
-      // Alignment
-      let xVelAvg = 0
-      let yVelAvg = 0
-      let zVelAvg = 0
-
-      // Cohesion
-      let xPosAvg = 0
-      let yPosAvg = 0
-      let zPosAvg = 0
-      
-
-      let j = this.boids.length
-      while(j--) {
-        if(j===i) continue;
-
-        const distance = Math.sqrt(
-          (this.boids[j].position[0] - this.boids[i].position[0])**2 +
-          (this.boids[j].position[1] - this.boids[i].position[1])**2 +
-          (this.boids[j].position[2] - this.boids[i].position[2])**2
-        )
-        
-        // Separation
-        if(distance < protectedRange){
-          closeDx += this.boids[i].position[0] - this.boids[j].position[0]
-          closeDy += this.boids[i].position[1] - this.boids[j].position[1]
-          closeDz += this.boids[i].position[2] - this.boids[j].position[2]
-        }
-
-        if(distance < visibleRange){
-
-          // Alignment
-          xVelAvg += this.boids[j].velocity[0] 
-          yVelAvg += this.boids[j].velocity[1] 
-          zVelAvg += this.boids[j].velocity[2] 
-
-          // Cohesion
-          xPosAvg += this.boids[j].position[0]
-          yPosAvg += this.boids[j].position[1]
-          zPosAvg += this.boids[j].position[2]
-
-          neighboringBoids++
-
-        }
-
-      }
-
-      // Separation
-      this.boids[i].accelleration[0] += closeDx * avoidFactor
-      this.boids[i].accelleration[1] += closeDy * avoidFactor
-      this.boids[i].accelleration[2] += closeDz * avoidFactor
-      
-      if(neighboringBoids){
-        
-        // Alignment
-        xVelAvg /= neighboringBoids
-        yVelAvg /= neighboringBoids
-        zVelAvg /= neighboringBoids
-        this.boids[i].accelleration[0] += (xVelAvg - this.boids[i].velocity[0]) * matchingfactor
-        this.boids[i].accelleration[1] += (yVelAvg - this.boids[i].velocity[1]) * matchingfactor
-        this.boids[i].accelleration[2] += (zVelAvg - this.boids[i].velocity[2]) * matchingfactor
-
-        // Cohesion
-        xPosAvg /= neighboringBoids
-        yPosAvg /= neighboringBoids
-        zPosAvg /= neighboringBoids
-        this.boids[i].accelleration[0] += (xPosAvg - this.boids[i].position[0]) * centeringFactor
-        this.boids[i].accelleration[1] += (yPosAvg - this.boids[i].position[1]) * centeringFactor
-        this.boids[i].accelleration[2] += (zPosAvg - this.boids[i].position[2]) * centeringFactor
-
-      }
-
-      if(this.predator){
-
-        const predatorDx = this.boids[i].position[0] - this.predator.x
-        const predatorDy = this.boids[i].position[1] - this.predator.y
-        const predatorDz = this.boids[i].position[2] - 0 // predator z is always 0
-
-        const predatorDistance = Math.sqrt(
-          predatorDx**2 + predatorDy**2 + predatorDz**2
-        )
-
-        if(predatorDistance < predatoryRange){
-          this.boids[i].accelleration[0] += predatorturnfactor * (predatorDx/Math.abs(predatorDx))
-          this.boids[i].accelleration[1] += predatorturnfactor * (predatorDy/Math.abs(predatorDy))
-          this.boids[i].accelleration[2] += predatorturnfactor * (predatorDz/Math.abs(predatorDz))
-        }
-        
-      }
-
-    }
-
-  }
-
-  calculate(){
-
-    this.loop()
-
-    let i = this.boids.length
-    while(i--) this.boids[i].calculate( this.boidBox )
-
-  }
-
   drawBox(){
     // draw boidBox
     this.context.beginPath()
@@ -295,7 +179,7 @@ export class Renderer {
       this.boundingBox.height
     )
     
-    if(!this.predator){
+    if(!this.predator.exists){
 
       let i = this.boids.length
       while(i--) this.boids[i].draw( this.boidBox )
@@ -328,15 +212,16 @@ export class Renderer {
     this.context.arc(
       this.predator.x, 
       this.predator.y, 
-      this.predatorSize,
+      this.predator.size,
       0, 
       2 * Math.PI
     );``
-
-    this.context.fillStyle = "#212121";
+    
     this.context.shadowColor = "red";
     this.context.shadowBlur = 10
+    this.context.fillStyle = "#212121";
     this.context.fill()
+    this.context.shadowBlur = 0
 
     // this.context.stroke()
 

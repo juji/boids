@@ -14,12 +14,12 @@ export default class Boid{
   position: [number, number, number] = [0,0,0]
   velocity: [number, number, number] = [0,0,0]
   accelleration: [number, number, number] = [0,0,0]
-  context: CanvasRenderingContext2D
+  context: CanvasRenderingContext2D|null = null
 
   minRadius = 0.7
   maxRadius = 1.4
-  maxVelocity: number = 4
-  minVelocity: number = 3
+  maxVelocity: number = 3
+  minVelocity: number = 2
 
   turnFactor: number = 0.2
 
@@ -28,12 +28,12 @@ export default class Boid{
     position,
     velocity,
   }:{
-    context: CanvasRenderingContext2D
+    context?: CanvasRenderingContext2D
     position?: [number, number, number]
     velocity?: [number, number, number]
   }){
 
-    this.context = context
+    if(context) this.context = context
     if(position) this.position = position
     if(velocity) this.velocity = velocity
 
@@ -98,8 +98,17 @@ export default class Boid{
 
   }
 
+  getPosition(){
+    return this.position
+  }
+
+  setPosition(position: [number, number, number]){
+    this.position = position
+  }
+
   draw( boidBox: BoidBox ){
 
+    if(!this.context) return;
     if(!this.position[0] && !this.position[1]) return;
 
     this.context.beginPath();
