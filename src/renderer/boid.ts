@@ -14,11 +14,12 @@ export default class Boid{
   accelleration: [number, number, number] = [0,0,0]
   context: CanvasRenderingContext2D
 
-  minRadius = 1
-  maxRadius = 3
-  maxVelocity: number = 5
+  minRadius = 0.7
+  maxRadius = 1.4
+  maxVelocity: number = 4
+  minVelocity: number = 3
 
-  turnFactor: number = 0.05 + Math.random() * 0.2
+  turnFactor: number = 0.2
 
   constructor({
     context,
@@ -45,35 +46,56 @@ export default class Boid{
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
+    const turnFactor = Math.random() * this.turnFactor
+
     if(this.position[0] > boidBox.right){
-      this.velocity[0] -= this.turnFactor
+      this.velocity[0] -= this.turnFactor * Math.random() * 0.9
     }
 
     if(this.position[0] < boidBox.left){
-      this.velocity[0] += this.turnFactor
+      this.velocity[0] += this.turnFactor * Math.random() * 0.9
     }
 
     if(this.position[1] > boidBox.bottom){
-      this.velocity[1] -= this.turnFactor
+      this.velocity[1] -= this.turnFactor * Math.random() * 0.4
     }
 
     if(this.position[1] < boidBox.top){
-      this.velocity[1] += this.turnFactor
+      this.velocity[1] += this.turnFactor * Math.random() * 0.4
     }
 
     if(this.position[2] > boidBox.front){
-      this.velocity[2] -= this.turnFactor
+      this.velocity[2] -= turnFactor
     }
 
     if(this.position[2] < boidBox.back){
-      this.velocity[2] += this.turnFactor
+      this.velocity[2] += turnFactor
     }
 
-    // set max velocity
-    this.velocity[0] = Math.max(Math.min(this.velocity[0], this.maxVelocity),-this.maxVelocity)
-    this.velocity[1] = Math.max(Math.min(this.velocity[1], this.maxVelocity),-this.maxVelocity)
-    this.velocity[2] = Math.max(Math.min(this.velocity[2], this.maxVelocity),-this.maxVelocity)
+    // this is interesting
+    // the forbidden tablet
+    // THIS no longer exists
+    // this.velocity[0] = this.velocity[0] * 0.9
+    // this.velocity[1] = this.velocity[1] * 0.9
 
+    // limit velocity
+    const velocity = Math.sqrt(
+      this.velocity[0]**2 + this.velocity[1]**2 + this.velocity[2]**2
+    )
+
+    if(velocity > this.maxVelocity){
+      this.velocity[0] = this.velocity[0] / velocity * this.maxVelocity
+      this.velocity[1] = this.velocity[1] / velocity * this.maxVelocity
+      this.velocity[2] = this.velocity[2] / velocity * this.maxVelocity
+    }
+
+    if(velocity < this.minVelocity){
+      this.velocity[0] = this.velocity[0] / velocity * this.minVelocity
+      this.velocity[1] = this.velocity[1] / velocity * this.minVelocity
+      this.velocity[2] = this.velocity[2] / velocity * this.minVelocity
+    }
+
+    //
     this.position[0] += this.velocity[0]
     this.position[1] += this.velocity[1]
     this.position[2] += this.velocity[2]
@@ -82,22 +104,33 @@ export default class Boid{
 
   draw( boidBox: BoidBox ){
 
+    if(!this.position[0] && !this.position[1]) return;
+
     this.context.beginPath();
 
-    const radius = this.minRadius + (
+    let radius = this.minRadius + (
       this.position[2] + boidBox.front
     ) / (
       boidBox.front*2
     ) * (this.maxRadius - this.minRadius)
-    
-    this.context.arc(
-      this.position[0], 
-      this.position[1], 
-      Math.min(Math.max(this.minRadius, radius), this.maxRadius), 
-      0, 
-      2 * Math.PI
-    );
 
+    radius = Math.min(Math.max(this.minRadius, radius), this.maxRadius)*2
+    
+    this.context.rect(
+      this.position[0],
+      this.position[1],
+      radius,
+      radius
+    )
+    
+    // this.context.arc(
+    //   this.position[0], 
+    //   this.position[1], 
+    //   radius, 
+    //   0, 
+    //   2 * Math.PI
+    // );
+      
     this.context.fillStyle = "orange";
     this.context.fill()
 
