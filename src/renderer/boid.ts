@@ -1,3 +1,5 @@
+
+
 export type BoidBox = {
   top: number
   left: number
@@ -72,12 +74,6 @@ export default class Boid{
       this.velocity[2] += turnFactor
     }
 
-    // this is interesting
-    // the forbidden tablet
-    // THIS no longer exists
-    // this.velocity[0] = this.velocity[0] * 0.9
-    // this.velocity[1] = this.velocity[1] * 0.9
-
     // limit velocity
     const velocity = Math.sqrt(
       this.velocity[0]**2 + this.velocity[1]**2 + this.velocity[2]**2
@@ -108,10 +104,10 @@ export default class Boid{
 
     this.context.beginPath();
 
-    let radius = this.minRadius + (
-      this.position[2] + boidBox.front
+    let radius = this.maxRadius - (
+      this.position[2] + boidBox.back
     ) / (
-      boidBox.front*2
+      boidBox.back*2
     ) * (this.maxRadius - this.minRadius)
 
     radius = Math.min(Math.max(this.minRadius, radius), this.maxRadius)*2
@@ -122,14 +118,6 @@ export default class Boid{
       radius,
       radius
     )
-    
-    // this.context.arc(
-    //   this.position[0], 
-    //   this.position[1], 
-    //   radius, 
-    //   0, 
-    //   2 * Math.PI
-    // );
       
     this.context.fillStyle = "orange";
     this.context.fill()

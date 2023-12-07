@@ -7,17 +7,23 @@ export default class MouseEvents {
   constructor(
     canvas: HTMLCanvasElement,
     events?:{
-      onMouseUp?: (e:MouseEvent) => void
-      onMouseDown?: (e:MouseEvent) => void
       onMouseMove?: (e:MouseEvent) => void
+      onMouseLeave?: (e:MouseEvent) => void
     }
   ){
 
     const {
-      onMouseUp,
-      onMouseDown,
       onMouseMove,
+      onMouseLeave,
     } = events || {}
+
+    let mouseLeaveListener = (e:MouseEvent) => {
+      if(e.currentTarget !== e.target) return;
+      if(e.currentTarget !== canvas) return;
+      e.preventDefault()
+      onMouseLeave && onMouseLeave(e)
+      return false
+    }
 
     let mouseMoveListener = (e:MouseEvent) => {
       if(e.currentTarget !== e.target) return;
@@ -27,30 +33,11 @@ export default class MouseEvents {
       return false
     }
 
-    let mouseDownListener = (e:MouseEvent) => {
-      if(e.currentTarget !== e.target) return;
-      if(e.currentTarget !== canvas) return;
-      e.preventDefault()
-      onMouseDown && onMouseDown(e)
-      if(onMouseMove) canvas.addEventListener('mousemove', mouseMoveListener)
-      return false
-    }
-
-    let mouseUpListener = (e: MouseEvent) => {
-      if(e.currentTarget !== e.target) return;
-      if(e.currentTarget !== canvas) return;
-      e.preventDefault()
-      onMouseUp && onMouseUp(e)
-      if(onMouseMove) canvas.removeEventListener('mousemove', mouseMoveListener)
-      return false
-    }
-
-    canvas.addEventListener('mousedown', mouseDownListener)
-    canvas.addEventListener('mouseup', mouseUpListener)
+    canvas.addEventListener('mouseleave', mouseLeaveListener)
+    canvas.addEventListener('mousemove', mouseMoveListener)
 
     this.clear = () => {
-      canvas.removeEventListener('mousedown', mouseDownListener)
-      canvas.removeEventListener('mouseup', mouseUpListener)
+      canvas.removeEventListener('mouseleave', mouseLeaveListener)
       canvas.removeEventListener('mousemove', mouseMoveListener)
     }
 

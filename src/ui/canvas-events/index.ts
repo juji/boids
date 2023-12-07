@@ -8,7 +8,7 @@ export function registerCanvasEvents(
   canvas: HTMLCanvasElement
 ){
 
-  console.log(renderer) // comment this when used
+  // console.log(renderer) // comment this when used
 
   if(window.matchMedia("(any-hover: none)").matches) {
     
@@ -17,7 +17,17 @@ export function registerCanvasEvents(
 
   }else{
 
-    const mouse = new MouseEvents(canvas)
+    const mouse = new MouseEvents(canvas,{
+      onMouseLeave(){
+        renderer.removePredator()
+      },
+      onMouseMove(e: MouseEvent){
+        renderer.setPredator(
+          e.pageX,
+          e.pageY
+        )
+      }
+    })
     return () => mouse.clear && mouse.clear()
 
   }

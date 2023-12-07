@@ -85,7 +85,7 @@ header{
   top:0;
   left:0;
   z-index: 1;
-  width: 100%;
+  width: 89px;
 }
 
 header svg{
@@ -155,17 +155,19 @@ main{
 }
 
 main canvas{
-  cursor: grab; 
   will-change: width, height;
-}
-
-main canvas:active{
-  cursor: grabbing; 
+  cursor: none;
 }
 
 footer{
+
+  position: fixed;
+  bottom:0;
+  left:0;
+  z-index: 1;
+
   padding: 1rem 2rem;
-  background-color: #151515;
+  background-color: rgb( 21 21 21 / 30% );
 
   & a{
     color: #ff6363;

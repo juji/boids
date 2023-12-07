@@ -14,6 +14,7 @@ export class Renderer {
   boids: Boid[];
   boidNum = 1500
   boxGap = 200
+  depth = 200
   boidBox: BoidBox = {
     top: 0,
     left: 0,
@@ -22,6 +23,8 @@ export class Renderer {
     front: 0,
     back: 0,
   }
+
+  predator: ({x: number, y: number})|null = null
 
   constructor(
     canvas: HTMLCanvasElement, 
@@ -72,11 +75,21 @@ export class Renderer {
 
   }
 
+  setPredator(x: number, y: number){
+    this.predator = { 
+      x: x - this.boundingBox.width/2, 
+      y: y - this.boundingBox.height/2
+    }
+  }
+
+  removePredator(){
+    this.predator = null
+  }
+
   calculateBoidBox(){
     const width = this.boundingBox.width/2
     const height = this.boundingBox.height/2
     const smaller = Math.min(width, height)
-    const depth = 30
 
     this.boxGap = 3 * smaller / 10
 
@@ -85,11 +98,11 @@ export class Renderer {
       left: (-width) + this.boxGap,
       bottom: (height/2) - this.boxGap,
       right: (width) - this.boxGap,
-      front: depth - this.boxGap,
-      back: -depth + this.boxGap
+      front: this.depth - this.boxGap,
+      back: -this.depth + this.boxGap
     }
 
-    return { width, height, depth }
+    return { width, height, depth: this.depth }
   }
   
 
@@ -132,13 +145,17 @@ export class Renderer {
 
     // Separation
     const avoidFactor = 0.05
-    const protectedRange = 30
+    const protectedRange = 25
 
     // Alignment
     const matchingfactor = 0.05
 
     // Cohesion
     const centeringFactor = 0.0005
+
+    // Predator
+    const predatorturnfactor = 0.5
+    const predatoryRange = 100
 
     let i = this.boids.length
     while(i--) {
@@ -225,6 +242,24 @@ export class Renderer {
 
       }
 
+      if(this.predator){
+
+        const predatorDx = this.boids[i].position[0] - this.predator.x
+        const predatorDy = this.boids[i].position[1] - this.predator.y
+        const predatorDz = this.boids[i].position[2] - 0 // predator z is always 0
+
+        const predatorDistance = Math.sqrt(
+          predatorDx**2 + predatorDy**2 + predatorDz**2
+        )
+
+        if(predatorDistance < predatoryRange){
+          this.boids[i].accelleration[0] += predatorturnfactor * (predatorDx/Math.abs(predatorDx))
+          this.boids[i].accelleration[1] += predatorturnfactor * (predatorDy/Math.abs(predatorDy))
+          this.boids[i].accelleration[2] += predatorturnfactor * (predatorDz/Math.abs(predatorDz))
+        }
+        
+      }
+
     }
 
   }
@@ -259,10 +294,49 @@ export class Renderer {
       this.boundingBox.height
     )
     
-    let i = this.boids.length
-    while(i--) this.boids[i].draw( this.boidBox )
+    if(!this.predator){
+
+      let i = this.boids.length
+      while(i--) this.boids[i].draw( this.boidBox )
+
+    }else{
+
+      let i = this.boids.length
+      while(i--) {
+        if(this.boids[i].position[2]<=0) this.boids[i].draw( this.boidBox )
+      }
+
+      this.drawPredator()
+
+      i = this.boids.length
+      while(i--) {
+        if(this.boids[i].position[2]>0) this.boids[i].draw( this.boidBox )
+      }
+
+    }
 
     // this.drawBox()
+
+  }
+
+  drawPredator(){
+
+    if(!this.predator) return;
+
+    this.context.beginPath();
+    this.context.arc(
+      this.predator.x, 
+      this.predator.y, 
+      20, 
+      0, 
+      2 * Math.PI
+    );``
+
+    this.context.fillStyle = "black";
+    this.context.fill()
+
+    this.context.strokeStyle = "red";
+    this.context.stroke()
 
   }
 

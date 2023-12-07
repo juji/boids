@@ -11,17 +11,14 @@ import { ui } from './ui'
 (function(){
   
   const canvas = document.querySelector('canvas') as HTMLCanvasElement
-  const footer = document.querySelector('footer') as HTMLElement
   
-  if(!canvas || !footer) return;
-
-  const footerDim = footer.getBoundingClientRect()
+  if(!canvas) return;
   
   const renderer = new Renderer(
     canvas,
     {
       width: window.innerWidth,
-      height: window.innerHeight - footerDim.height
+      height: window.innerHeight
     }
   )
   
@@ -31,7 +28,7 @@ import { ui } from './ui'
   window.addEventListener('resize', () => {
     renderer.changeBoundingBox({
       width: window.innerWidth,
-      height: window.innerHeight - footerDim.height
+      height: window.innerHeight
     })
   })
 
