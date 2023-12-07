@@ -167,7 +167,6 @@ self.onmessage = (e: MessageEvent<string>) => {
   // console.log(data)
 
   if(data.predator){
-    console.log(data.predator)
     predator = data.predator
   }
 

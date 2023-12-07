@@ -27,8 +27,8 @@ export class Renderer {
 
   predator: Predator = {
     size: 40,
-    x: 0,
-    y: 0,
+    x: -1000,
+    y: -1000,
     exists: false
   }
   worker: Worker
@@ -95,6 +95,13 @@ export class Renderer {
 
   }
 
+  intersectPredator(x: number, y: number){
+    return (
+      ((this.predator.x + this.boundingBox.width/2) - x)**2 +
+      ((this.predator.y + this.boundingBox.height/2) - y)**2
+    ) < (this.predator.size**2)
+  }
+
   setPredator(x: number, y: number){
     this.predator = { 
       size: this.predator.size,
@@ -110,6 +117,8 @@ export class Renderer {
 
   removePredator(){
     this.predator.exists = false
+    this.predator.x = -1000
+    this.predator.y = -1000
     this.worker.postMessage(JSON.stringify({
       predator: this.predator
     }));

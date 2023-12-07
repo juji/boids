@@ -12,21 +12,31 @@ export function registerCanvasEvents(
 
   if(window.matchMedia("(any-hover: none)").matches) {
     
+    let removePredator: boolean;
     const touch = new TouchEvents(canvas,{
       onPointerDown(e:TouchEvent){
+        
+        removePredator = false
+        if(renderer.intersectPredator(
+          e.touches[0].pageX,
+          e.touches[0].pageY
+        )) removePredator = true
+
         renderer.setPredator(
           e.touches[0].pageX,
           e.touches[0].pageY
         )
       },
       onPointerMove(e:TouchEvent){
+        removePredator = false
         renderer.setPredator(
           e.touches[0].pageX,
           e.touches[0].pageY
         )
       },
       onPointerUp(){
-        renderer.removePredator()
+        if(removePredator) renderer.removePredator()
+        removePredator = false
       }
     })
     return () => touch.clear && touch.clear()
