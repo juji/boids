@@ -25,6 +25,7 @@ export class Renderer {
   }
 
   predator: ({x: number, y: number})|null = null
+  predatorSize: number = 20
 
   constructor(
     canvas: HTMLCanvasElement, 
@@ -154,8 +155,8 @@ export class Renderer {
     const centeringFactor = 0.0005
 
     // Predator
-    const predatorturnfactor = 0.5
-    const predatoryRange = 100
+    const predatorturnfactor = 1
+    const predatoryRange = this.predatorSize * 3
 
     let i = this.boids.length
     while(i--) {
@@ -327,16 +328,17 @@ export class Renderer {
     this.context.arc(
       this.predator.x, 
       this.predator.y, 
-      20, 
+      this.predatorSize,
       0, 
       2 * Math.PI
     );``
 
-    this.context.fillStyle = "black";
+    this.context.fillStyle = "#212121";
+    this.context.shadowColor = "red";
+    this.context.shadowBlur = 10
     this.context.fill()
 
-    this.context.strokeStyle = "red";
-    this.context.stroke()
+    // this.context.stroke()
 
   }
 
