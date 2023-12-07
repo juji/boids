@@ -127,7 +127,7 @@ export class Renderer {
 
   loop(){
 
-    // visible range is different each time
+    // visible range is a range
     const visibleRange = 40 + Math.random() * 40
 
     // Separation
