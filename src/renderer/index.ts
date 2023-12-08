@@ -1,8 +1,6 @@
 import Boid, { BoidBox } from './boid'
 import { type Predator } from './predator'
 
-// https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
-
 export class Renderer {
 
   canvas: HTMLCanvasElement;

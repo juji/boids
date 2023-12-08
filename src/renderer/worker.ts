@@ -20,6 +20,7 @@ let predator:Predator = {
   y: 0
 }
 
+// https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
 function loop(){
 
   // visible range is a range
