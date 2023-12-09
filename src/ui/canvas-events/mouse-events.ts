@@ -5,7 +5,7 @@ export default class MouseEvents {
   clear: null | (() => void) = null
 
   constructor(
-    canvas: HTMLCanvasElement,
+    canvas: HTMLElement,
     events?:{
       onMouseMove?: (e:MouseEvent) => void
       onMouseLeave?: (e:MouseEvent) => void

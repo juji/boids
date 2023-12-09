@@ -5,7 +5,7 @@ export default class TouchEvents {
   clear: null | (() => void) = null
 
   constructor(
-    canvas: HTMLCanvasElement, 
+    canvas: HTMLElement, 
     events?: {
       onPointerUp?: (e:TouchEvent) => void
       onPointerDown?: (e:TouchEvent) => void

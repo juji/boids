@@ -35,7 +35,7 @@ export class Renderer {
   }
 
   boidColor = 0xFFD700
-  boidSize = 7
+  boidSize = 10
 
   worker: Worker
 
@@ -48,17 +48,15 @@ export class Renderer {
   ){
 
     // let window size set boidNum
-    this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 
-      1000 : 1500
-    // this.boidNum = 2000
+    this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
 
     this.canvas = canvas
     this.boundingBox = boundingBox // screen
     
     // scene
     this.scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 20, boundingBox.width / boundingBox.height, 0.1, 5000 );
-    camera.position.z = 2000;
+    const camera = new THREE.PerspectiveCamera( 15, boundingBox.width / boundingBox.height, 0.1, 5000 );
+    camera.position.z = 3000;
 
     // predator
     const sphere = new THREE.SphereGeometry( this.predator.size, 32, 16 ); 
@@ -76,10 +74,7 @@ export class Renderer {
     dLight2.position.set(-2000,7000,4000)
 
     // renderer
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: false,
-    });
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
     renderer.setSize( boundingBox.width, boundingBox.height);
     renderer.setClearColor( 0x000000, 0 )
     renderer.autoClear = true
@@ -100,29 +95,26 @@ export class Renderer {
     this.scene.add( dLight );
     this.scene.add( dLight2 );
 
-    // boidbox
-    const { width, height, depth } = this.calculateBoidBox()
-
     this.renderer = renderer
     this.camera = camera
-    
-    const boids = [...new Array(this.boidNum)].map(() => {
-      
-      return {
 
+
+    // boidbox
+    const { width, height, depth } = this.calculateBoidBox()
+    const boids = [...new Array(this.boidNum)].map(() => {
+      return {
         position: [
           Math.random() * width * (Math.random()<.5?-1:1),
           Math.random() * height * (Math.random()<.5?-1:1),
           Math.random() * depth * (Math.random()<.5?-1:1),
         ],
-
         // give them initial velocity
         velocity: [1,1,1]
-
       }
 
     })
     
+    // worker
     this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
       type: 'module'
     });
@@ -152,8 +144,7 @@ export class Renderer {
 
   setPredator(x: number, y: number){
     this.predator = { 
-      size: this.predator.size,
-      exists: true,
+      ...this.predator,
       x: (x - this.boundingBox.width/2), 
       y: (y - this.boundingBox.height/2) * -1
     }
@@ -165,15 +156,6 @@ export class Renderer {
     this.worker.postMessage(JSON.stringify({
       predator: this.predator
     }));
-  }
-
-  removePredator(){
-    // this.predator.exists = false
-    // this.predator.x = -1000
-    // this.predator.y = -1000
-    // this.worker.postMessage(JSON.stringify({
-    //   predator: this.predator
-    // }));
   }
 
   calculateBoidBox(){

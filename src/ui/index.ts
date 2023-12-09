@@ -4,7 +4,7 @@ import { Renderer } from "@/renderer";
 
 export function ui(
   renderer: Renderer, 
-  canvas: HTMLCanvasElement
+  canvas: HTMLElement
 ){
 
   registerCanvasEvents(renderer, canvas)
