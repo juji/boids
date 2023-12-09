@@ -6,9 +6,6 @@ export class Renderer {
 
   canvas: HTMLCanvasElement;
   boundingBox: {width:number, height: number}
-  stopped = false
-
-  anim: number = 0
 
   boidNum = 0
   boxGap = 200
@@ -22,12 +19,10 @@ export class Renderer {
     front: 0,
     back: 0,
   }
-
-  scene: THREE.Scene
   
-  predatorMesh: THREE.Mesh
+  predator: THREE.Mesh
   predatorColor = 0x9b0000
-  predator: Predator = {
+  predatorAttr: Predator = {
     size: 40,
     x: 0,
     y: 0,
@@ -54,17 +49,17 @@ export class Renderer {
     this.boundingBox = boundingBox // screen
     
     // scene
-    this.scene = new THREE.Scene();
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 15, boundingBox.width / boundingBox.height, 0.1, 5000 );
     camera.position.z = 3000;
 
     // predator
-    const sphere = new THREE.SphereGeometry( this.predator.size, 32, 16 ); 
+    const sphere = new THREE.SphereGeometry( this.predatorAttr.size, 32, 16 ); 
     const sphereMaterial = new THREE.MeshPhysicalMaterial({ 
       color: this.predatorColor,
       roughness: 0.5
     }); 
-    this.predatorMesh = new THREE.Mesh( sphere, sphereMaterial ); 
+    this.predator = new THREE.Mesh( sphere, sphereMaterial ); 
 
     // lights
     const light = new THREE.AmbientLight( 0xffffff );
@@ -89,11 +84,11 @@ export class Renderer {
     const points = new THREE.Points( geometry, material );
     
     // adding to scene
-    this.scene.add(points);
-    this.scene.add(this.predatorMesh);
-    this.scene.add( light );
-    this.scene.add( dLight );
-    this.scene.add( dLight2 );
+    scene.add(points);
+    scene.add(this.predator);
+    scene.add( light );
+    scene.add( dLight );
+    scene.add( dLight2 );
 
     this.renderer = renderer
     this.camera = camera
@@ -123,39 +118,45 @@ export class Renderer {
       const data = JSON.parse(e.data)
       if(data.positions){
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( data.positions, 3 ) );
-        renderer.render( this.scene, camera );
+        renderer.render( scene, camera );
       }
     }
 
     this.worker.postMessage(JSON.stringify({
       boids: boids,
       boidBox: this.boidBox,
-      predator: this.predator
+      predator: this.predatorAttr
     }));
 
   }
 
-  intersectPredator(x: number, y: number){
-    return (
-      ((this.predator.x + this.boundingBox.width/2) - x)**2 +
-      ((this.predator.y + this.boundingBox.height/2) - y)**2
-    ) < (this.predator.size**2)
-  }
-
   setPredator(x: number, y: number){
-    this.predator = { 
-      ...this.predator,
+    this.predatorAttr = { 
+      ...this.predatorAttr,
       x: (x - this.boundingBox.width/2), 
       y: (y - this.boundingBox.height/2) * -1
     }
 
-    this.predatorMesh.position.x = this.predator.x
-    this.predatorMesh.position.y = this.predator.y
-    this.predatorMesh.position.z = 1
+    this.predator.position.x = this.predatorAttr.x
+    this.predator.position.y = this.predatorAttr.y
+    this.predator.position.z = 1
 
     this.worker.postMessage(JSON.stringify({
-      predator: this.predator
+      predator: this.predatorAttr
     }));
+  }
+
+  // when resize happens
+  changeBoundingBox(boundingBox: {width:number, height: number}){
+    
+    this.boundingBox = boundingBox
+    this.calculateBoidBox()
+
+    this.renderer.clear()
+    this.camera.aspect = boundingBox.width / boundingBox.height
+    this.camera.updateProjectionMatrix()
+    this.renderer.setSize(boundingBox.width, boundingBox.height)
+
   }
 
   calculateBoidBox(){
@@ -179,88 +180,6 @@ export class Renderer {
     }));
 
     return { width, height, depth: this.depth }
-  }
-  
-
-  // when resize happens
-  changeBoundingBox(boundingBox: {width:number, height: number}){
-    
-    this.boundingBox = boundingBox
-    this.renderer.clear()
-    this.camera.aspect = boundingBox.width / boundingBox.height
-    this.camera.updateProjectionMatrix()
-    this.renderer.setSize(boundingBox.width, boundingBox.height)
-
-    this.calculateBoidBox()
-  }
-
-  drawBox(){
-    // draw boidBox
-    // this.context.beginPath()
-    // this.context.moveTo(this.boidBox.left, this.boidBox.top)
-    // this.context.lineTo(this.boidBox.right, this.boidBox.top)
-    // this.context.lineTo(this.boidBox.right, this.boidBox.bottom)
-    // this.context.lineTo(this.boidBox.left, this.boidBox.bottom)
-    // this.context.lineTo(this.boidBox.left, this.boidBox.top)
-    // this.context.strokeStyle = "red";
-    // this.context.stroke();
-  }
-
-  draw(){
-
-    // this.context.clearRect(
-    //   -this.boundingBox.width/2, 
-    //   -this.boundingBox.height/2, 
-    //   this.boundingBox.width, 
-    //   this.boundingBox.height
-    // )
-    
-    // if(!this.predator.exists){
-
-    //   let i = this.boids.length
-    //   while(i--) this.boids[i].draw( this.boidBox )
-
-    // }else{
-
-    //   let i = this.boids.length
-    //   while(i--) {
-    //     if(this.boids[i].position[2]<=0) this.boids[i].draw( this.boidBox )
-    //   }
-
-    //   this.drawPredator()
-
-    //   i = this.boids.length
-    //   while(i--) {
-    //     if(this.boids[i].position[2]>0) this.boids[i].draw( this.boidBox )
-    //   }
-
-    // }
-
-    // this.drawBox()
-
-  }
-
-  drawPredator(){
-
-    if(!this.predator) return;
-
-    // this.context.beginPath();
-    // this.context.arc(
-    //   this.predator.x, 
-    //   this.predator.y, 
-    //   this.predator.size,
-    //   0, 
-    //   2 * Math.PI
-    // );``
-    
-    // this.context.shadowColor = "red";
-    // this.context.shadowBlur = 10
-    // this.context.fillStyle = "#212121";
-    // this.context.fill()
-    // this.context.shadowBlur = 0
-
-    // this.context.stroke()
-
   }
 
 }

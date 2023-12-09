@@ -148,9 +148,13 @@ function loop(){
 }
 
 
+let firstHalf = true
 function calculate( postMessage: typeof self.postMessage){
 
+  requestAnimationFrame(() => calculate( postMessage ))
+
   loop()
+  firstHalf = false
   let i = boids.length
   while(i--) boids[i].calculate( boidBox )
 
@@ -164,7 +168,6 @@ function calculate( postMessage: typeof self.postMessage){
     },[] as number[])
   }))
 
-  requestAnimationFrame(() => calculate( postMessage ))
   
 }
 
