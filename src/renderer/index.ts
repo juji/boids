@@ -4,7 +4,6 @@ import * as THREE from 'three';
 
 export class Renderer {
 
-  canvas: HTMLCanvasElement;
   boundingBox: {width:number, height: number}
 
   boidNum = 0
@@ -48,8 +47,6 @@ export class Renderer {
 
     // let window size set boidNum
     this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
-
-    this.canvas = canvas
     this.boundingBox = boundingBox // screen
     
     // scene
