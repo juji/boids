@@ -1,19 +1,19 @@
-import Boid, { BoidBox } from './boid'
+import { BoidBox } from './boid'
 import { type Predator } from './predator'
+import * as THREE from 'three';
 
 export class Renderer {
 
   canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
   boundingBox: {width:number, height: number}
   stopped = false
 
   anim: number = 0
 
-  boids: Boid[];
-  boidNum = 2500
+  boidNum = 0
   boxGap = 200
   depth = 200
+
   boidBox: BoidBox = {
     top: 0,
     left: 0,
@@ -23,13 +23,24 @@ export class Renderer {
     back: 0,
   }
 
+  scene: THREE.Scene
+  
+  predatorMesh: THREE.Mesh
+  predatorColor = 0x9b0000
   predator: Predator = {
     size: 40,
-    x: -1000,
-    y: -1000,
-    exists: false
+    x: 0,
+    y: 0,
+    exists: true
   }
+
+  boidColor = 0xFFD700
+  boidSize = 7
+
   worker: Worker
+
+  renderer: THREE.WebGLRenderer
+  camera: THREE.PerspectiveCamera
 
   constructor(
     canvas: HTMLCanvasElement, 
@@ -38,27 +49,67 @@ export class Renderer {
 
     // let window size set boidNum
     this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 
-      1000 : 2000
+      1000 : 1500
+    // this.boidNum = 2000
 
     this.canvas = canvas
-    this.context = canvas.getContext('2d') as CanvasRenderingContext2D
     this.boundingBox = boundingBox // screen
-    this.canvas.width = boundingBox.width
-    this.canvas.height = boundingBox.height
-    this.canvas.style.width = `${boundingBox.width}px`
-    this.canvas.style.height = `${boundingBox.height}px`
-
-    this.context.translate(
-      boundingBox.width/2,
-      boundingBox.height/2
-    )
-
-    const { width, height, depth } = this.calculateBoidBox()
     
-    this.boids = [...new Array(this.boidNum)].map(() => {
+    // scene
+    this.scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera( 20, boundingBox.width / boundingBox.height, 0.1, 5000 );
+    camera.position.z = 2000;
+
+    // predator
+    const sphere = new THREE.SphereGeometry( this.predator.size, 32, 16 ); 
+    const sphereMaterial = new THREE.MeshPhysicalMaterial({ 
+      color: this.predatorColor,
+      roughness: 0.5
+    }); 
+    this.predatorMesh = new THREE.Mesh( sphere, sphereMaterial ); 
+
+    // lights
+    const light = new THREE.AmbientLight( 0xffffff );
+    const dLight = new THREE.DirectionalLight( 0xffffff, 1 );
+    dLight.position.set(-2000,7000,4000)
+    const dLight2 = new THREE.DirectionalLight( 0xffffff, 1 );
+    dLight2.position.set(-2000,7000,4000)
+
+    // renderer
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: false,
+    });
+    renderer.setSize( boundingBox.width, boundingBox.height);
+    renderer.setClearColor( 0x000000, 0 )
+    renderer.autoClear = true
+
+    // boid
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.PointsMaterial( { 
+      color: this.boidColor,
+      transparent: false
+    });
+    material.size = this.boidSize
+    const points = new THREE.Points( geometry, material );
+    
+    // adding to scene
+    this.scene.add(points);
+    this.scene.add(this.predatorMesh);
+    this.scene.add( light );
+    this.scene.add( dLight );
+    this.scene.add( dLight2 );
+
+    // boidbox
+    const { width, height, depth } = this.calculateBoidBox()
+
+    this.renderer = renderer
+    this.camera = camera
+    
+    const boids = [...new Array(this.boidNum)].map(() => {
       
-      return new Boid({
-        context: this.context,
+      return {
+
         position: [
           Math.random() * width * (Math.random()<.5?-1:1),
           Math.random() * height * (Math.random()<.5?-1:1),
@@ -68,7 +119,7 @@ export class Renderer {
         // give them initial velocity
         velocity: [1,1,1]
 
-      })
+      }
 
     })
     
@@ -79,14 +130,13 @@ export class Renderer {
     this.worker.onmessage = (e: MessageEvent) => {
       const data = JSON.parse(e.data)
       if(data.positions){
-        let i = this.boids.length
-        while(i--) this.boids[i].setPosition(data.positions[i])
-        this.draw()
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( data.positions, 3 ) );
+        renderer.render( this.scene, camera );
       }
     }
 
     this.worker.postMessage(JSON.stringify({
-      boids: this.boids,
+      boids: boids,
       boidBox: this.boidBox,
       predator: this.predator
     }));
@@ -104,9 +154,13 @@ export class Renderer {
     this.predator = { 
       size: this.predator.size,
       exists: true,
-      x: x - this.boundingBox.width/2, 
-      y: y - this.boundingBox.height/2
+      x: (x - this.boundingBox.width/2), 
+      y: (y - this.boundingBox.height/2) * -1
     }
+
+    this.predatorMesh.position.x = this.predator.x
+    this.predatorMesh.position.y = this.predator.y
+    this.predatorMesh.position.z = 1
 
     this.worker.postMessage(JSON.stringify({
       predator: this.predator
@@ -114,12 +168,12 @@ export class Renderer {
   }
 
   removePredator(){
-    this.predator.exists = false
-    this.predator.x = -1000
-    this.predator.y = -1000
-    this.worker.postMessage(JSON.stringify({
-      predator: this.predator
-    }));
+    // this.predator.exists = false
+    // this.predator.x = -1000
+    // this.predator.y = -1000
+    // this.worker.postMessage(JSON.stringify({
+    //   predator: this.predator
+    // }));
   }
 
   calculateBoidBox(){
@@ -148,64 +202,57 @@ export class Renderer {
 
   // when resize happens
   changeBoundingBox(boundingBox: {width:number, height: number}){
-    this.context.translate(
-      -boundingBox.width/2,
-      -boundingBox.height/2
-    )
+    
     this.boundingBox = boundingBox
-    this.canvas.width = boundingBox.width
-    this.canvas.height = boundingBox.height
-    this.canvas.style.width = `${boundingBox.width}px`
-    this.canvas.style.height = `${boundingBox.height}px`
-    this.context.translate(
-      boundingBox.width/2,
-      boundingBox.height/2
-    )
+    this.renderer.clear()
+    this.camera.aspect = boundingBox.width / boundingBox.height
+    this.camera.updateProjectionMatrix()
+    this.renderer.setSize(boundingBox.width, boundingBox.height)
 
     this.calculateBoidBox()
   }
 
   drawBox(){
     // draw boidBox
-    this.context.beginPath()
-    this.context.moveTo(this.boidBox.left, this.boidBox.top)
-    this.context.lineTo(this.boidBox.right, this.boidBox.top)
-    this.context.lineTo(this.boidBox.right, this.boidBox.bottom)
-    this.context.lineTo(this.boidBox.left, this.boidBox.bottom)
-    this.context.lineTo(this.boidBox.left, this.boidBox.top)
-    this.context.strokeStyle = "red";
-    this.context.stroke();
+    // this.context.beginPath()
+    // this.context.moveTo(this.boidBox.left, this.boidBox.top)
+    // this.context.lineTo(this.boidBox.right, this.boidBox.top)
+    // this.context.lineTo(this.boidBox.right, this.boidBox.bottom)
+    // this.context.lineTo(this.boidBox.left, this.boidBox.bottom)
+    // this.context.lineTo(this.boidBox.left, this.boidBox.top)
+    // this.context.strokeStyle = "red";
+    // this.context.stroke();
   }
 
   draw(){
 
-    this.context.clearRect(
-      -this.boundingBox.width/2, 
-      -this.boundingBox.height/2, 
-      this.boundingBox.width, 
-      this.boundingBox.height
-    )
+    // this.context.clearRect(
+    //   -this.boundingBox.width/2, 
+    //   -this.boundingBox.height/2, 
+    //   this.boundingBox.width, 
+    //   this.boundingBox.height
+    // )
     
-    if(!this.predator.exists){
+    // if(!this.predator.exists){
 
-      let i = this.boids.length
-      while(i--) this.boids[i].draw( this.boidBox )
+    //   let i = this.boids.length
+    //   while(i--) this.boids[i].draw( this.boidBox )
 
-    }else{
+    // }else{
 
-      let i = this.boids.length
-      while(i--) {
-        if(this.boids[i].position[2]<=0) this.boids[i].draw( this.boidBox )
-      }
+    //   let i = this.boids.length
+    //   while(i--) {
+    //     if(this.boids[i].position[2]<=0) this.boids[i].draw( this.boidBox )
+    //   }
 
-      this.drawPredator()
+    //   this.drawPredator()
 
-      i = this.boids.length
-      while(i--) {
-        if(this.boids[i].position[2]>0) this.boids[i].draw( this.boidBox )
-      }
+    //   i = this.boids.length
+    //   while(i--) {
+    //     if(this.boids[i].position[2]>0) this.boids[i].draw( this.boidBox )
+    //   }
 
-    }
+    // }
 
     // this.drawBox()
 
@@ -215,20 +262,20 @@ export class Renderer {
 
     if(!this.predator) return;
 
-    this.context.beginPath();
-    this.context.arc(
-      this.predator.x, 
-      this.predator.y, 
-      this.predator.size,
-      0, 
-      2 * Math.PI
-    );``
+    // this.context.beginPath();
+    // this.context.arc(
+    //   this.predator.x, 
+    //   this.predator.y, 
+    //   this.predator.size,
+    //   0, 
+    //   2 * Math.PI
+    // );``
     
-    this.context.shadowColor = "red";
-    this.context.shadowBlur = 10
-    this.context.fillStyle = "#212121";
-    this.context.fill()
-    this.context.shadowBlur = 0
+    // this.context.shadowColor = "red";
+    // this.context.shadowBlur = 10
+    // this.context.fillStyle = "#212121";
+    // this.context.fill()
+    // this.context.shadowBlur = 0
 
     // this.context.stroke()
 

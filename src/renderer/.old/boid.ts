@@ -14,6 +14,7 @@ export default class Boid{
   position: [number, number, number] = [0,0,0]
   velocity: [number, number, number] = [0,0,0]
   accelleration: [number, number, number] = [0,0,0]
+  context: CanvasRenderingContext2D|null = null
 
   minRadius = 0.7
   maxRadius = 1.4
@@ -23,13 +24,16 @@ export default class Boid{
   turnFactor: number = 0.2
 
   constructor({
+    context,
     position,
     velocity,
   }:{
+    context?: CanvasRenderingContext2D
     position?: [number, number, number]
     velocity?: [number, number, number]
   }){
 
+    if(context) this.context = context
     if(position) this.position = position
     if(velocity) this.velocity = velocity
 
@@ -100,6 +104,33 @@ export default class Boid{
 
   setPosition(position: [number, number, number]){
     this.position = position
+  }
+
+  draw( boidBox: BoidBox ){
+
+    if(!this.context) return;
+    if(!this.position[0] && !this.position[1]) return;
+
+    this.context.beginPath();
+
+    let radius = this.maxRadius - (
+      this.position[2] + boidBox.back
+    ) / (
+      boidBox.back*2
+    ) * (this.maxRadius - this.minRadius)
+
+    radius = Math.min(Math.max(this.minRadius, radius), this.maxRadius)*2
+    
+    this.context.rect(
+      this.position[0],
+      this.position[1],
+      radius,
+      radius
+    )
+      
+    this.context.fillStyle = "orange";
+    this.context.fill()
+
   }
 
 }

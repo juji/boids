@@ -153,9 +153,17 @@ function calculate( postMessage: typeof self.postMessage){
   loop()
   let i = boids.length
   while(i--) boids[i].calculate( boidBox )
+
   postMessage(JSON.stringify({
-    positions: boids.map(boid => boid.getPosition())
+    positions: boids.reduce((a,boid) => {
+      const p = boid.getPosition()
+      a.push(p[0])
+      a.push(p[1])
+      a.push(p[2])
+      return a
+    },[] as number[])
   }))
+
   requestAnimationFrame(() => calculate( postMessage ))
   
 }
@@ -180,7 +188,7 @@ self.onmessage = (e: MessageEvent<string>) => {
       
       return new Boid({
         position: boid.position,
-        velocity: boid.velicity
+        velocity: boid.velocity
       })
 
     });
@@ -190,7 +198,5 @@ self.onmessage = (e: MessageEvent<string>) => {
     calculating = true
     calculate( self.postMessage )
   }
-
-  // self.postMessage({ ok: true });
 
 }
