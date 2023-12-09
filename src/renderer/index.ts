@@ -30,7 +30,7 @@ export class Renderer {
   }
 
   boidColor = 0xFFD700
-  boidSize = 10
+  boidSize = 11
 
   worker: Worker
 
@@ -43,8 +43,8 @@ export class Renderer {
   ){
 
     // for firefox
-    if(navigator.userAgent.match(/Gecko\//))
-      this.boidSize = 11
+    // if(navigator.userAgent.match(/Gecko\//))
+    //   this.boidSize = 11
 
     // let window size set boidNum
     this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
