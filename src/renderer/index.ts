@@ -9,7 +9,7 @@ export class Renderer {
 
   boidNum = 0
   boxGap = 200
-  depth = 200
+  depth = 100
 
   boidBox: BoidBox = {
     top: 0,
@@ -30,7 +30,7 @@ export class Renderer {
   }
 
   boidColor = 0xFFD700
-  boidSize = 10
+  boidSize = 11
 
   worker: Worker
 
