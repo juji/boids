@@ -9,6 +9,11 @@ export type BoidBox = {
   back: number  
 }
 
+export type BoidInit = {
+  position: [number, number, number]
+  velocity: [number, number, number]
+}
+
 export default class Boid{
 
   position: [number, number, number] = [0,0,0]
@@ -25,13 +30,10 @@ export default class Boid{
   constructor({
     position,
     velocity,
-  }:{
-    position?: [number, number, number]
-    velocity?: [number, number, number]
-  }){
+  }: BoidInit ){
 
-    if(position) this.position = position
-    if(velocity) this.velocity = velocity
+    this.position = position
+    this.velocity = velocity
 
   }
 
