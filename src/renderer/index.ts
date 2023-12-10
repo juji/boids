@@ -29,7 +29,7 @@ export class Renderer {
   }
 
   boidColor = 0xFFD700
-  boidSize = 11
+  boidSize = 11 // in firefox, this works better if it is set to 11
 
   worker: Worker
 
@@ -40,10 +40,6 @@ export class Renderer {
     canvas: HTMLCanvasElement, 
     boundingBox: {width:number, height: number}
   ){
-
-    // for firefox
-    // if(navigator.userAgent.match(/Gecko\//))
-    //   this.boidSize = 11
 
     // let window size set boidNum
     this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
@@ -82,39 +78,23 @@ export class Renderer {
       transparent: false
     });
     material.size = this.boidSize
-    const points = new THREE.Points( geometry, material );
+    const boids = new THREE.Points( geometry, material );
     
     // adding to scene
-    scene.add(points);
+    scene.add(boids);
     scene.add(this.predator);
     scene.add( light );
     scene.add( dLight );
     scene.add( dLight2 );
-
+    
     this.renderer = renderer
     this.camera = camera
-
-
-    // boidbox
-    const { width, height, depth } = this.calculateBoidBox()
-    const boids = [...new Array(this.boidNum)].map(() => {
-      return {
-        position: [
-          Math.random() * width * (Math.random()<.5?-1:1),
-          Math.random() * height * (Math.random()<.5?-1:1),
-          Math.random() * depth * (Math.random()<.5?-1:1),
-        ],
-        // give them initial velocity
-        velocity: [1,1,1]
-      }
-
-    })
     
     // worker
     this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
       type: 'module'
     });
-
+    
     this.worker.onmessage = (e: MessageEvent) => {
       if(e.data.positions){
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( e.data.positions, 3 ) );
@@ -122,8 +102,21 @@ export class Renderer {
       }
     }
 
+    // boidbox
+    const { width, height, depth } = this.calculateBoidBox()
     this.worker.postMessage({
-      boids: boids,
+      boids: [...new Array(this.boidNum)].map(() => {
+        return {
+          position: [
+            Math.random() * width * (Math.random()<.5?-1:1),
+            Math.random() * height * (Math.random()<.5?-1:1),
+            Math.random() * depth * (Math.random()<.5?-1:1),
+          ],
+          // give them initial velocity
+          velocity: [1,1,1]
+        }
+        
+      }),
       boidBox: this.boidBox,
       predator: this.predatorAttr
     });
