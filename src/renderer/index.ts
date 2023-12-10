@@ -116,9 +116,8 @@ export class Renderer {
     });
 
     this.worker.onmessage = (e: MessageEvent) => {
-      const { data } = e
-      if(data.positions){
-        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( data.positions, 3 ) );
+      if(e.data.positions){
+        geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( e.data.positions, 3 ) );
         renderer.render( scene, camera );
       }
     }

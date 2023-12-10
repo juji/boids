@@ -173,7 +173,6 @@ function calculate(){
 
 self.onmessage = (e: MessageEvent) => {
 
-  // console.log(e.data)
   const { data } = e
 
   if(data.predator){
