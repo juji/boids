@@ -30,9 +30,8 @@ export default class Boids {
   renderer: THREE.WebGLRenderer
   camera: THREE.PerspectiveCamera
   geometry: THREE.BufferGeometry
+  position: THREE.Float32BufferAttribute
   scene: THREE.Scene
-
-  data: number[] = []
 
   constructor(
     boids: BoidInit[],
@@ -86,6 +85,17 @@ export default class Boids {
 
     // boid
     const geometry = new THREE.BufferGeometry();
+    const position = new THREE.Float32BufferAttribute(
+      boids.reduce((a) => { 
+        a.push(0); a.push(0); a.push(0)
+        return a
+      },[] as number[]), 
+      3
+    )
+    
+    position.setUsage( THREE.StreamDrawUsage );
+    geometry.setAttribute( 'position', position );
+
     const material = new THREE.PointsMaterial( { 
       color: this.boidColor,
       transparent: false
@@ -101,10 +111,13 @@ export default class Boids {
     scene.add( dLight2 );
     
     this.geometry = geometry
+    this.position = position
     this.renderer = renderer
     this.camera = camera
     this.scene = scene
     this.predator = predator
+
+    this.renderer.render( this.scene, this.camera );
 
   }
 
@@ -130,19 +143,16 @@ export default class Boids {
   }
 
   draw(){
-    this.geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( this.data, 3 ) );
+    this.geometry.attributes.position.needsUpdate = true
     this.renderer.render( this.scene, this.camera );
   }
 
   calculate(){
     this.loop()
-    this.data = []
     let i = this.boids.length
     while(i--) {
       this.boids[i].calculate( this.boidBox )
-      this.data.push(this.boids[i].position[0])
-      this.data.push(this.boids[i].position[1])
-      this.data.push(this.boids[i].position[2])
+      this.position.set(this.boids[i].position, i*3)
     }
   }
 

@@ -3,7 +3,12 @@ import Boids from './boids'
 let boids: Boids
 let calculating = false
 
+// let lastCalledTime: number
+// let fps: number
+
 function calculate(){
+
+  // lastCalledTime = Date.now();
 
   if(!boids) {
     throw new Error('Boids does not exists')
@@ -13,8 +18,10 @@ function calculate(){
 
   boids.calculate()
   boids.draw()
-  // self.postMessage({ positions: boids.getPositions() })
-  
+
+  // console.clear()
+  // fps = 1 / ( (Date.now() - lastCalledTime)/1000 );
+  // console.log(fps)
 }
 
 
