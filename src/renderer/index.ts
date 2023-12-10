@@ -1,6 +1,5 @@
 import { BoidBox } from './boid'
 import { type Predator } from './predator'
-import * as THREE from 'three';
 
 export class Renderer {
 
