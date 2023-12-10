@@ -148,15 +148,15 @@ function loop(){
 }
 
 
-function calculate( postMessage: typeof self.postMessage){
+function calculate(){
 
-  requestAnimationFrame(() => calculate( postMessage ))
+  requestAnimationFrame(() => calculate())
 
   loop()
   let i = boids.length
   while(i--) boids[i].calculate( boidBox )
 
-  postMessage(JSON.stringify({
+  self.postMessage({
     positions: boids.reduce((a,boid) => {
       const p = boid.getPosition()
       a.push(p[0])
@@ -164,17 +164,17 @@ function calculate( postMessage: typeof self.postMessage){
       a.push(p[2])
       return a
     },[] as number[])
-  }))
+  })
 
   
 }
 
 
 
-self.onmessage = (e: MessageEvent<string>) => {
+self.onmessage = (e: MessageEvent) => {
 
-  const data = JSON.parse(e.data)
-  // console.log(data)
+  // console.log(e.data)
+  const { data } = e
 
   if(data.predator){
     predator = data.predator
@@ -197,7 +197,7 @@ self.onmessage = (e: MessageEvent<string>) => {
 
   if(!calculating){
     calculating = true
-    calculate( self.postMessage )
+    calculate()
   }
 
 }

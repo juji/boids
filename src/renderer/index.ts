@@ -116,18 +116,18 @@ export class Renderer {
     });
 
     this.worker.onmessage = (e: MessageEvent) => {
-      const data = JSON.parse(e.data)
+      const { data } = e
       if(data.positions){
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( data.positions, 3 ) );
         renderer.render( scene, camera );
       }
     }
 
-    this.worker.postMessage(JSON.stringify({
+    this.worker.postMessage({
       boids: boids,
       boidBox: this.boidBox,
       predator: this.predatorAttr
-    }));
+    });
 
   }
 
@@ -142,9 +142,9 @@ export class Renderer {
     this.predator.position.y = this.predatorAttr.y
     this.predator.position.z = 1
 
-    this.worker.postMessage(JSON.stringify({
+    this.worker.postMessage({
       predator: this.predatorAttr
-    }));
+    });
   }
 
   // when resize happens
@@ -176,9 +176,9 @@ export class Renderer {
       back: -this.depth + this.boxGap
     }
 
-    if(this.worker) this.worker.postMessage(JSON.stringify({
+    if(this.worker) this.worker.postMessage({
       boidBox: this.boidBox
-    }));
+    });
 
     return { width, height, depth: this.depth }
   }
