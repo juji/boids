@@ -5,7 +5,7 @@ export class Renderer {
 
   boundingBox: {width:number, height: number}
 
-  boidNum = 0
+  boidNum = 1000
   boxGap = 200
   depth = 100
 
@@ -32,7 +32,7 @@ export class Renderer {
   ){
 
     // let window size set boidNum
-    this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
+    // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
     this.boundingBox = boundingBox // screen
     this.canvas = canvas
     
