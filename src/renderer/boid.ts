@@ -20,12 +20,10 @@ export default class Boid{
   velocity: [number, number, number] = [0,0,0]
   accelleration: [number, number, number] = [0,0,0]
 
-  minRadius = 0.7
-  maxRadius = 1.4
-  maxVelocity: number = 3
-  minVelocity: number = 2
+  maxVelocity: number = 5
+  minVelocity: number = 4
 
-  turnFactor: number = 0.2
+  turnFactor: number = 0.6
 
   constructor({
     position,
@@ -37,7 +35,7 @@ export default class Boid{
 
   }
 
-  calculate( boidBox: BoidBox ){
+  calculatePosition( boidBox: BoidBox ){
 
     this.velocity[0] += this.accelleration[0]
     this.velocity[1] += this.accelleration[1]

@@ -1,12 +1,12 @@
 import Boids from './boids'
 
 let boids: Boids
-let calculating = false
+let looping = false
 
 // let lastCalledTime: number
 // let fps: number
 
-function calculate(){
+function loop(){
 
   // lastCalledTime = Date.now();
 
@@ -14,7 +14,7 @@ function calculate(){
     throw new Error('Boids does not exists')
   }
 
-  requestAnimationFrame(() => calculate())
+  requestAnimationFrame(() => loop())
 
   boids.calculate()
   boids.draw()
@@ -30,16 +30,15 @@ self.onmessage = (e: MessageEvent) => {
 
   const { data } = e
 
-  if(data.sab){
-    console.log(data.sab)
-  }
-
   if(data.boundingBox && boids){
     boids.setBoundingBox(data.boundingBox)
   }
 
-  if(data.boids && data.canvas && data.boundingBox){
+  if(data.boids && data.canvas && data.boundingBox && data.sab && data.counter ){
+    const sharedArray = new Float32Array(data.sab)
     boids = new Boids(
+      sharedArray,
+      new Int8Array(data.counter),
       data.boids,
       data.canvas,
       data.boundingBox
@@ -58,9 +57,9 @@ self.onmessage = (e: MessageEvent) => {
   }
 
 
-  if(!calculating && boids){
-    calculating = true
-    calculate()
+  if(!looping && boids){
+    looping = true
+    loop()
   }
 
 }

@@ -1,4 +1,4 @@
-import { type Predator } from './predator'
+import { type Predator } from './types'
 import Boid,{ BoidBox, BoidInit } from './boid'
 import * as THREE from 'three';
 
@@ -33,7 +33,13 @@ export default class Boids {
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
 
+  sharedArray: Float32Array
+  counter: Int8Array
+  counterIndex = 0
+
   constructor(
+    sharedArray: Float32Array,
+    counter: Int8Array,
     boids: BoidInit[],
     canvas: OffscreenCanvas,
     boundingBox: { width:number, height: number }
@@ -43,8 +49,12 @@ export default class Boids {
       boids,
       canvas,
       boundingBox,
+      sharedArray,
+      counter
     })
 
+    this.counter = counter
+    this.sharedArray = sharedArray
     this.boids = boids.map((boid : BoidInit) => {
       
       return new Boid({
@@ -148,12 +158,41 @@ export default class Boids {
   }
 
   calculate(){
-    this.loop()
+
+    let counter = this.counter.length
+    // console.log(this.counter)
+    while(counter--) if(!this.counter[counter]) return;
+    
+    // console.log('START')
+
     let i = this.boids.length
+
     while(i--) {
-      this.boids[i].calculate( this.boidBox )
+
+      this.boids[i].accelleration = [
+        this.sharedArray[ i * 9 + 6 + 0 ],
+        this.sharedArray[ i * 9 + 6 + 1 ],
+        this.sharedArray[ i * 9 + 6 + 2 ]
+      ]
+
+      this.boids[i].calculatePosition( this.boidBox )
       this.position.set(this.boids[i].position, i*3)
+
+      // set velocity
+      this.sharedArray[ i * 9 + 3 + 0 ] = this.boids[i].velocity[0]
+      this.sharedArray[ i * 9 + 3 + 1 ] = this.boids[i].velocity[1]
+      this.sharedArray[ i * 9 + 3 + 2 ] = this.boids[i].velocity[2]
+
+      // set position
+      this.sharedArray[ i * 9 + 0 ] = this.boids[i].position[0]
+      this.sharedArray[ i * 9 + 1 ] = this.boids[i].position[1]
+      this.sharedArray[ i * 9 + 2 ] = this.boids[i].position[2]
+
     }
+
+    for(i=0;i<this.counter.length;i++)
+      this.counter[i] = 0
+
   }
 
   loop(){
@@ -222,7 +261,7 @@ export default class Boids {
           closeDz += boids[i].position[2] - boids[j].position[2]
         }
 
-        if(distance < visibleRange){
+        else if(distance < visibleRange){
 
           // Alignment
           xVelAvg += boids[j].velocity[0] 
@@ -276,9 +315,9 @@ export default class Boids {
         )
 
         if(predatorDistance < predatoryRange){
-          boids[i].accelleration[0] += predatorturnfactor * (predatorDx/Math.abs(predatorDx))
-          boids[i].accelleration[1] += predatorturnfactor * (predatorDy/Math.abs(predatorDy))
-          boids[i].accelleration[2] += predatorturnfactor * (predatorDz/Math.abs(predatorDz))
+          boids[i].accelleration[0] += predatorturnfactor * (predatorDx < 0 ? -1 : 1)
+          boids[i].accelleration[1] += predatorturnfactor * (predatorDy < 0 ? -1 : 1)
+          boids[i].accelleration[2] += predatorturnfactor * (predatorDz < 0 ? -1 : 1)
         }
         
       }

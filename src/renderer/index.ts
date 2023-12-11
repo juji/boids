@@ -1,14 +1,13 @@
 import { BoidBox } from './boid'
-import { type Predator } from './predator'
+import { type Predator } from './types'
 
 export class Renderer {
 
   boundingBox: {width:number, height: number}
 
-  boidNum = 1000
   boxGap = 200
-  depth = 100
-
+  depth = 50
+  
   boidBox: BoidBox = {
     top: 0,
     left: 0,
@@ -19,11 +18,15 @@ export class Renderer {
   }
   
   predatorAttr: Predator = {
+    size: 40,
     x: 0,
     y: 0
   }
-
+  
   worker: Worker
+  calculators: Worker[] = []
+  calculatorNum = 6
+  boidNum = 1000 * this.calculatorNum
   canvas: HTMLCanvasElement
 
   constructor(
@@ -41,27 +44,61 @@ export class Renderer {
     this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
       type: 'module'
     });
+
+    let num = this.calculatorNum
+    while(num--){
+      this.calculators.push(new Worker(new URL("./calculator.ts", import.meta.url),{
+        type: 'module'
+      }))
+    }
     
     // boidbox
     const { width, height, depth } = this.calculateBoidBox()
     const offscreenCanvas = canvas.transferControlToOffscreen();
     
     // shared array buffer
-    const sab = new SharedArrayBuffer(1024);
+    const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * 3 * 3);
+    const sharedArray = new Float32Array(sab)
+
+    // counter
+    const counter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
+    const counterArray = new Int8Array(counter)
+    for(let i =0;i<counterArray.length;i++)
+      counterArray[i] = 0
 
     this.worker.postMessage({
       canvas: offscreenCanvas,
       boundingBox: boundingBox,
       sab: sab,
-      boids: [...new Array(this.boidNum)].map(() => {
+      counter: counter,
+      boids: [...new Array(this.boidNum)].map((_,i) => {
+
+        const position = [
+          Math.random() * width * (Math.random()<.5?-1:1),
+          Math.random() * height * (Math.random()<.5?-1:1),
+          Math.random() * depth * (Math.random()<.5?-1:1),
+        ]
+
+        // give them initial velocity
+        const velocity = [ 1, 1, 1 ]
+        const accelleration = [ 0, 0, 0 ]
+        const arrLen = 9
+
+        sharedArray[ (i * arrLen) ] = position[0]
+        sharedArray[ (i * arrLen) + 1 ] = position[1]
+        sharedArray[ (i * arrLen) + 2 ] = position[2]
+
+        sharedArray[ (i * arrLen) + 3 ] = velocity[0]
+        sharedArray[ (i * arrLen) + 4 ] = velocity[1]
+        sharedArray[ (i * arrLen) + 5 ] = velocity[2]
+
+        sharedArray[ (i * arrLen) + 6 ] = accelleration[0]
+        sharedArray[ (i * arrLen) + 7 ] = accelleration[1]
+        sharedArray[ (i * arrLen) + 8 ] = accelleration[2]
+        
         return {
-          position: [
-            Math.random() * width * (Math.random()<.5?-1:1),
-            Math.random() * height * (Math.random()<.5?-1:1),
-            Math.random() * depth * (Math.random()<.5?-1:1),
-          ],
-          // give them initial velocity
-          velocity: [1,1,1]
+          position,
+          velocity
         }
         
       }),
@@ -69,6 +106,20 @@ export class Renderer {
       predator: this.predatorAttr
     },[ offscreenCanvas ]);
 
+
+    this.calculators.forEach((calc, i) => {
+
+      calc.postMessage({
+        start: i * (this.boidNum / this.calculatorNum),
+        end: (i+1) * (this.boidNum / this.calculatorNum) - 1,
+        sab: sab,
+        counterIndex: i,
+        counter: counter,
+        boidBox: this.boidBox,
+        predatorAttr: this.predatorAttr
+      })
+
+    })
   }
 
   setPredator(x: number, y: number){
@@ -77,6 +128,12 @@ export class Renderer {
       x: (x - this.boundingBox.width/2), 
       y: (y - this.boundingBox.height/2) * -1
     }
+
+    this.calculators.forEach((calc) => {
+      calc.postMessage({
+        predatorAttr: this.predatorAttr
+      })
+    })
 
     this.worker.postMessage({
       predator: this.predatorAttr
