@@ -30,6 +30,10 @@ self.onmessage = (e: MessageEvent) => {
 
   const { data } = e
 
+  if(data.sab){
+    console.log(data.sab)
+  }
+
   if(data.boundingBox && boids){
     boids.setBoundingBox(data.boundingBox)
   }

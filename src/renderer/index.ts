@@ -35,20 +35,24 @@ export class Renderer {
     // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
     this.boundingBox = boundingBox // screen
     this.canvas = canvas
+
     
     // worker
     this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
       type: 'module'
     });
-
+    
     // boidbox
     const { width, height, depth } = this.calculateBoidBox()
     const offscreenCanvas = canvas.transferControlToOffscreen();
-
+    
+    // shared array buffer
+    const sab = new SharedArrayBuffer(1024);
 
     this.worker.postMessage({
       canvas: offscreenCanvas,
       boundingBox: boundingBox,
+      sab: sab,
       boids: [...new Array(this.boidNum)].map(() => {
         return {
           position: [
