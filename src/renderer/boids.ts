@@ -222,7 +222,7 @@ export default class Boids {
           closeDz += boids[i].position[2] - boids[j].position[2]
         }
 
-        if(distance < visibleRange){
+        else if(distance < visibleRange){
 
           // Alignment
           xVelAvg += boids[j].velocity[0] 

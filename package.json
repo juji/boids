@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serveo": "ssh -R boids:80:localhost:5173 serveo.net"
   },
   "devDependencies": {
     "@types/three": "^0.159.0",
