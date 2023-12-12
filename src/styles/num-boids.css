@@ -3,9 +3,8 @@
   
   position: fixed;
   top:0;
-  left: 90px; /* header width */
-  height: 90px; /* header height */
-  transform: translateX(-50%);
+  left: 89px; /* header width */
+  height: 89px; /* header height */
   padding: 0 1.4rem;
   display: flex;
   flex-direction: column;
