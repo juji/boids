@@ -41,8 +41,8 @@ export class Renderer {
     this.canvas = canvas
 
     if(num){
-      this.calculatorNum = Math.round(num / 500)
-      this.boidNum = 500 * this.calculatorNum
+      this.calculatorNum = Math.round(num / 100)
+      this.boidNum = 100 * this.calculatorNum
     }
 
     console.log('boidNum', this.boidNum)

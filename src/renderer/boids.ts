@@ -165,4 +165,32 @@ export default class Boids {
 
   }
 
+  // setPositions(){
+    
+  //   let counter = this.posCounter.length
+  //   let eachCounterNum = Math.round(this.boidsLength / counter)
+  //   while(counter--) {
+
+  //     if(!this.posCounter[counter]) continue;
+      
+  //     let start = counter * eachCounterNum
+  //     let end = start + eachCounterNum
+      
+  //     while(end--) {
+  //       if(end<start) break;
+  //       this.position.set([
+  //         this.sharedArray[ end * 9 + 0 ],
+  //         this.sharedArray[ end * 9 + 1 ],
+  //         this.sharedArray[ end * 9 + 2 ],  
+  //       ], end*3)
+  //     }
+      
+  //     this.posCounter[counter] = 0
+  //     this.accelCounter[counter] = 0
+
+  //     this.geometry.attributes.position.needsUpdate = true
+
+  //   }
+  // }
+
 }

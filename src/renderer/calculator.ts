@@ -26,7 +26,7 @@ let posCounter: Int8Array;
 let counterIndex: number;
 
 
-const maxVelocity: number = 6
+const maxVelocity: number = 3
 const minVelocity: number = 2
 
 // on edges
@@ -34,16 +34,16 @@ const turnFactor: number = 0.5
 
 // Separation
 const avoidFactor = 0.05
-const protectedRange = 20
+const protectedRange = 18
 
 // Alignment
-const matchingfactor = 0.05
+const matchingfactor = 0.06
 
 // Cohesion
 const centeringFactor = 0.0001
 
 // Predator
-const predatorturnfactor = 1
+const predatorturnfactor = 0.7
 const predatoryRange = (predatorAttr.size || 0) * 2
 
 // visible range is a range
