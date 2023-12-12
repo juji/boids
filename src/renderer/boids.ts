@@ -160,10 +160,7 @@ export default class Boids {
   calculate(){
 
     let counter = this.counter.length
-    // console.log(this.counter)
     while(counter--) if(!this.counter[counter]) return;
-    
-    // console.log('START')
 
     let i = this.boids.length
 

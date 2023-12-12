@@ -6,7 +6,7 @@ export class Renderer {
   boundingBox: {width:number, height: number}
 
   boxGap = 200
-  depth = 50
+  depth = 100
   
   boidBox: BoidBox = {
     top: 0,
@@ -25,12 +25,13 @@ export class Renderer {
   
   worker: Worker
   calculators: Worker[] = []
-  calculatorNum = 6
-  boidNum = 1000 * this.calculatorNum
+  calculatorNum = 10
+  boidNum = 100 * this.calculatorNum
   canvas: HTMLCanvasElement
 
   constructor(
-    canvas: HTMLCanvasElement, 
+    canvas: HTMLCanvasElement,
+    num: number,
     boundingBox: {width:number, height: number}
   ){
 
@@ -39,14 +40,21 @@ export class Renderer {
     this.boundingBox = boundingBox // screen
     this.canvas = canvas
 
+    if(num){
+      this.calculatorNum = Math.round(num / 500)
+      this.boidNum = 500 * this.calculatorNum
+    }
+
+    console.log('boidNum', this.boidNum)
+
     
     // worker
     this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
       type: 'module'
     });
 
-    let num = this.calculatorNum
-    while(num--){
+    let calcNum = this.calculatorNum
+    while(calcNum--){
       this.calculators.push(new Worker(new URL("./calculator.ts", import.meta.url),{
         type: 'module'
       }))
@@ -63,8 +71,15 @@ export class Renderer {
     // counter
     const counter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
     const counterArray = new Int8Array(counter)
-    for(let i =0;i<counterArray.length;i++)
+    for(let i =0;i<counterArray.length;i++){
       counterArray[i] = 0
+    }
+
+    const velocityXYZ = [
+      Math.random() < 0.5 ? -1 : 1,
+      Math.random() < 0.5 ? -1 : 1,
+      Math.random() < 0.5 ? -1 : 1,
+    ]
 
     this.worker.postMessage({
       canvas: offscreenCanvas,
@@ -80,7 +95,7 @@ export class Renderer {
         ]
 
         // give them initial velocity
-        const velocity = [ 1, 1, 1 ]
+        const velocity = [...velocityXYZ]
         const accelleration = [ 0, 0, 0 ]
         const arrLen = 9
 

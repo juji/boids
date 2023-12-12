@@ -20,10 +20,10 @@ export default class Boid{
   velocity: [number, number, number] = [0,0,0]
   accelleration: [number, number, number] = [0,0,0]
 
-  maxVelocity: number = 5
-  minVelocity: number = 4
+  maxVelocity: number = 4
+  minVelocity: number = 2
 
-  turnFactor: number = 0.6
+  turnFactor: number = 0.2
 
   constructor({
     position,
@@ -44,14 +44,12 @@ export default class Boid{
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
-    const turnFactor = Math.random() * this.turnFactor
-
     if(this.position[0] > boidBox.right){
-      this.velocity[0] -= this.turnFactor * Math.random() * 0.9
+      this.velocity[0] -= this.turnFactor * Math.random() * 0.6
     }
 
     if(this.position[0] < boidBox.left){
-      this.velocity[0] += this.turnFactor * Math.random() * 0.9
+      this.velocity[0] += this.turnFactor * Math.random() * 0.6
     }
 
     if(this.position[1] > boidBox.bottom){
@@ -63,11 +61,11 @@ export default class Boid{
     }
 
     if(this.position[2] > boidBox.front){
-      this.velocity[2] -= turnFactor
+      this.velocity[2] -= this.turnFactor * Math.random()
     }
 
     if(this.position[2] < boidBox.back){
-      this.velocity[2] += turnFactor
+      this.velocity[2] += this.turnFactor * Math.random()
     }
 
     // limit velocity

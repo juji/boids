@@ -1,0 +1,32 @@
+
+.num-boids{
+  
+  position: fixed;
+  top:0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 1.4rem;
+  z-index: 1;
+  background-color: rgba(0,0,0,0.8);
+
+  p{
+    margin: 0;
+  }
+
+  &>div{
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-gap: 5px;
+
+    &>a{
+      text-align: center;
+      color: var(--color);
+
+      &.active{
+        color: var(--anchor-color);
+      }
+    }
+  }
+
+}

@@ -2,6 +2,7 @@ import type { Predator } from './types'
 
 let predatorAttr:Predator = {
   exists: true,
+  size: 40,
   x: 0,
   y: 0
 }
@@ -22,10 +23,11 @@ function loop(){
 
   // visible range is a range
   const visibleRange = 40 + Math.random() * 40
+  // const visibleRange = 40
 
   // Separation
   const avoidFactor = 0.05
-  const protectedRange = 20
+  const protectedRange = 16
 
   // Alignment
   const matchingfactor = 0.05
@@ -37,6 +39,8 @@ function loop(){
   const predatorturnfactor = 1
   const predatoryRange = (predator.size || 0) * 2
 
+  //
+  const maxPartner = 100 // as big as 100 in 100 * calculatorNum
 
   let i = end + 1
   while(i--) {
@@ -44,6 +48,7 @@ function loop(){
     if(i<start) break;
     // console.log(i)
 
+    let partners = 0
     const accelleration = [0,0,0]
 
     const iPosition = [
@@ -85,25 +90,33 @@ function loop(){
     let j = sharedArray.length / 9
     while(j--) {
       if(j===i) continue;
+      if(partners >= maxPartner) break;
 
+      
       const jPosition = [
         j * 9 + 0,
         j * 9 + 1,
         j * 9 + 2,
       ]
-  
+      
       const jVelocity = [
         j * 9 + 3 + 0,
         j * 9 + 3 + 1,
         j * 9 + 3 + 2,
       ]
-
+      
       const distance = Math.sqrt(
         (sharedArray[ jPosition[0] ] - sharedArray[ iPosition[0] ])**2 +
         (sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ])**2 +
         (sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ])**2
       )
       
+      if(
+        distance < protectedRange ||
+        distance < visibleRange
+      ) partners++;
+      
+
       // Separation
       if(distance < protectedRange){
         closeDx += sharedArray[ iPosition[0] ] - sharedArray[ jPosition[0] ]

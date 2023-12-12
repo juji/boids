@@ -1,11 +1,16 @@
 
 :root {
+  --logo-fg: #fff;
+  --logo-bg: #000;
+  --color: rgba(255, 255, 255, 0.87);
+  --anchor-color: #ff6363;
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color);
   background-color: #242424;
 
   font-synthesis: none;
@@ -14,8 +19,6 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-  --logo-fg: #fff;
-  --logo-bg: #000;
 }
 
 *, *::after, *::before{
@@ -44,6 +47,11 @@ body,html{
   height: 100%;
   margin:0;
   padding:0;
+}
+
+a{
+  color: var(--anchor-color);
+  text-underline-offset: 3px;
 }
 
 .noscript{
@@ -169,7 +177,4 @@ footer{
   padding: 1rem 2rem;
   background-color: rgb( 21 21 21 / 30% );
 
-  & a{
-    color: #ff6363;
-  }
 }
