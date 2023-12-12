@@ -26,7 +26,7 @@ let posCounter: Int8Array;
 let counterIndex: number;
 
 
-const maxVelocity: number = 3
+const maxVelocity: number = 5
 const minVelocity: number = 2
 
 // on edges

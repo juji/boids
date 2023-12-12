@@ -30,6 +30,8 @@ export default class Boids {
   posCounter: Int8Array
   counterIndex = 0
 
+  hasChanged: number[]
+
   constructor(
     sharedArray: Float32Array,
     accelCounter: Int8Array,
@@ -50,6 +52,7 @@ export default class Boids {
 
     this.accelCounter = accelCounter
     this.posCounter = posCounter
+    this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
     this.boidsLength = boids.length
 
@@ -142,55 +145,38 @@ export default class Boids {
   draw(){
     this.renderer.render( this.scene, this.camera );
   }
-  
+
   setPositions(){
     
     let counter = this.posCounter.length
-    while(counter--) if(!this.posCounter[counter]) return;
-    
-    this.posCounter.fill(0)
-    this.accelCounter.fill(0)
+    let counterLen = Math.round(this.boidsLength / counter)
+    while(counter--) {
 
-    let i = this.boidsLength
-    
-    while(i--) {
-      this.position.set([
-        this.sharedArray[ i * 9 + 0 ],
-        this.sharedArray[ i * 9 + 1 ],
-        this.sharedArray[ i * 9 + 2 ],  
-      ], i*3)
+      if(!this.posCounter[counter]) continue;
+      if(this.hasChanged[counter]) continue;
+      
+      this.hasChanged[counter] = 1
+      let start = counter * counterLen
+      let end = start + counterLen
+      
+      while(end--) {
+        if(end<start) break;
+        this.position.set([
+          this.sharedArray[ end * 9 + 0 ],
+          this.sharedArray[ end * 9 + 1 ],
+          this.sharedArray[ end * 9 + 2 ],  
+        ], end*3)
+      }
+      
     }
     
-    this.geometry.attributes.position.needsUpdate = true
+    if( this.hasChanged.findIndex(v => !v) === -1 ){
+      this.posCounter.fill(0)
+      this.accelCounter.fill(0)
+      this.hasChanged.fill(0)
+      this.geometry.attributes.position.needsUpdate = true
+    }
 
   }
-
-  // setPositions(){
-    
-  //   let counter = this.posCounter.length
-  //   let eachCounterNum = Math.round(this.boidsLength / counter)
-  //   while(counter--) {
-
-  //     if(!this.posCounter[counter]) continue;
-      
-  //     let start = counter * eachCounterNum
-  //     let end = start + eachCounterNum
-      
-  //     while(end--) {
-  //       if(end<start) break;
-  //       this.position.set([
-  //         this.sharedArray[ end * 9 + 0 ],
-  //         this.sharedArray[ end * 9 + 1 ],
-  //         this.sharedArray[ end * 9 + 2 ],  
-  //       ], end*3)
-  //     }
-      
-  //     this.posCounter[counter] = 0
-  //     this.accelCounter[counter] = 0
-
-  //     this.geometry.attributes.position.needsUpdate = true
-
-  //   }
-  // }
 
 }
