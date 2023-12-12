@@ -163,7 +163,7 @@ export class Renderer {
     this.boundingBox = boundingBox
     this.calculateBoidBox()
 
-    this.calculators.forEach((calc, i) => {
+    this.calculators.forEach((calc) => {
 
       calc.postMessage({
         boidBox: this.boidBox,
