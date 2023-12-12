@@ -31,8 +31,8 @@ export default class Boids {
   counterIndex = 0
 
   hasChanged: number[]
-
-  times: number[] = [ performance.now() ]
+  prevTime: number = performance.now()
+  frames = 0
   fps: number = 0
 
   sendFps: (fps: number) => void;
@@ -184,13 +184,14 @@ export default class Boids {
       this.geometry.attributes.position.needsUpdate = true
 
       // fps counter
-      const now = performance.now()
-      while (this.times.length > 0 && this.times[0] <= now - 1000) {
-        this.times.shift();
+      const time = performance.now();
+      this.frames++;
+      if (time > this.prevTime + 1000) {
+        let fps = Math.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
+        this.prevTime = time;
+        this.frames = 0;
+        this.sendFps(fps)
       }
-      this.times.push(now);
-      const fps = this.times.length;
-      this.sendFps(fps)
 
     }
 
