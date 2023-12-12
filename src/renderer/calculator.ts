@@ -1,4 +1,4 @@
-import type { Predator } from './types'
+import type { Predator, BoidBox } from './types'
 
 let predatorAttr:Predator = {
   exists: true,
@@ -7,40 +7,58 @@ let predatorAttr:Predator = {
   y: 0
 }
 
+let boidBox: BoidBox = {
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+  front: 0,
+  back: 0,
+}
+
 let calculating = false
 let sharedArray: Float32Array;
 let start = 0
 let end = 0
 
-let counter: Int8Array;
+let accelCounter: Int8Array;
+let posCounter: Int8Array;
 let counterIndex: number;
 
-function loop(){
+
+const maxVelocity: number = 6
+const minVelocity: number = 2
+
+// on edges
+const turnFactor: number = 0.5
+
+// Separation
+const avoidFactor = 0.05
+const protectedRange = 20
+
+// Alignment
+const matchingfactor = 0.05
+
+// Cohesion
+const centeringFactor = 0.0001
+
+// Predator
+const predatorturnfactor = 1
+const predatoryRange = (predatorAttr.size || 0) * 2
+
+// visible range is a range
+const getVisibleRange = () => 40 + Math.random() * 40
+
+//
+const maxPartner = 100 // as big as 100 in 100 * calculatorNum
+
+function calculateAccelleration(){
 
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
 
   const predator = predatorAttr
+  const visibleRange = getVisibleRange()
 
-  // visible range is a range
-  const visibleRange = 40 + Math.random() * 40
-  // const visibleRange = 40
-
-  // Separation
-  const avoidFactor = 0.05
-  const protectedRange = 16
-
-  // Alignment
-  const matchingfactor = 0.05
-
-  // Cohesion
-  const centeringFactor = 0.0005
-
-  // Predator
-  const predatorturnfactor = 1
-  const predatoryRange = (predator.size || 0) * 2
-
-  //
-  const maxPartner = 100 // as big as 100 in 100 * calculatorNum
 
   let i = end + 1
   while(i--) {
@@ -193,6 +211,88 @@ function loop(){
 
 }
 
+function calculatePosition(){
+
+  let i = end + 1
+  while(i--) {
+
+    if(i<start) break;
+
+    const iPosition = [
+      i * 9 + 0,
+      i * 9 + 1,
+      i * 9 + 2,
+    ]
+
+    const iVelocity = [
+      i * 9 + 3 + 0,
+      i * 9 + 3 + 1,
+      i * 9 + 3 + 2,
+    ]
+
+    const iAccelleration = [
+      i * 9 + 6 + 0,
+      i * 9 + 6 + 1,
+      i * 9 + 6 + 2,
+    ]
+
+    sharedArray[ iVelocity[0] ] += sharedArray[ iAccelleration[0] ]
+    sharedArray[ iVelocity[1] ] += sharedArray[ iAccelleration[1] ]
+    sharedArray[ iVelocity[2] ] += sharedArray[ iAccelleration[2] ]
+
+    // turn factor
+    // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
+
+    if(sharedArray[ iPosition[0] ] > boidBox.right){
+      sharedArray[ iVelocity[0] ] -= turnFactor * Math.random() * 0.6
+    }
+
+    if(sharedArray[ iPosition[0] ] < boidBox.left){
+      sharedArray[ iVelocity[0] ] += turnFactor * Math.random() * 0.6
+    }
+
+    if(sharedArray[ iPosition[1] ] > boidBox.bottom){
+      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.4
+    }
+
+    if(sharedArray[ iPosition[1] ] < boidBox.top){
+      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.4
+    }
+
+    if(sharedArray[ iPosition[2] ] > boidBox.front){
+      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random()
+    }
+
+    if(sharedArray[ iPosition[2] ] < boidBox.back){
+      sharedArray[ iVelocity[2] ] += turnFactor * Math.random()
+    }
+
+    // limit velocity
+    const velocity = Math.sqrt(
+      sharedArray[ iVelocity[0] ]**2 + sharedArray[ iVelocity[1] ]**2 + sharedArray[ iVelocity[2] ]**2
+    )
+
+    if(velocity > maxVelocity){
+      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * maxVelocity
+      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * maxVelocity
+      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * maxVelocity
+    }
+
+    if(velocity < minVelocity){
+      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * minVelocity
+      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * minVelocity
+      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * minVelocity
+    }
+
+    //
+    sharedArray[ iPosition[0] ] += sharedArray[ iVelocity[0] ]
+    sharedArray[ iPosition[1] ] += sharedArray[ iVelocity[1] ]
+    sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
+
+  }
+
+}
+
 function calculate(){
   if(!sharedArray) {
     throw new Error('sharedArray does not exists')
@@ -200,10 +300,21 @@ function calculate(){
 
   requestAnimationFrame(() => calculate())
 
-  // loop()
-  if( !counter[ counterIndex] ){
-    loop()
-    counter[ counterIndex] = 1
+  // loop: calculate accellearation
+  if( !accelCounter[ counterIndex ] ){
+    accelCounter[ counterIndex ] = 1
+    calculateAccelleration()
+    return;
+  }
+
+  // if all accel is done, calculate position
+  let counter = accelCounter.length
+  while(counter--) if(!accelCounter[counter]) return;
+
+  if( !posCounter[ counterIndex ] ){
+    posCounter[ counterIndex ] = 1
+    calculatePosition()
+    return;
   }
 
 }
@@ -219,8 +330,11 @@ self.onmessage = (e: MessageEvent) => {
       ...data.predatorAttr
     }
 
+  if(data.boidBox)
+    boidBox = data.boidBox
+
   if(
-    data.sab && data.boidBox && data.counter &&
+    data.sab && data.accelCounter && data.posCounter &&
     typeof data.start !== 'undefined' &&
     typeof data.end !== 'undefined'
   ){
@@ -231,8 +345,9 @@ self.onmessage = (e: MessageEvent) => {
     counterIndex = data.counterIndex
     // console.log({ counterIndex, start, end })
 
-    counter = new Int8Array(data.counter)
     sharedArray = new Float32Array(data.sab)
+    accelCounter = new Int8Array(data.accelCounter)
+    posCounter = new Int8Array(data.posCounter)
     
     if(!calculating){
       calculating = true

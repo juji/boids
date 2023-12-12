@@ -1,4 +1,4 @@
-import { BoidBox } from './boid'
+import { BoidBox } from './types'
 import { type Predator } from './types'
 
 export class Renderer {
@@ -68,12 +68,13 @@ export class Renderer {
     const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * 3 * 3);
     const sharedArray = new Float32Array(sab)
 
-    // counter
-    const counter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
-    const counterArray = new Int8Array(counter)
-    for(let i =0;i<counterArray.length;i++){
-      counterArray[i] = 0
-    }
+    // acceleration counter
+    const accelCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
+    new Int8Array(accelCounter).fill(0)
+
+    // position Counter
+    const posCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
+    new Int8Array(posCounter).fill(0)
 
     const velocityXYZ = [
       Math.random() < 0.5 ? -1 : 1,
@@ -85,7 +86,8 @@ export class Renderer {
       canvas: offscreenCanvas,
       boundingBox: boundingBox,
       sab: sab,
-      counter: counter,
+      accelCounter: accelCounter,
+      posCounter: posCounter,
       boids: [...new Array(this.boidNum)].map((_,i) => {
 
         const position = [
@@ -99,6 +101,7 @@ export class Renderer {
         const accelleration = [ 0, 0, 0 ]
         const arrLen = 9
 
+        // set sharedArray
         sharedArray[ (i * arrLen) ] = position[0]
         sharedArray[ (i * arrLen) + 1 ] = position[1]
         sharedArray[ (i * arrLen) + 2 ] = position[2]
@@ -111,10 +114,8 @@ export class Renderer {
         sharedArray[ (i * arrLen) + 7 ] = accelleration[1]
         sharedArray[ (i * arrLen) + 8 ] = accelleration[2]
         
-        return {
-          position,
-          velocity
-        }
+        // return positions
+        return { position }
         
       }),
       boidBox: this.boidBox,
@@ -129,7 +130,8 @@ export class Renderer {
         end: (i+1) * (this.boidNum / this.calculatorNum) - 1,
         sab: sab,
         counterIndex: i,
-        counter: counter,
+        accelCounter: accelCounter,
+        posCounter: posCounter,
         boidBox: this.boidBox,
         predatorAttr: this.predatorAttr
       })
@@ -161,8 +163,16 @@ export class Renderer {
     this.boundingBox = boundingBox
     this.calculateBoidBox()
 
+    this.calculators.forEach((calc, i) => {
+
+      calc.postMessage({
+        boidBox: this.boidBox,
+        boundingBox: this.boundingBox
+      })
+
+    })
+
     if(this.worker) this.worker.postMessage({
-      boidBox: this.boidBox,
       boundingBox: this.boundingBox
     });
 

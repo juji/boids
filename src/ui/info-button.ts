@@ -2,7 +2,7 @@
 
 export function infoButton(){
 
-  const revealTimeout = 5000
+  const revealTimeout = 10000
   
   const button = document.querySelector('button.info-button')
   const content = document.querySelector('.info-content')

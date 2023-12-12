@@ -16,7 +16,7 @@ function loop(){
 
   requestAnimationFrame(() => loop())
 
-  boids.calculate()
+  boids.setPositions()
   boids.draw()
 
   // console.clear()
@@ -30,30 +30,30 @@ self.onmessage = (e: MessageEvent) => {
 
   const { data } = e
 
-  if(data.boundingBox && boids){
-    boids.setBoundingBox(data.boundingBox)
-  }
+  if(
+    data.boids && data.canvas && 
+    data.boundingBox && data.sab && 
+    data.accelCounter && data.posCounter 
+  ){
 
-  if(data.boids && data.canvas && data.boundingBox && data.sab && data.counter ){
-    const sharedArray = new Float32Array(data.sab)
     boids = new Boids(
-      sharedArray,
-      new Int8Array(data.counter),
+      new Float32Array(data.sab),
+      new Int8Array(data.accelCounter),
+      new Int8Array(data.posCounter),
       data.boids,
       data.canvas,
       data.boundingBox
     )
   }
 
-
-  if(data.predator){
-    if(!boids) { throw new Error('Boids does not exists') }
-    boids.setPredator( data.predator )
+  if(data.boundingBox){
+    if(!boids) { throw new Error('BOUNDINGBOX ERROR: Boids does not exists') }
+    boids.setBoundingBox(data.boundingBox)
   }
 
-  if(data.boidBox){
-    if(!boids) { throw new Error('Boids does not exists') }
-    boids.setBoidBox( data.boidBox )
+  if(data.predator){
+    if(!boids) { throw new Error('PREDATOR ERROR: Boids does not exists') }
+    boids.setPredator( data.predator )
   }
 
 
