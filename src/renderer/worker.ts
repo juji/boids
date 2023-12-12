@@ -42,7 +42,8 @@ self.onmessage = (e: MessageEvent) => {
       new Int8Array(data.posCounter),
       data.boids,
       data.canvas,
-      data.boundingBox
+      data.boundingBox,
+      (fps: number) => self.postMessage({ fps })
     )
   }
 

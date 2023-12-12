@@ -28,12 +28,16 @@ export class Renderer {
   calculatorNum = 10
   boidNum = 100 * this.calculatorNum
   canvas: HTMLCanvasElement
+  reportFps: (fps: number) => void
 
   constructor(
     canvas: HTMLCanvasElement,
     num: number,
-    boundingBox: {width:number, height: number}
+    boundingBox: {width:number, height: number},
+    reportFps: (fps: number) => void
   ){
+
+    this.reportFps = reportFps
 
     // let window size set boidNum
     // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
@@ -81,6 +85,10 @@ export class Renderer {
       Math.random() < 0.5 ? -1 : 1,
       Math.random() < 0.5 ? -1 : 1,
     ]
+
+    this.worker.onmessage = (ev : MessageEvent) => {
+      if(ev.data.fps) this.reportFps(ev.data.fps)
+    }
 
     this.worker.postMessage({
       canvas: offscreenCanvas,

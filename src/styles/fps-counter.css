@@ -1,0 +1,11 @@
+
+
+.fps-counter{
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 8px 13px;
+  background-color: rgba(0,0,0,0.3);
+  color: white;
+  font-size: 13px;
+}

@@ -32,13 +32,19 @@ export default class Boids {
 
   hasChanged: number[]
 
+  times: number[] = [ performance.now() ]
+  fps: number = 0
+
+  sendFps: (fps: number) => void;
+
   constructor(
     sharedArray: Float32Array,
     accelCounter: Int8Array,
     posCounter: Int8Array,
     boids: BoidInit[],
     canvas: OffscreenCanvas,
-    boundingBox: { width:number, height: number }
+    boundingBox: { width:number, height: number },
+    sendFps: (fps: number) => void
   ){
 
     console.log('contructor', {
@@ -50,6 +56,7 @@ export default class Boids {
       boundingBox,
     })
 
+    this.sendFps = sendFps
     this.accelCounter = accelCounter
     this.posCounter = posCounter
     this.hasChanged = new Array(this.posCounter.length).fill(0)
@@ -175,6 +182,16 @@ export default class Boids {
       this.accelCounter.fill(0)
       this.hasChanged.fill(0)
       this.geometry.attributes.position.needsUpdate = true
+
+      // fps counter
+      const now = performance.now()
+      while (this.times.length > 0 && this.times[0] <= now - 1000) {
+        this.times.shift();
+      }
+      this.times.push(now);
+      const fps = this.times.length;
+      this.sendFps(fps)
+
     }
 
   }
