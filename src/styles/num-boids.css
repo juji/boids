@@ -3,9 +3,9 @@
   
   position: fixed;
   top:0;
-  left: 50%;
+  left: 90px; /* header width */
+  height: 90px; /* header height */
   transform: translateX(-50%);
-  height: 90px;
   padding: 0 1.4rem;
   display: flex;
   flex-direction: column;
