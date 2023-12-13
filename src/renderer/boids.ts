@@ -178,6 +178,7 @@ export default class Boids {
     }
     
     if( this.hasChanged.findIndex(v => !v) === -1 ){
+      
       this.posCounter.fill(0)
       this.accelCounter.fill(0)
       this.hasChanged.fill(0)

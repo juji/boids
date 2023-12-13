@@ -304,7 +304,6 @@ function calculate(){
   if( !accelCounter[ counterIndex ] ){
     accelCounter[ counterIndex ] = 1
     calculateAccelleration()
-    return;
   }
 
   // if all accel is done, calculate position
