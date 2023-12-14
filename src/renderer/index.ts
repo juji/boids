@@ -1,12 +1,17 @@
 import { BoidBox } from './types'
 import { type Predator } from './types'
+import Boids from './boids'
 
 export class Renderer {
+
+  boids: Boids
 
   boundingBox: {width:number, height: number}
 
   boxGap = 200
-  depth = 100
+  depth = 500
+  width = 500
+  height = 500
   
   boidBox: BoidBox = {
     top: 0,
@@ -23,12 +28,10 @@ export class Renderer {
     y: 0
   }
   
-  worker: Worker
   calculators: Worker[] = []
   calculatorNum = 10
   boidNum = 100 * this.calculatorNum
   canvas: HTMLCanvasElement
-  reportFps: (fps: number) => void
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -36,8 +39,6 @@ export class Renderer {
     boundingBox: {width:number, height: number},
     reportFps: (fps: number) => void
   ){
-
-    this.reportFps = reportFps
 
     // let window size set boidNum
     // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
@@ -51,12 +52,6 @@ export class Renderer {
 
     console.log('boidNum', this.boidNum)
 
-    
-    // worker
-    this.worker = new Worker(new URL("./worker.ts", import.meta.url),{
-      type: 'module'
-    });
-
     let calcNum = this.calculatorNum
     while(calcNum--){
       this.calculators.push(new Worker(new URL("./calculator.ts", import.meta.url),{
@@ -65,8 +60,7 @@ export class Renderer {
     }
     
     // boidbox
-    const { width, height, depth } = this.calculateBoidBox()
-    const offscreenCanvas = canvas.transferControlToOffscreen();
+    this.calculateBoidBox()
     
     // shared array buffer
     const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * 3 * 3);
@@ -80,56 +74,54 @@ export class Renderer {
     const posCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
     new Int8Array(posCounter).fill(0)
 
+
     const velocityXYZ = [
       Math.random() < 0.5 ? -1 : 1,
       Math.random() < 0.5 ? -1 : 1,
       Math.random() < 0.5 ? -1 : 1,
     ]
 
-    this.worker.onmessage = (ev : MessageEvent) => {
-      if(ev.data.fps) this.reportFps(ev.data.fps)
-    }
+    const boids = [...new Array(this.boidNum)].map((_,i) => {
 
-    this.worker.postMessage({
-      canvas: offscreenCanvas,
-      boundingBox: boundingBox,
-      sab: sab,
-      accelCounter: accelCounter,
-      posCounter: posCounter,
-      boids: [...new Array(this.boidNum)].map((_,i) => {
+      const position = [
+        Math.random() * this.width * (Math.random()<.5?-1:1),
+        Math.random() * this.height * (Math.random()<.5?-1:1),
+        Math.random() * this.depth * (Math.random()<.5?-1:1),
+      ]
 
-        const position = [
-          Math.random() * width * (Math.random()<.5?-1:1),
-          Math.random() * height * (Math.random()<.5?-1:1),
-          Math.random() * depth * (Math.random()<.5?-1:1),
-        ]
+      // give them initial velocity
+      const velocity = [...velocityXYZ]
+      const accelleration = [ 0, 0, 0 ]
+      const arrLen = 9
 
-        // give them initial velocity
-        const velocity = [...velocityXYZ]
-        const accelleration = [ 0, 0, 0 ]
-        const arrLen = 9
+      // set sharedArray
+      sharedArray[ (i * arrLen) ] = position[0]
+      sharedArray[ (i * arrLen) + 1 ] = position[1]
+      sharedArray[ (i * arrLen) + 2 ] = position[2]
 
-        // set sharedArray
-        sharedArray[ (i * arrLen) ] = position[0]
-        sharedArray[ (i * arrLen) + 1 ] = position[1]
-        sharedArray[ (i * arrLen) + 2 ] = position[2]
+      sharedArray[ (i * arrLen) + 3 ] = velocity[0]
+      sharedArray[ (i * arrLen) + 4 ] = velocity[1]
+      sharedArray[ (i * arrLen) + 5 ] = velocity[2]
 
-        sharedArray[ (i * arrLen) + 3 ] = velocity[0]
-        sharedArray[ (i * arrLen) + 4 ] = velocity[1]
-        sharedArray[ (i * arrLen) + 5 ] = velocity[2]
+      sharedArray[ (i * arrLen) + 6 ] = accelleration[0]
+      sharedArray[ (i * arrLen) + 7 ] = accelleration[1]
+      sharedArray[ (i * arrLen) + 8 ] = accelleration[2]
+      
+      // return positions
+      return { position: position as [number, number, number] }
+      
+    })
 
-        sharedArray[ (i * arrLen) + 6 ] = accelleration[0]
-        sharedArray[ (i * arrLen) + 7 ] = accelleration[1]
-        sharedArray[ (i * arrLen) + 8 ] = accelleration[2]
-        
-        // return positions
-        return { position }
-        
-      }),
-      boidBox: this.boidBox,
-      predator: this.predatorAttr
-    },[ offscreenCanvas ]);
-
+    this.boids = new Boids(
+      new Float32Array(sab),
+      new Int8Array(accelCounter),
+      new Int8Array(posCounter),
+      boids,
+      canvas,
+      boundingBox,
+      this.boidBox,
+      reportFps
+    )
 
     this.calculators.forEach((calc, i) => {
 
@@ -145,6 +137,8 @@ export class Renderer {
       })
 
     })
+
+    this.loop()
   }
 
   setPredator(x: number, y: number){
@@ -160,9 +154,7 @@ export class Renderer {
       })
     })
 
-    this.worker.postMessage({
-      predator: this.predatorAttr
-    });
+    this.boids.setPredator(this.predatorAttr)
   }
 
   // when resize happens
@@ -180,29 +172,36 @@ export class Renderer {
 
     })
 
-    if(this.worker) this.worker.postMessage({
-      boundingBox: this.boundingBox
-    });
+    this.boids.setBoundingBox(boundingBox)
 
   }
 
   calculateBoidBox(){
-    const width = this.boundingBox.width/2
-    const height = this.boundingBox.height/2
-    const smaller = Math.min(width, height)
 
-    this.boxGap = 3 * smaller / 10
+    this.boxGap = 0
 
     this.boidBox = {
-      top: (-height/2) + this.boxGap,
-      left: (-width) + this.boxGap,
-      bottom: (height/2) - this.boxGap,
-      right: (width) - this.boxGap,
-      front: this.depth - this.boxGap,
-      back: -this.depth + this.boxGap
+      top: (-this.height/2) + this.boxGap,
+      left: (-this.width/2) + this.boxGap,
+      bottom: (this.height/2) - this.boxGap,
+      right: (this.width/2) - this.boxGap,
+      front: (this.depth/2) - this.boxGap,
+      back: (-this.depth/2) + this.boxGap
     }
 
-    return { width, height, depth: this.depth }
+  }
+
+  loop(){
+  
+    if(!this.boids) {
+      throw new Error('Boids does not exists')
+    }
+  
+    requestAnimationFrame(() => this.loop())
+  
+    this.boids.setPositions()
+    this.boids.draw()
+  
   }
 
 }

@@ -5,7 +5,7 @@
   top:0;
   left: 89px; /* header width */
   height: 89px; /* header height */
-  padding: 0 1.4rem;
+  padding: 0 1rem;
   display: flex;
   flex-direction: column;
   align-items: left;

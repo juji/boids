@@ -252,19 +252,19 @@ function calculatePosition(){
     }
 
     if(sharedArray[ iPosition[1] ] > boidBox.bottom){
-      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.4
+      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[1] ] < boidBox.top){
-      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.4
+      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] > boidBox.front){
-      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random()
+      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] < boidBox.back){
-      sharedArray[ iVelocity[2] ] += turnFactor * Math.random()
+      sharedArray[ iVelocity[2] ] += turnFactor * Math.random() * 0.6
     }
 
     // limit velocity

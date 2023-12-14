@@ -16,5 +16,5 @@ export type BoidBox = {
 
 export type BoidInit = {
   position: [number, number, number]
-  velocity: [number, number, number]
+  // velocity: [number, number, number]
 }
