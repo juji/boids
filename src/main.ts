@@ -36,7 +36,9 @@ import { ui } from './ui'
   )
   
   // start the ui handler
-  ui(renderer, canvas)
+  ui(
+    // renderer, canvas
+  )
   
   window.addEventListener('resize', () => {
     renderer.changeBoundingBox({
