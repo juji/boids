@@ -89,6 +89,7 @@ export default class Boids {
     renderer.setSize( boundingBox.width, boundingBox.height, false);
     renderer.setClearColor( 0x000000, 0 )
     renderer.autoClear = true
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
     // Controls
     const controls = new OrbitControls( camera, canvas )
