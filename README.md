@@ -1,10 +1,6 @@
 # Boids
 
-NOT DONE
-
-I Don't think it will ever be...
-
-eh,
+Craig Reynolds' Boid as desribed by V. Hunter Adams.
 
 [https://boids.jujiplay.com/](https://boids.jujiplay.com/)
 

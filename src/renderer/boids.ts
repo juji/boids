@@ -53,16 +53,6 @@ export default class Boids {
     sendFps: (fps: number) => void
   ){
 
-    console.log('contructor', {
-      sharedArray,
-      accelCounter,
-      posCounter,
-      boids,
-      canvas,
-      boundingBox,
-      boidBox,
-    })
-
     this.boidBox = boidBox
     this.sendFps = sendFps
     this.accelCounter = accelCounter
@@ -131,7 +121,6 @@ export default class Boids {
     // helpers
     const axesHelper = new THREE.AxesHelper( 100 );
     const box = new THREE.Box3();
-    console.log(this.boidBox)
     box.setFromCenterAndSize( 
       new THREE.Vector3( 0, 0, 0 ),
       new THREE.Vector3( 

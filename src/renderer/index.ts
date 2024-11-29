@@ -50,7 +50,7 @@ export class Renderer {
       this.boidNum = 100 * this.calculatorNum
     }
 
-    console.log('boidNum', this.boidNum)
+    // console.log('boidNum', this.boidNum)
 
     let calcNum = this.calculatorNum
     while(calcNum--){
