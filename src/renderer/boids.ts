@@ -86,9 +86,9 @@ export default class Boids {
 
     // renderer
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
-    renderer.setSize( boundingBox.width, boundingBox.height, false);
+    renderer.setSize( boundingBox.width, boundingBox.height );
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setClearColor( 0x000000, 0 )
-    renderer.autoClear = true
 
     // Controls
     const controls = new OrbitControls( camera, canvas )
@@ -155,7 +155,7 @@ export default class Boids {
 
   setBoundingBox( boundingBox: { width:number, height: number }){
     this.renderer.clear()
-    this.renderer.setSize( boundingBox.width, boundingBox.height, false);
+    this.renderer.setSize( boundingBox.width, boundingBox.height);
     this.camera.aspect = boundingBox.width / boundingBox.height
     this.camera.updateProjectionMatrix()
   }
