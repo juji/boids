@@ -156,6 +156,7 @@ export default class Boids {
   setBoundingBox( boundingBox: { width:number, height: number }){
     this.renderer.clear()
     this.renderer.setSize( boundingBox.width, boundingBox.height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.camera.aspect = boundingBox.width / boundingBox.height
     this.camera.updateProjectionMatrix()
   }
