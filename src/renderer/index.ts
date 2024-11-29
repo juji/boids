@@ -29,8 +29,9 @@ export class Renderer {
   }
   
   calculators: Worker[] = []
+  calcPerThread = 100
   calculatorNum = 10
-  boidNum = 100 * this.calculatorNum
+  boidNum = 1000
   canvas: HTMLCanvasElement
 
   constructor(
@@ -46,8 +47,8 @@ export class Renderer {
     this.canvas = canvas
 
     if(num){
-      this.calculatorNum = Math.round(num / 100)
-      this.boidNum = 100 * this.calculatorNum
+      this.calculatorNum = Math.round(num / this.calcPerThread)
+      this.boidNum = this.calcPerThread * this.calculatorNum
     }
 
     // console.log('boidNum', this.boidNum)

@@ -50,7 +50,7 @@ const predatoryRange = (predatorAttr.size || 0) * 2
 const getVisibleRange = () => 40 + Math.random() * 40
 
 //
-const maxPartner = 100 // as big as 100 in 100 * calculatorNum
+const maxPartner = 100 // as big as calcPerThread
 
 function calculateAccelleration(){
 
