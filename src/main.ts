@@ -16,7 +16,7 @@ import { ui } from './ui'
   
   if(!canvas) return;
   const urlParams = new URLSearchParams(window.location.search);
-  const num = urlParams.get('num') ? Number(urlParams.get('num')) : 1000;
+  const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
 
   const numLink = document.querySelector(`.num-boids-link>a[data-num="${num}"]`) as HTMLAnchorElement
   if(numLink) numLink.classList.add('active')
