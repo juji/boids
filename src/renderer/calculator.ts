@@ -32,8 +32,8 @@ const minVelocity: number = 2
 const turnFactor: number = 0.5
 
 // Separation
-const avoidFactor = 0.05
-const protectedRange = 18
+const avoidFactor = 0.075
+const protectedRange = 16
 
 // Alignment
 const matchingfactor = 0.1
