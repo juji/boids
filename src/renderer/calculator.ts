@@ -268,7 +268,9 @@ function calculatePosition(){
 
     // limit velocity
     const velocity = Math.sqrt(
-      sharedArray[ iVelocity[0] ]**2 + sharedArray[ iVelocity[1] ]**2 + sharedArray[ iVelocity[2] ]**2
+      sharedArray[ iVelocity[0] ]**2 + 
+      sharedArray[ iVelocity[1] ]**2 + 
+      sharedArray[ iVelocity[2] ]**2
     )
 
     if(velocity > maxVelocity){
@@ -305,6 +307,7 @@ function calculate(){
     calculateAcceleration()
   }
 
+  // this waits for all acceleration calc is done
   // if all accel is done, calculate position
   let counter = accelCounter.length
   while(counter--) if(!accelCounter[counter]) return;

@@ -73,23 +73,27 @@ export class Renderer {
     const posCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
     new Int8Array(posCounter).fill(0)
 
-
-    const velocityXYZ = [
-      Math.random() < 0.5 ? -1 : 1,
-      Math.random() < 0.5 ? -1 : 1,
-      Math.random() < 0.5 ? -1 : 1,
-    ]
-
     const boids = [...new Array(this.boidNum)].map((_,i) => {
 
       const position = [
-        Math.random() * this.width * (Math.random()<.5?-1:1),
-        Math.random() * this.height * (Math.random()<.5?-1:1),
-        Math.random() * this.depth * (Math.random()<.5?-1:1),
+
+        // outside boundingBox
+        // Math.random() * this.width * (Math.random()<.5?-1:1),
+        // Math.random() * this.height * (Math.random()<.5?-1:1),
+        // Math.random() * this.depth * (Math.random()<.5?-1:1),
+
+        // inside boundingBox
+        Math.random() * this.width - (this.width * .5),
+        Math.random() * this.height - (this.height * .5),
+        Math.random() * this.depth - (this.depth * .5),
       ]
 
       // give them initial velocity
-      const velocity = [...velocityXYZ]
+      const velocity = [
+        Math.random() < 0.5 ? -1 : 1,
+        Math.random() < 0.5 ? -1 : 1,
+        Math.random() < 0.5 ? -1 : 1,
+      ]
       const accelleration = [ 0, 0, 0 ]
       const arrLen = 9
 
