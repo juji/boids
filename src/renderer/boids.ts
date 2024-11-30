@@ -193,9 +193,9 @@ export default class Boids {
       while(end--) {
         if(end<start) break;
         this.position.set([
-          this.sharedArray[ end * this.sharedArrayLen + 0 ],
-          this.sharedArray[ end * this.sharedArrayLen + 1 ],
-          this.sharedArray[ end * this.sharedArrayLen + 2 ],  
+          this.sharedArray[ end * this.sharedArrayLen + 10 ],
+          this.sharedArray[ end * this.sharedArrayLen + 11 ],
+          this.sharedArray[ end * this.sharedArrayLen + 12 ],  
         ], end*3)
       }
       
