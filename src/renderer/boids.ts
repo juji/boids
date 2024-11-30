@@ -194,7 +194,7 @@ export default class Boids {
       
       this.hasChanged[counter] = 1
       let start = counter * counterLen
-      let end = start + counterLen
+      let end = Math.min(start + counterLen, this.boidsLength)
       
       while(end--) {
         if(end<start) break;
@@ -205,11 +205,11 @@ export default class Boids {
         ], end*3)
       }
       
+      this.geometry.attributes.position.needsUpdate = true
     }
     
     if( this.hasChanged.findIndex(v => !v) === -1 ){
       
-      this.geometry.attributes.position.needsUpdate = true
       this.posCounter.fill(0)
       this.hasChanged.fill(0)
 

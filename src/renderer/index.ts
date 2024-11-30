@@ -29,7 +29,7 @@ export class Renderer {
   }
   
   calculators: Worker[] = []
-  calcPerThread = 2000 //
+  calcPerThread = 1000 //
   calculatorNum = 1
   boidNum = 500
   canvas: HTMLCanvasElement
@@ -49,15 +49,15 @@ export class Renderer {
     reportFps: (fps: number) => void
   ){
 
+    if(!num) throw new Error('num is falsy')
+
     // let window size set boidNum
     // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
     this.boundingBox = boundingBox // screen
     this.canvas = canvas
 
-    if(num){
-      this.calculatorNum = Math.max(Math.round(num / this.calcPerThread), 1)
-      this.boidNum = Math.min(num, this.calcPerThread * this.calculatorNum)
-    }
+    this.calculatorNum = Math.max(Math.ceil(num / this.calcPerThread), 1)
+    this.boidNum = num
 
     let calcNum = this.calculatorNum
     while(calcNum--){
@@ -148,8 +148,8 @@ export class Renderer {
     this.calculators.forEach((calc, i) => {
 
       calc.postMessage({
-        start: i * (this.boidNum / this.calculatorNum),
-        end: (i+1) * (this.boidNum / this.calculatorNum) - 1,
+        start: i * this.calcPerThread,
+        end: Math.min(this.boidNum, ((i+1) * this.calcPerThread) - 1),
         sab: sab,
         sal: this.arrLen,
         counterIndex: i,
