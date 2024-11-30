@@ -86,14 +86,14 @@ export class Renderer {
       const position = [
 
         // outside boundingBox
-        // Math.random() * this.width * (Math.random()<.5?-1:1),
-        // Math.random() * this.height * (Math.random()<.5?-1:1),
-        // Math.random() * this.depth * (Math.random()<.5?-1:1),
+        Math.random() * this.width * (Math.random()<.5?-1:1),
+        Math.random() * this.height * (Math.random()<.5?-1:1),
+        Math.random() * this.depth * (Math.random()<.5?-1:1),
 
         // inside boundingBox
-        Math.random() * this.width - (this.width * .5),
-        Math.random() * this.height - (this.height * .5),
-        Math.random() * this.depth - (this.depth * .5),
+        // Math.random() * this.width - (this.width * .5),
+        // Math.random() * this.height - (this.height * .5),
+        // Math.random() * this.depth - (this.depth * .5),
       ]
 
       // give them initial velocity

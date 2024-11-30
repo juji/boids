@@ -125,6 +125,8 @@ function calculateAcceleration(){
 
       // grid based neighbour
       if(sharedArray[ j * sal + 9 ] !== iGridNum) continue;
+
+      // 
       if(partners >= maxPartner) break;
 
       const jPosition = [
