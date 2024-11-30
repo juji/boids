@@ -1,6 +1,5 @@
 import { type Predator, BoidInit, BoidBox } from './types'
 import * as THREE from 'three';
-// import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
@@ -30,7 +29,6 @@ export default class Boids {
   controls: OrbitControls
 
   sharedArray: Float32Array
-  accelCounter: Int8Array
   posCounter: Int8Array
   counterIndex = 0
 
@@ -46,7 +44,6 @@ export default class Boids {
   constructor(
     sharedArray: Float32Array,
     sharedArrayLen: number,
-    accelCounter: Int8Array,
     posCounter: Int8Array,
     boids: BoidInit[],
     canvas: HTMLCanvasElement,
@@ -57,7 +54,6 @@ export default class Boids {
 
     this.boidBox = boidBox
     this.sendFps = sendFps
-    this.accelCounter = accelCounter
     this.posCounter = posCounter
     this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
@@ -182,7 +178,7 @@ export default class Boids {
   setPositions(){
     
     let counter = this.posCounter.length
-    let counterLen = Math.round(this.boidsLength / counter)
+    let counterLen = Math.ceil(this.boidsLength / counter)
     while(counter--) {
 
       if(!this.posCounter[counter]) continue;
@@ -206,7 +202,6 @@ export default class Boids {
     if( this.hasChanged.findIndex(v => !v) === -1 ){
       
       this.posCounter.fill(0)
-      this.accelCounter.fill(0)
       this.hasChanged.fill(0)
       this.geometry.attributes.position.needsUpdate = true
 

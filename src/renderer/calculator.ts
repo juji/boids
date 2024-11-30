@@ -21,7 +21,6 @@ let sharedArray: Float32Array;
 let start = 0
 let end = 0
 
-let accelCounter: Int8Array;
 let posCounter: Int8Array;
 let counterIndex: number;
 
@@ -65,7 +64,7 @@ let gridParams: {
   gridDepth: 0,
 }
 
-function calculateAcceleration(){
+function calculatePosition(){
 
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
 
@@ -222,99 +221,90 @@ function calculateAcceleration(){
     sharedArray[ iAcceleration[1] ] = acceleration[1]
     sharedArray[ iAcceleration[2] ] = acceleration[2]
 
-  }
-
-}
-
-function calculatePosition(){
-
-  let i = end + 1
-  while(i--) {
-
-    if(i<start) break;
-
-    const iPosition = [
-      i * sal + 0,
-      i * sal + 1,
-      i * sal + 2,
+    // calculate position
+    const iPositionT = [
+      i * sal + 10,
+      i * sal + 11,
+      i * sal + 12,
     ]
 
-    const iVelocity = [
-      i * sal + 3 + 0,
-      i * sal + 3 + 1,
-      i * sal + 3 + 2,
+    const iVelocityT = [
+      i * sal + 13,
+      i * sal + 14,
+      i * sal + 15,
     ]
 
-    const iAcceleration = [
-      i * sal + 6 + 0,
-      i * sal + 6 + 1,
-      i * sal + 6 + 2,
-    ]
-
-    sharedArray[ iVelocity[0] ] += sharedArray[ iAcceleration[0] ]
-    sharedArray[ iVelocity[1] ] += sharedArray[ iAcceleration[1] ]
-    sharedArray[ iVelocity[2] ] += sharedArray[ iAcceleration[2] ]
+    sharedArray[ iVelocityT[0] ] += sharedArray[ iAcceleration[0] ]
+    sharedArray[ iVelocityT[1] ] += sharedArray[ iAcceleration[1] ]
+    sharedArray[ iVelocityT[2] ] += sharedArray[ iAcceleration[2] ]
 
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
     if(sharedArray[ iPosition[0] ] > boidBox.right){
-      sharedArray[ iVelocity[0] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[0] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[0] ] < boidBox.left){
-      sharedArray[ iVelocity[0] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[0] ] += turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[1] ] > boidBox.bottom){
-      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[1] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[1] ] < boidBox.top){
-      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[1] ] += turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] > boidBox.front){
-      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[2] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] < boidBox.back){
-      sharedArray[ iVelocity[2] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocityT[2] ] += turnFactor * Math.random() * 0.6
     }
 
     // limit velocity
     const velocity = Math.sqrt(
-      sharedArray[ iVelocity[0] ]**2 + 
-      sharedArray[ iVelocity[1] ]**2 + 
-      sharedArray[ iVelocity[2] ]**2
+      sharedArray[ iVelocityT[0] ]**2 + 
+      sharedArray[ iVelocityT[1] ]**2 + 
+      sharedArray[ iVelocityT[2] ]**2
     )
 
     if(velocity > maxVelocity){
-      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * maxVelocity
-      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * maxVelocity
-      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * maxVelocity
+      sharedArray[ iVelocityT[0] ] = sharedArray[ iVelocityT[0] ] / velocity * maxVelocity
+      sharedArray[ iVelocityT[1] ] = sharedArray[ iVelocityT[1] ] / velocity * maxVelocity
+      sharedArray[ iVelocityT[2] ] = sharedArray[ iVelocityT[2] ] / velocity * maxVelocity
     }
 
     if(velocity < minVelocity){
-      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * minVelocity
-      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * minVelocity
-      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * minVelocity
+      sharedArray[ iVelocityT[0] ] = sharedArray[ iVelocityT[0] ] / velocity * minVelocity
+      sharedArray[ iVelocityT[1] ] = sharedArray[ iVelocityT[1] ] / velocity * minVelocity
+      sharedArray[ iVelocityT[2] ] = sharedArray[ iVelocityT[2] ] / velocity * minVelocity
     }
 
     //
-    sharedArray[ iPosition[0] ] += sharedArray[ iVelocity[0] ]
-    sharedArray[ iPosition[1] ] += sharedArray[ iVelocity[1] ]
-    sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
+    sharedArray[ iPositionT[0] ] += sharedArray[ iVelocityT[0] ]
+    sharedArray[ iPositionT[1] ] += sharedArray[ iVelocityT[1] ]
+    sharedArray[ iPositionT[2] ] += sharedArray[ iVelocityT[2] ]
 
-    //
+    // grid pos
     sharedArray[ i * sal + 9 ] = getGridNum(
-      sharedArray[ iPosition[0] ],
-      sharedArray[ iPosition[1] ],
-      sharedArray[ iPosition[2] ]
+      sharedArray[ iPositionT[0] ],
+      sharedArray[ iPositionT[1] ],
+      sharedArray[ iPositionT[2] ]
     )
 
-  }
+    sharedArray[ iVelocity[0] ] = sharedArray[ iVelocityT[0] ]
+    sharedArray[ iVelocity[1] ] = sharedArray[ iVelocityT[1] ]
+    sharedArray[ iVelocity[2] ] = sharedArray[ iVelocityT[2] ]
 
+    sharedArray[ iPosition[0] ] = sharedArray[ iPositionT[0] ]
+    sharedArray[ iPosition[1] ] = sharedArray[ iPositionT[1] ]
+    sharedArray[ iPosition[2] ] = sharedArray[ iPositionT[2] ]
+
+  }
 
 }
 
@@ -332,20 +322,9 @@ function calculate(){
   requestAnimationFrame(() => calculate())
 
   // loop: calculate acceleration
-  if( !accelCounter[ counterIndex ] ){
-    accelCounter[ counterIndex ] = 1
-    calculateAcceleration()
-  }
-
-  // this waits for all acceleration calc is done
-  // if all accel is done, calculate position
-  let counter = accelCounter.length
-  while(counter--) if(!accelCounter[counter]) return;
-
   if( !posCounter[ counterIndex ] ){
     posCounter[ counterIndex ] = 1
     calculatePosition()
-    return;
   }
 
 }
@@ -365,7 +344,7 @@ self.onmessage = (e: MessageEvent) => {
     boidBox = data.boidBox
 
   if(
-    data.sab && data.accelCounter && data.posCounter && 
+    data.sab && data.posCounter && 
     data.sal && data.gridParams &&
     typeof data.start !== 'undefined' &&
     typeof data.end !== 'undefined'
@@ -378,7 +357,6 @@ self.onmessage = (e: MessageEvent) => {
     counterIndex = data.counterIndex
 
     sharedArray = new Float32Array(data.sab)
-    accelCounter = new Int8Array(data.accelCounter)
     posCounter = new Int8Array(data.posCounter)
     
     if(!calculating){
