@@ -39,11 +39,11 @@ export default class Boids {
   boidBox: BoidBox
 
   sendFps: (fps: number) => void;
-  sharedArrayLen: number = 0
+  arrLen: number = 0
 
   constructor(
     sharedArray: Float32Array,
-    sharedArrayLen: number,
+    arrLen: number,
     posCounter: Int8Array,
     boids: BoidInit[],
     canvas: HTMLCanvasElement,
@@ -58,11 +58,17 @@ export default class Boids {
     this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
     this.boidsLength = boids.length
-    this.sharedArrayLen = sharedArrayLen
+    this.arrLen = arrLen
 
     // scene
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 15, boundingBox.width / boundingBox.height, 0.1, 100000 );
+    const camera = new THREE.PerspectiveCamera( 
+      15, 
+      boundingBox.width / boundingBox.height, 
+      0.1, 
+      10000
+    );
+
     camera.position.z = 5000;
     camera.position.x = 4000;
     camera.position.y = 1000;
@@ -193,19 +199,15 @@ export default class Boids {
       while(end--) {
         if(end<start) break;
         this.position.set([
-          this.sharedArray[ end * this.sharedArrayLen + 10 ],
-          this.sharedArray[ end * this.sharedArrayLen + 11 ],
-          this.sharedArray[ end * this.sharedArrayLen + 12 ],  
+          this.sharedArray[ end * this.arrLen + 10 ],
+          this.sharedArray[ end * this.arrLen + 11 ],
+          this.sharedArray[ end * this.arrLen + 12 ],  
         ], end*3)
       }
-      
-    }
-    
-    if( this.hasChanged.findIndex(v => !v) === -1 ){
-      
-      this.posCounter.fill(0)
-      this.hasChanged.fill(0)
+
       this.geometry.attributes.position.needsUpdate = true
+      this.posCounter[counter] = 0
+      this.hasChanged[counter] = 0
 
       // fps counter
       const time = performance.now();
@@ -218,6 +220,14 @@ export default class Boids {
       }
 
     }
+    
+    // if( this.hasChanged.findIndex(v => !v) === -1 ){
+      
+    //   this.geometry.attributes.position.needsUpdate = true
+    //   this.posCounter.fill(0)
+    //   this.hasChanged.fill(0)
+
+    // }
 
   }
 
