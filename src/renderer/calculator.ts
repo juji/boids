@@ -53,7 +53,7 @@ const getVisibleRange = () => 40 + Math.random() * 40
 const maxPartner = 25 // max is calcPerThread
 // 
 
-function calculateAccelleration(){
+function calculateAcceleration(){
 
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
 
@@ -68,7 +68,7 @@ function calculateAccelleration(){
     // console.log(i)
 
     let partners = 0
-    const accelleration = [0,0,0]
+    const acceleration = [0,0,0]
 
     const iPosition = [
       i * 9 + 0,
@@ -82,7 +82,7 @@ function calculateAccelleration(){
       i * 9 + 3 + 2,
     ]
 
-    const iAccelleration = [
+    const iAcceleration = [
       i * 9 + 6 + 0,
       i * 9 + 6 + 1,
       i * 9 + 6 + 2,
@@ -162,9 +162,9 @@ function calculateAccelleration(){
     }
 
     // Separation
-    accelleration[0] += closeDx * avoidFactor
-    accelleration[1] += closeDy * avoidFactor
-    accelleration[2] += closeDz * avoidFactor
+    acceleration[0] += closeDx * avoidFactor
+    acceleration[1] += closeDy * avoidFactor
+    acceleration[2] += closeDz * avoidFactor
     
     if(neighboringBoids){
       
@@ -172,17 +172,17 @@ function calculateAccelleration(){
       xVelAvg /= neighboringBoids
       yVelAvg /= neighboringBoids
       zVelAvg /= neighboringBoids
-      accelleration[0] += (xVelAvg - sharedArray[ iVelocity[0] ]) * matchingfactor
-      accelleration[1] += (yVelAvg - sharedArray[ iVelocity[1] ]) * matchingfactor
-      accelleration[2] += (zVelAvg - sharedArray[ iVelocity[2] ]) * matchingfactor
+      acceleration[0] += (xVelAvg - sharedArray[ iVelocity[0] ]) * matchingfactor
+      acceleration[1] += (yVelAvg - sharedArray[ iVelocity[1] ]) * matchingfactor
+      acceleration[2] += (zVelAvg - sharedArray[ iVelocity[2] ]) * matchingfactor
 
       // Cohesion
       xPosAvg /= neighboringBoids
       yPosAvg /= neighboringBoids
       zPosAvg /= neighboringBoids
-      accelleration[0] += (xPosAvg - sharedArray[ iPosition[0] ]) * centeringFactor
-      accelleration[1] += (yPosAvg - sharedArray[ iPosition[1] ]) * centeringFactor
-      accelleration[2] += (zPosAvg - sharedArray[ iPosition[2] ]) * centeringFactor
+      acceleration[0] += (xPosAvg - sharedArray[ iPosition[0] ]) * centeringFactor
+      acceleration[1] += (yPosAvg - sharedArray[ iPosition[1] ]) * centeringFactor
+      acceleration[2] += (zPosAvg - sharedArray[ iPosition[2] ]) * centeringFactor
 
     }
 
@@ -197,16 +197,16 @@ function calculateAccelleration(){
       )
 
       if(predatorDistance < predatoryRange){
-        accelleration[0] += predatorturnfactor * (predatorDx < 0 ? -1 : 1)
-        accelleration[1] += predatorturnfactor * (predatorDy < 0 ? -1 : 1)
-        accelleration[2] += predatorturnfactor * (predatorDz < 0 ? -1 : 1)
+        acceleration[0] += predatorturnfactor * (predatorDx < 0 ? -1 : 1)
+        acceleration[1] += predatorturnfactor * (predatorDy < 0 ? -1 : 1)
+        acceleration[2] += predatorturnfactor * (predatorDz < 0 ? -1 : 1)
       }
       
     }
 
-    sharedArray[ iAccelleration[0] ] = accelleration[0]
-    sharedArray[ iAccelleration[1] ] = accelleration[1]
-    sharedArray[ iAccelleration[2] ] = accelleration[2]
+    sharedArray[ iAcceleration[0] ] = acceleration[0]
+    sharedArray[ iAcceleration[1] ] = acceleration[1]
+    sharedArray[ iAcceleration[2] ] = acceleration[2]
 
   }
 
@@ -231,15 +231,15 @@ function calculatePosition(){
       i * 9 + 3 + 2,
     ]
 
-    const iAccelleration = [
+    const iAcceleration = [
       i * 9 + 6 + 0,
       i * 9 + 6 + 1,
       i * 9 + 6 + 2,
     ]
 
-    sharedArray[ iVelocity[0] ] += sharedArray[ iAccelleration[0] ]
-    sharedArray[ iVelocity[1] ] += sharedArray[ iAccelleration[1] ]
-    sharedArray[ iVelocity[2] ] += sharedArray[ iAccelleration[2] ]
+    sharedArray[ iVelocity[0] ] += sharedArray[ iAcceleration[0] ]
+    sharedArray[ iVelocity[1] ] += sharedArray[ iAcceleration[1] ]
+    sharedArray[ iVelocity[2] ] += sharedArray[ iAcceleration[2] ]
 
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
@@ -301,10 +301,10 @@ function calculate(){
 
   requestAnimationFrame(() => calculate())
 
-  // loop: calculate accellearation
+  // loop: calculate acceleration
   if( !accelCounter[ counterIndex ] ){
     accelCounter[ counterIndex ] = 1
-    calculateAccelleration()
+    calculateAcceleration()
   }
 
   // if all accel is done, calculate position
