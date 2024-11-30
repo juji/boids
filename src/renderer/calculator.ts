@@ -33,7 +33,7 @@ const minVelocity: number = 2
 const turnFactor: number = 0.5
 
 // Separation
-const avoidFactor = 0.05
+const avoidFactor = 0.1
 const protectedRange = 18
 
 // Alignment
@@ -49,8 +49,9 @@ const predatoryRange = (predatorAttr.size || 0) * 2
 // visible range is a range
 const getVisibleRange = () => 40 + Math.random() * 40
 
-//
-const maxPartner = 100 // as big as calcPerThread
+// fps is greatly affected by this
+const maxPartner = 25 // max is calcPerThread
+// 
 
 function calculateAccelleration(){
 
@@ -124,9 +125,9 @@ function calculateAccelleration(){
       ]
       
       const distance = Math.sqrt(
-        (sharedArray[ jPosition[0] ] - sharedArray[ iPosition[0] ])**2 +
-        (sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ])**2 +
-        (sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ])**2
+        Math.pow((sharedArray[ jPosition[0] ] - sharedArray[ iPosition[0] ]), 2) +
+        Math.pow((sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ]), 2) +
+        Math.pow((sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ]), 2)
       )
       
       if(
