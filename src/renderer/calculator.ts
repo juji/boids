@@ -87,16 +87,40 @@ function calculatePosition(){
     ]
 
     const iVelocity = [
-      i * sal + 3 + 0,
-      i * sal + 3 + 1,
-      i * sal + 3 + 2,
+      i * sal + 3,
+      i * sal + 4,
+      i * sal + 5,
     ]
 
     const iAcceleration = [
-      i * sal + 6 + 0,
-      i * sal + 6 + 1,
-      i * sal + 6 + 2,
+      i * sal + 6,
+      i * sal + 7,
+      i * sal + 8,
     ]
+
+    // 9 is for grid pos
+
+    const iPositionT = [
+      i * sal + 10,
+      i * sal + 11,
+      i * sal + 12,
+    ]
+
+    const iVelocityT = [
+      i * sal + 13,
+      i * sal + 14,
+      i * sal + 15,
+    ]
+
+    // this should be first
+    // so that the result will show before and after
+    sharedArray[ iVelocity[0] ] = sharedArray[ iVelocityT[0] ]
+    sharedArray[ iVelocity[1] ] = sharedArray[ iVelocityT[1] ]
+    sharedArray[ iVelocity[2] ] = sharedArray[ iVelocityT[2] ]
+
+    sharedArray[ iPosition[0] ] = sharedArray[ iPositionT[0] ]
+    sharedArray[ iPosition[1] ] = sharedArray[ iPositionT[1] ]
+    sharedArray[ iPosition[2] ] = sharedArray[ iPositionT[2] ]
 
     // Separation
     let closeDx = 0
@@ -123,6 +147,7 @@ function calculatePosition(){
       if(j===i) continue;
 
       // grid based neighbour
+      // https://ercang.github.io/boids-js/
       if(sharedArray[ j * sal + 9 ] !== iGridNum) continue;
 
       // 
@@ -135,9 +160,9 @@ function calculatePosition(){
       ]
       
       const distance = Math.sqrt(
-        Math.pow((sharedArray[ jPosition[0] ] - sharedArray[ iPosition[0] ]), 2) +
-        Math.pow((sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ]), 2) +
-        Math.pow((sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ]), 2)
+        (sharedArray[ jPosition[0] ] - sharedArray[ iPosition[0] ]) ** 2 +
+        (sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ]) ** 2 +
+        (sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ]) ** 2
       )
 
       if(distance >= visibleRange) continue;
@@ -153,9 +178,9 @@ function calculatePosition(){
       else if(distance < visibleRange){
 
         const jVelocity = [
-          j * sal + 3 + 0,
-          j * sal + 3 + 1,
-          j * sal + 3 + 2,
+          j * sal + 3,
+          j * sal + 4,
+          j * sal + 5,
         ]
 
         // Alignment
@@ -222,17 +247,6 @@ function calculatePosition(){
     sharedArray[ iAcceleration[2] ] = acceleration[2]
 
     // calculate position
-    const iPositionT = [
-      i * sal + 10,
-      i * sal + 11,
-      i * sal + 12,
-    ]
-
-    const iVelocityT = [
-      i * sal + 13,
-      i * sal + 14,
-      i * sal + 15,
-    ]
 
     sharedArray[ iVelocityT[0] ] += sharedArray[ iAcceleration[0] ]
     sharedArray[ iVelocityT[1] ] += sharedArray[ iAcceleration[1] ]
@@ -295,14 +309,6 @@ function calculatePosition(){
       sharedArray[ iPositionT[1] ],
       sharedArray[ iPositionT[2] ]
     )
-
-    sharedArray[ iVelocity[0] ] = sharedArray[ iVelocityT[0] ]
-    sharedArray[ iVelocity[1] ] = sharedArray[ iVelocityT[1] ]
-    sharedArray[ iVelocity[2] ] = sharedArray[ iVelocityT[2] ]
-
-    sharedArray[ iPosition[0] ] = sharedArray[ iPositionT[0] ]
-    sharedArray[ iPosition[1] ] = sharedArray[ iPositionT[1] ]
-    sharedArray[ iPosition[2] ] = sharedArray[ iPositionT[2] ]
 
   }
 
