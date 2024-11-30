@@ -47,6 +47,7 @@ const predatorturnfactor = 0.7
 const predatoryRange = (predatorAttr.size || 0) * 2
 
 // visible range is a range
+// and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
 // fps is greatly affected by this
@@ -111,17 +112,10 @@ function calculateAcceleration(){
       if(j===i) continue;
       if(partners >= maxPartner) break;
 
-      
       const jPosition = [
         j * 9 + 0,
         j * 9 + 1,
         j * 9 + 2,
-      ]
-      
-      const jVelocity = [
-        j * 9 + 3 + 0,
-        j * 9 + 3 + 1,
-        j * 9 + 3 + 2,
       ]
       
       const distance = Math.sqrt(
@@ -129,12 +123,10 @@ function calculateAcceleration(){
         Math.pow((sharedArray[ jPosition[1] ] - sharedArray[ iPosition[1] ]), 2) +
         Math.pow((sharedArray[ jPosition[2] ] - sharedArray[ iPosition[2] ]), 2)
       )
-      
-      if(
-        distance < protectedRange ||
-        distance < visibleRange
-      ) partners++;
-      
+
+      if(distance >= visibleRange) continue;
+
+      partners++;
 
       // Separation
       if(distance < protectedRange){
@@ -144,6 +136,12 @@ function calculateAcceleration(){
       }
 
       else if(distance < visibleRange){
+
+        const jVelocity = [
+          j * 9 + 3 + 0,
+          j * 9 + 3 + 1,
+          j * 9 + 3 + 2,
+        ]
 
         // Alignment
         xVelAvg += sharedArray[ jVelocity[0] ] 
