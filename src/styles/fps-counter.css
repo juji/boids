@@ -4,8 +4,8 @@
   position: fixed;
   bottom: 0;
   right: 0;
-  padding: 8px 13px;
-  background-color: rgba(0,0,0,0.3);
-  color: white;
-  font-size: 13px;
+  padding: 5px 8px;
+  background-color: rgb(20, 246, 0);
+  color: rgb(40, 40, 40);
+  font-size: 21px;
 }
