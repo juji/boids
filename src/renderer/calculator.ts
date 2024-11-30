@@ -50,7 +50,7 @@ const predatoryRange = (predatorAttr.size || 0) * 2
 // and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
-const maxPartner = 25 // max is calcPerThread
+const maxPartner = 10 // max is calcPerThread
 //
 
 // share array length per boid
