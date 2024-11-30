@@ -29,15 +29,15 @@ export class Renderer {
   }
   
   calculators: Worker[] = []
-  calcPerThread = 100
-  calculatorNum = 10
-  boidNum = 1000
+  calcPerThread = 1000
+  calculatorNum = 1
+  boidNum = 500
   canvas: HTMLCanvasElement
 
   constructor(
     canvas: HTMLCanvasElement,
     num: number,
-    boundingBox: {width:number, height: number},
+    boundingBox: { width:number, height: number },
     reportFps: (fps: number) => void
   ){
 
@@ -47,11 +47,9 @@ export class Renderer {
     this.canvas = canvas
 
     if(num){
-      this.calculatorNum = Math.round(num / this.calcPerThread)
-      this.boidNum = this.calcPerThread * this.calculatorNum
+      this.calculatorNum = Math.max(Math.round(num / this.calcPerThread), 1)
+      this.boidNum = Math.min(num, this.calcPerThread * this.calculatorNum)
     }
-
-    // console.log('boidNum', this.boidNum)
 
     let calcNum = this.calculatorNum
     while(calcNum--){
