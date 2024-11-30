@@ -34,6 +34,14 @@ export class Renderer {
   boidNum = 500
   canvas: HTMLCanvasElement
 
+  // grids
+  gridCol = 10
+  gridRow = 10
+  gridDepth = 10
+
+  // arrLen per boid
+  arrLen = 10
+
   constructor(
     canvas: HTMLCanvasElement,
     num: number,
@@ -62,7 +70,7 @@ export class Renderer {
     this.calculateBoidBox()
     
     // shared array buffer
-    const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * 3 * 3);
+    const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
     const sharedArray = new Float32Array(sab)
 
     // acceleration counter
@@ -95,20 +103,25 @@ export class Renderer {
         Math.random() < 0.5 ? -1 : 1,
       ]
       const accelleration = [ 0, 0, 0 ]
-      const arrLen = 9
 
       // set sharedArray
-      sharedArray[ (i * arrLen) ] = position[0]
-      sharedArray[ (i * arrLen) + 1 ] = position[1]
-      sharedArray[ (i * arrLen) + 2 ] = position[2]
+      sharedArray[ (i * this.arrLen) + 0 ] = position[0]
+      sharedArray[ (i * this.arrLen) + 1 ] = position[1]
+      sharedArray[ (i * this.arrLen) + 2 ] = position[2]
 
-      sharedArray[ (i * arrLen) + 3 ] = velocity[0]
-      sharedArray[ (i * arrLen) + 4 ] = velocity[1]
-      sharedArray[ (i * arrLen) + 5 ] = velocity[2]
+      sharedArray[ (i * this.arrLen) + 3 ] = velocity[0]
+      sharedArray[ (i * this.arrLen) + 4 ] = velocity[1]
+      sharedArray[ (i * this.arrLen) + 5 ] = velocity[2]
 
-      sharedArray[ (i * arrLen) + 6 ] = accelleration[0]
-      sharedArray[ (i * arrLen) + 7 ] = accelleration[1]
-      sharedArray[ (i * arrLen) + 8 ] = accelleration[2]
+      sharedArray[ (i * this.arrLen) + 6 ] = accelleration[0]
+      sharedArray[ (i * this.arrLen) + 7 ] = accelleration[1]
+      sharedArray[ (i * this.arrLen) + 8 ] = accelleration[2]
+
+      sharedArray[ (i * this.arrLen) + 9 ] = this.getGridNum(
+        position[0],
+        position[1],  
+        position[2],  
+      )
       
       // return positions
       return { position: position as [number, number, number] }
@@ -117,6 +130,7 @@ export class Renderer {
 
     this.boids = new Boids(
       new Float32Array(sab),
+      this.arrLen,
       new Int8Array(accelCounter),
       new Int8Array(posCounter),
       boids,
@@ -132,16 +146,31 @@ export class Renderer {
         start: i * (this.boidNum / this.calculatorNum),
         end: (i+1) * (this.boidNum / this.calculatorNum) - 1,
         sab: sab,
+        sal: this.arrLen,
         counterIndex: i,
         accelCounter: accelCounter,
         posCounter: posCounter,
         boidBox: this.boidBox,
-        predatorAttr: this.predatorAttr
+        predatorAttr: this.predatorAttr,
+        gridParams: {
+          width: this.width,
+          height: this.height,
+          depth: this.depth,
+          gridCol: this.gridCol,
+          gridRow: this.gridRow,
+          gridDepth: this.gridDepth,
+        }
       })
 
     })
 
     this.loop()
+  }
+
+  getGridNum(x: number, y: number, z: number){
+    return Math.floor((x + this.width * .5) / (this.width / this.gridCol)) +
+      Math.floor((y + this.height * .5) / (this.height / this.gridRow)) +
+      Math.floor((z + this.depth * .5) / (this.depth / this.gridDepth))
   }
 
   setPredator(x: number, y: number){

@@ -33,7 +33,7 @@ const minVelocity: number = 2
 const turnFactor: number = 0.5
 
 // Separation
-const avoidFactor = 0.1
+const avoidFactor = 0.05
 const protectedRange = 18
 
 // Alignment
@@ -50,9 +50,20 @@ const predatoryRange = (predatorAttr.size || 0) * 2
 // and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
-// fps is greatly affected by this
 const maxPartner = 25 // max is calcPerThread
-// 
+//
+
+// share array length per boid
+let sal = 0
+
+let gridParams: {
+  width: 0,
+  height: 0,
+  depth: 0,
+  gridCol: 0,
+  gridRow: 0,
+  gridDepth: 0,
+}
 
 function calculateAcceleration(){
 
@@ -66,27 +77,26 @@ function calculateAcceleration(){
   while(i--) {
 
     if(i<start) break;
-    // console.log(i)
 
     let partners = 0
     const acceleration = [0,0,0]
 
     const iPosition = [
-      i * 9 + 0,
-      i * 9 + 1,
-      i * 9 + 2,
+      i * sal + 0,
+      i * sal + 1,
+      i * sal + 2,
     ]
 
     const iVelocity = [
-      i * 9 + 3 + 0,
-      i * 9 + 3 + 1,
-      i * 9 + 3 + 2,
+      i * sal + 3 + 0,
+      i * sal + 3 + 1,
+      i * sal + 3 + 2,
     ]
 
     const iAcceleration = [
-      i * 9 + 6 + 0,
-      i * 9 + 6 + 1,
-      i * 9 + 6 + 2,
+      i * sal + 6 + 0,
+      i * sal + 6 + 1,
+      i * sal + 6 + 2,
     ]
 
     // Separation
@@ -105,17 +115,22 @@ function calculateAcceleration(){
     let xPosAvg = 0
     let yPosAvg = 0
     let zPosAvg = 0
-    
 
-    let j = sharedArray.length / 9
+    const iGridNum = sharedArray[ i * sal + 9 ]
+    
+    // calculate neighbour effect
+    let j = sharedArray.length / sal
     while(j--) {
       if(j===i) continue;
+
+      // grid based neighbour
+      if(sharedArray[ j * sal + 9 ] !== iGridNum) continue;
       if(partners >= maxPartner) break;
 
       const jPosition = [
-        j * 9 + 0,
-        j * 9 + 1,
-        j * 9 + 2,
+        j * sal + 0,
+        j * sal + 1,
+        j * sal + 2,
       ]
       
       const distance = Math.sqrt(
@@ -125,7 +140,6 @@ function calculateAcceleration(){
       )
 
       if(distance >= visibleRange) continue;
-
       partners++;
 
       // Separation
@@ -138,9 +152,9 @@ function calculateAcceleration(){
       else if(distance < visibleRange){
 
         const jVelocity = [
-          j * 9 + 3 + 0,
-          j * 9 + 3 + 1,
-          j * 9 + 3 + 2,
+          j * sal + 3 + 0,
+          j * sal + 3 + 1,
+          j * sal + 3 + 2,
         ]
 
         // Alignment
@@ -218,21 +232,21 @@ function calculatePosition(){
     if(i<start) break;
 
     const iPosition = [
-      i * 9 + 0,
-      i * 9 + 1,
-      i * 9 + 2,
+      i * sal + 0,
+      i * sal + 1,
+      i * sal + 2,
     ]
 
     const iVelocity = [
-      i * 9 + 3 + 0,
-      i * 9 + 3 + 1,
-      i * 9 + 3 + 2,
+      i * sal + 3 + 0,
+      i * sal + 3 + 1,
+      i * sal + 3 + 2,
     ]
 
     const iAcceleration = [
-      i * 9 + 6 + 0,
-      i * 9 + 6 + 1,
-      i * 9 + 6 + 2,
+      i * sal + 6 + 0,
+      i * sal + 6 + 1,
+      i * sal + 6 + 2,
     ]
 
     sharedArray[ iVelocity[0] ] += sharedArray[ iAcceleration[0] ]
@@ -290,8 +304,22 @@ function calculatePosition(){
     sharedArray[ iPosition[1] ] += sharedArray[ iVelocity[1] ]
     sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
 
+    //
+    sharedArray[ i * sal + 9 ] = getGridNum(
+      sharedArray[ iPosition[0] ],
+      sharedArray[ iPosition[1] ],
+      sharedArray[ iPosition[2] ]
+    )
+
   }
 
+
+}
+
+function getGridNum(x: number, y: number, z: number){
+  return Math.floor((x + gridParams.width * .5) / (gridParams.width / gridParams.gridCol)) +
+      Math.floor((y + gridParams.height * .5) / (gridParams.height / gridParams.gridRow)) +
+      Math.floor((z + gridParams.depth * .5) / (gridParams.depth / gridParams.gridDepth))
 }
 
 function calculate(){
@@ -335,16 +363,17 @@ self.onmessage = (e: MessageEvent) => {
     boidBox = data.boidBox
 
   if(
-    data.sab && data.accelCounter && data.posCounter &&
+    data.sab && data.accelCounter && data.posCounter && 
+    data.sal && data.gridParams &&
     typeof data.start !== 'undefined' &&
     typeof data.end !== 'undefined'
   ){
 
-    
+    gridParams =  data.gridParams
+    sal = data.sal
     start = data.start
     end = data.end
     counterIndex = data.counterIndex
-    // console.log({ counterIndex, start, end })
 
     sharedArray = new Float32Array(data.sab)
     accelCounter = new Int8Array(data.accelCounter)

@@ -41,9 +41,11 @@ export default class Boids {
   boidBox: BoidBox
 
   sendFps: (fps: number) => void;
+  sharedArrayLen: number = 0
 
   constructor(
     sharedArray: Float32Array,
+    sharedArrayLen: number,
     accelCounter: Int8Array,
     posCounter: Int8Array,
     boids: BoidInit[],
@@ -60,6 +62,7 @@ export default class Boids {
     this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
     this.boidsLength = boids.length
+    this.sharedArrayLen = sharedArrayLen
 
     // scene
     const scene = new THREE.Scene();
@@ -192,9 +195,9 @@ export default class Boids {
       while(end--) {
         if(end<start) break;
         this.position.set([
-          this.sharedArray[ end * 9 + 0 ],
-          this.sharedArray[ end * 9 + 1 ],
-          this.sharedArray[ end * 9 + 2 ],  
+          this.sharedArray[ end * this.sharedArrayLen + 0 ],
+          this.sharedArray[ end * this.sharedArrayLen + 1 ],
+          this.sharedArray[ end * this.sharedArrayLen + 2 ],  
         ], end*3)
       }
       
