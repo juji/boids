@@ -36,20 +36,20 @@ const avoidFactor = 0.05
 const protectedRange = 18
 
 // Alignment
-const matchingfactor = 0.06
+const matchingfactor = 0.1
 
 // Cohesion
 const centeringFactor = 0.0001
 
 // Predator
-const predatorturnfactor = 0.7
-const predatoryRange = (predatorAttr.size || 0) * 2
+const predatorturnfactor = 0.9
+const predatoryRange = (predatorAttr.size || 0) * 3
 
 // visible range is a range
 // and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
-const maxPartner = 10 // max is calcPerThread
+const maxPartner = 15 // max is calcPerThread
 //
 
 // share array length per boid

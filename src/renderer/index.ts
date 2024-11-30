@@ -73,10 +73,6 @@ export class Renderer {
     const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
     const sharedArray = new Float32Array(sab)
 
-    // acceleration counter
-    const accelCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
-    new Int8Array(accelCounter).fill(0)
-
     // position Counter
     const posCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
     new Int8Array(posCounter).fill(0)

@@ -64,6 +64,8 @@ export default class Boids {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 15, boundingBox.width / boundingBox.height, 0.1, 100000 );
     camera.position.z = 5000;
+    camera.position.x = 4000;
+    camera.position.y = 1000;
 
     // predator
     const sphere = new THREE.SphereGeometry( this.predatorAttr.size ); 
