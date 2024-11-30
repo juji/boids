@@ -39,11 +39,11 @@ export default class Boids {
   boidBox: BoidBox
 
   sendFps: (fps: number) => void;
-  arrLen: number = 0
+  sharedArrayLen: number = 0
 
   constructor(
     sharedArray: Float32Array,
-    arrLen: number,
+    sharedArrayLen: number,
     posCounter: Int8Array,
     boids: BoidInit[],
     canvas: HTMLCanvasElement,
@@ -58,7 +58,7 @@ export default class Boids {
     this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
     this.boidsLength = boids.length
-    this.arrLen = arrLen
+    this.sharedArrayLen = sharedArrayLen
 
     // scene
     const scene = new THREE.Scene();
@@ -199,15 +199,19 @@ export default class Boids {
       while(end--) {
         if(end<start) break;
         this.position.set([
-          this.sharedArray[ end * this.arrLen + 10 ],
-          this.sharedArray[ end * this.arrLen + 11 ],
-          this.sharedArray[ end * this.arrLen + 12 ],  
+          this.sharedArray[ end * this.sharedArrayLen + 10 ],
+          this.sharedArray[ end * this.sharedArrayLen + 11 ],
+          this.sharedArray[ end * this.sharedArrayLen + 12 ],  
         ], end*3)
       }
-
+      
+    }
+    
+    if( this.hasChanged.findIndex(v => !v) === -1 ){
+      
       this.geometry.attributes.position.needsUpdate = true
-      this.posCounter[counter] = 0
-      this.hasChanged[counter] = 0
+      this.posCounter.fill(0)
+      this.hasChanged.fill(0)
 
       // fps counter
       const time = performance.now();
@@ -220,14 +224,6 @@ export default class Boids {
       }
 
     }
-    
-    // if( this.hasChanged.findIndex(v => !v) === -1 ){
-      
-    //   this.geometry.attributes.position.needsUpdate = true
-    //   this.posCounter.fill(0)
-    //   this.hasChanged.fill(0)
-
-    // }
 
   }
 
