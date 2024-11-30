@@ -29,7 +29,7 @@ export class Renderer {
   }
   
   calculators: Worker[] = []
-  calcPerThread = 250 //
+  calcPerThread = 100 //
   calculatorNum = 5
   boidNum = 500
   canvas: HTMLCanvasElement
