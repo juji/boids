@@ -92,24 +92,18 @@ function calculatePosition(){
       i * sal + 5,
     ]
 
-    const iAcceleration = [
-      i * sal + 6,
-      i * sal + 7,
-      i * sal + 8,
-    ]
-
-    // 9 is for grid pos
+    // 6 is for grid pos
 
     const iPositionT = [
-      i * sal + 10,
-      i * sal + 11,
-      i * sal + 12,
+      i * sal + 7,
+      i * sal + 8,
+      i * sal + 9,
     ]
 
     const iVelocityT = [
-      i * sal + 13,
-      i * sal + 14,
-      i * sal + 15,
+      i * sal + 10,
+      i * sal + 11,
+      i * sal + 12,
     ]
 
     // this should be first
@@ -139,7 +133,7 @@ function calculatePosition(){
     let yPosAvg = 0
     let zPosAvg = 0
 
-    const iGridNum = sharedArray[ i * sal + 9 ]
+    const iGridNum = sharedArray[ i * sal + 6 ]
     
     // calculate neighbour effect
     let j = sharedArray.length / sal
@@ -148,7 +142,7 @@ function calculatePosition(){
 
       // grid based neighbour
       // https://ercang.github.io/boids-js/
-      if(sharedArray[ j * sal + 9 ] !== iGridNum) continue;
+      if(sharedArray[ j * sal + 6 ] !== iGridNum) continue;
 
       // 
       if(partners >= maxPartner) break;
@@ -242,15 +236,10 @@ function calculatePosition(){
       
     }
 
-    sharedArray[ iAcceleration[0] ] = acceleration[0]
-    sharedArray[ iAcceleration[1] ] = acceleration[1]
-    sharedArray[ iAcceleration[2] ] = acceleration[2]
-
     // calculate position
-
-    sharedArray[ iVelocityT[0] ] += sharedArray[ iAcceleration[0] ]
-    sharedArray[ iVelocityT[1] ] += sharedArray[ iAcceleration[1] ]
-    sharedArray[ iVelocityT[2] ] += sharedArray[ iAcceleration[2] ]
+    sharedArray[ iVelocityT[0] ] += acceleration[0]
+    sharedArray[ iVelocityT[1] ] += acceleration[1]
+    sharedArray[ iVelocityT[2] ] += acceleration[2]
 
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
@@ -304,7 +293,7 @@ function calculatePosition(){
     sharedArray[ iPositionT[2] ] += sharedArray[ iVelocityT[2] ]
 
     // grid pos
-    sharedArray[ i * sal + 9 ] = getGridNum(
+    sharedArray[ i * sal + 6 ] = getGridNum(
       sharedArray[ iPositionT[0] ],
       sharedArray[ iPositionT[1] ],
       sharedArray[ iPositionT[2] ]
@@ -349,14 +338,15 @@ self.onmessage = (e: MessageEvent) => {
   if(data.boidBox)
     boidBox = data.boidBox
 
+  if(data.gridParams)
+    gridParams = data.gridParams
+
   if(
-    data.sab && data.posCounter && 
-    data.sal && data.gridParams &&
+    data.sab && data.posCounter && data.sal &&
     typeof data.start !== 'undefined' &&
     typeof data.end !== 'undefined'
   ){
 
-    gridParams =  data.gridParams
     sal = data.sal
     start = data.start
     end = data.end

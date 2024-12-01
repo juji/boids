@@ -40,7 +40,7 @@ export class Renderer {
   gridDepth = 10
 
   // arrLen per boid
-  arrLen = 16
+  arrLen = 13
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -98,7 +98,6 @@ export class Renderer {
         Math.random() < 0.5 ? -1 : 1,
         Math.random() < 0.5 ? -1 : 1,
       ]
-      const accelleration = [ 0, 0, 0 ]
 
       // set sharedArray
       sharedArray[ (i * this.arrLen) + 0 ] = position[0]
@@ -109,25 +108,21 @@ export class Renderer {
       sharedArray[ (i * this.arrLen) + 4 ] = velocity[1]
       sharedArray[ (i * this.arrLen) + 5 ] = velocity[2]
 
-      sharedArray[ (i * this.arrLen) + 6 ] = accelleration[0]
-      sharedArray[ (i * this.arrLen) + 7 ] = accelleration[1]
-      sharedArray[ (i * this.arrLen) + 8 ] = accelleration[2]
-
       // grid num
-      sharedArray[ (i * this.arrLen) + 9 ] = this.getGridNum(
+      sharedArray[ (i * this.arrLen) + 6 ] = this.getGridNum(
         position[0],
         position[1],  
         position[2],  
       )
 
       // position and velocity at t
-      sharedArray[ (i * this.arrLen) + 10 ] = position[0]
-      sharedArray[ (i * this.arrLen) + 11 ] = position[1]
-      sharedArray[ (i * this.arrLen) + 12 ] = position[2]
+      sharedArray[ (i * this.arrLen) + 7 ] = position[0]
+      sharedArray[ (i * this.arrLen) + 8 ] = position[1]
+      sharedArray[ (i * this.arrLen) + 9 ] = position[2]
 
-      sharedArray[ (i * this.arrLen) + 13 ] = velocity[0]
-      sharedArray[ (i * this.arrLen) + 14 ] = velocity[1]
-      sharedArray[ (i * this.arrLen) + 15 ] = velocity[2]
+      sharedArray[ (i * this.arrLen) + 10 ] = velocity[0]
+      sharedArray[ (i * this.arrLen) + 11 ] = velocity[1]
+      sharedArray[ (i * this.arrLen) + 12 ] = velocity[2]
       
       // return positions
       return { position: position as [number, number, number] }
