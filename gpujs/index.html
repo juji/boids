@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boids Simulation with GPU.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/gpu.js@2.11.0/dist/gpu-browser.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+    }
+    canvas {
+      display: block;
+    }
+
+    #fps{
+      display: block;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      background-color: burlywood;
+      color: black;
+      padding: 0.5rem;
+      font-size: larger;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="boidsCanvas"></canvas>
+  <div id="fps"></div>
+  <script>
+    const canvas = document.getElementById('boidsCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // const { GPU } = gpujs;
+
+    // Number of boids
+    const urlParams = new URLSearchParams(window.location.search);
+    const numBoids = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
+
+    // Simulation parameters
+    const maxSpeed = 4;
+    const perceptionRadius = 50;
+
+    // Initialize boids with random positions and velocities
+    const positions = new Float32Array(numBoids * 2);
+    const velocities = new Float32Array(numBoids * 2);
+
+    for (let i = 0; i < numBoids; i++) {
+      positions[i * 2] = Math.random() * canvas.width; // x position
+      positions[i * 2 + 1] = Math.random() * canvas.height; // y position
+      velocities[i * 2] = Math.random() * 2 - 1; // x velocity
+      velocities[i * 2 + 1] = Math.random() * 2 - 1; // y velocity
+    }
+
+    const GPUJS = GPU.GPU || GPU
+    const gpu = new GPUJS();
+
+    // Define GPU function to calculate boid behavior
+    const updateBoids = gpu
+      .createKernel(function (positions, velocities, width, height, maxSpeed, perceptionRadius) {
+        const index = this.thread.x;
+        const x = positions[index * 2];
+        const y = positions[index * 2 + 1];
+        const vx = velocities[index * 2];
+        const vy = velocities[index * 2 + 1];
+
+        let alignmentX = 0, alignmentY = 0;
+        let cohesionX = 0, cohesionY = 0;
+        let separationX = 0, separationY = 0;
+        let total = 0;
+
+        for (let i = 0; i < this.constants.numBoids; i++) {
+          if (i !== index) {
+            const otherX = positions[i * 2];
+            const otherY = positions[i * 2 + 1];
+            const otherVX = velocities[i * 2];
+            const otherVY = velocities[i * 2 + 1];
+            const distance = Math.sqrt((x - otherX) ** 2 + (y - otherY) ** 2);
+
+            if (distance < perceptionRadius) {
+              alignmentX += otherVX;
+              alignmentY += otherVY;
+              cohesionX += otherX;
+              cohesionY += otherY;
+              separationX += x - otherX;
+              separationY += y - otherY;
+              total++;
+            }
+          }
+        }
+
+        if (total > 0) {
+          alignmentX /= total;
+          alignmentY /= total;
+
+          cohesionX = (cohesionX / total - x) * 0.05;
+          cohesionY = (cohesionY / total - y) * 0.05;
+
+          separationX /= total;
+          separationY /= total;
+        }
+
+        let newVx = vx + alignmentX + cohesionX + separationX;
+        let newVy = vy + alignmentY + cohesionY + separationY;
+
+        const speed = Math.sqrt(newVx ** 2 + newVy ** 2);
+        if (speed > maxSpeed) {
+          newVx = (newVx / speed) * maxSpeed;
+          newVy = (newVy / speed) * maxSpeed;
+        }
+
+        let newX = x + newVx;
+        let newY = y + newVy;
+
+        // Wrap boids around screen edges
+        if (newX < 0) newX += width;
+        if (newX >= width) newX -= width;
+        if (newY < 0) newY += height;
+        if (newY >= height) newY -= height;
+
+        return [newX, newY, newVx, newVy];
+      })
+      .setOutput([numBoids])
+      .setConstants({ numBoids });
+    
+
+    // fps counter
+    let frames = 0
+    let prevTime = performance.now()
+    function setFps(fps){
+      document.getElementById('fps').innerText = `${fps} fps`
+    }
+
+    // Update loop
+    function update() {
+      const newData = updateBoids(
+        positions,
+        velocities,
+        canvas.width,
+        canvas.height,
+        maxSpeed,
+        perceptionRadius
+      );
+
+      for (let i = 0; i < numBoids; i++) {
+        positions[i * 2] = newData[i][0]; // New x position
+        positions[i * 2 + 1] = newData[i][1]; // New y position
+        velocities[i * 2] = newData[i][2]; // New x velocity
+        velocities[i * 2 + 1] = newData[i][3]; // New y velocity
+      }
+
+      renderBoids();
+
+      // fps counter
+      const time = performance.now();
+      frames++;
+      if (time > prevTime + 1000) {
+        let fps = Math.round( ( frames * 1000 ) / ( time - prevTime ) );
+        prevTime = time;
+        frames = 0;
+        setFps(fps)
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Rendering logic
+    function renderBoids() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < numBoids; i++) {
+        const x = positions[i * 2];
+        const y = positions[i * 2 + 1];
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'grey'; // Boids are white for contrast
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+
+    // Start the simulation
+    update();
+  </script>
+</body>
+</html>

@@ -8,10 +8,16 @@ export class Renderer {
 
   boundingBox: {width:number, height: number}
 
-  boxGap = 200
+  // the box
+  boxGap = 200 // 
   depth = 500
   width = 500
   height = 500
+
+  // grids
+  gridCol = 10
+  gridRow = 10
+  gridDepth = 10
   
   boidBox: BoidBox = {
     top: 0,
@@ -33,11 +39,6 @@ export class Renderer {
   calculatorNum = 1
   boidNum = 500
   canvas: HTMLCanvasElement
-
-  // grids
-  gridCol = 10
-  gridRow = 10
-  gridDepth = 10
 
   // arrLen per boid
   arrLen = 13
@@ -67,7 +68,14 @@ export class Renderer {
     }
     
     // boidbox
-    this.calculateBoidBox()
+    this.boidBox = {
+      top: -this.height/2,
+      left: -this.width/2,
+      bottom: this.height/2,
+      right: this.width/2,
+      front: this.depth/2,
+      back: -this.depth/2,
+    }
     
     // shared array buffer
     const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
@@ -192,33 +200,14 @@ export class Renderer {
   changeBoundingBox(boundingBox: {width:number, height: number}){
     
     this.boundingBox = boundingBox
-    this.calculateBoidBox()
 
     this.calculators.forEach((calc) => {
-
       calc.postMessage({
-        boidBox: this.boidBox,
         boundingBox: this.boundingBox
       })
-
     })
 
     this.boids.setBoundingBox(boundingBox)
-
-  }
-
-  calculateBoidBox(){
-
-    this.boxGap = 0
-
-    this.boidBox = {
-      top: (-this.height/2) + this.boxGap,
-      left: (-this.width/2) + this.boxGap,
-      bottom: (this.height/2) - this.boxGap,
-      right: (this.width/2) - this.boxGap,
-      front: (this.depth/2) - this.boxGap,
-      back: (-this.depth/2) + this.boxGap
-    }
 
   }
 
