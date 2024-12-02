@@ -10,14 +10,15 @@ export class Renderer {
 
   // the box
   boxGap = 200 // 
+  width = 800
   depth = 500
-  width = 500
   height = 500
 
   // grids
-  gridCol = 10
-  gridRow = 10
-  gridDepth = 10
+  // these affects fps
+  gridCol = 40
+  gridRow = 30
+  gridDepth = 30
   
   boidBox: BoidBox = {
     top: 0,

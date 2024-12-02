@@ -1,5 +1,6 @@
 import type { Predator, BoidBox } from './types'
 
+
 let predatorAttr:Predator = {
   exists: true,
   size: 40,
@@ -49,7 +50,10 @@ const predatoryRange = (predatorAttr.size || 0) * 3
 // and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
-const maxPartner = 15 // max is calcPerThread
+// greatly  affects fps
+// but, setting these to low, we will start to see kernels of boid
+// ( group of boids on the same space )
+const maxPartner = 10 // max is calcPerThread
 //
 
 // share array length per boid
@@ -94,6 +98,7 @@ function calculatePosition(){
 
     // 6 is for grid pos
 
+    // separating between 0 and t results in higher fps?
     const iPositionT = [
       i * sal + 7,
       i * sal + 8,
