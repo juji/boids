@@ -172,21 +172,21 @@ export class Renderer {
       Math.floor((z + this.depth * .5) / (this.depth / this.gridDepth))
   }
 
-  setPredator(x: number, y: number){
-    this.predatorAttr = { 
-      ...this.predatorAttr,
-      x: (x - this.screen.width/2), 
-      y: (y - this.screen.height/2) * -1
-    }
+  // setPredator(x: number, y: number){
+  //   this.predatorAttr = { 
+  //     ...this.predatorAttr,
+  //     x: (x - this.screen.width/2), 
+  //     y: (y - this.screen.height/2) * -1
+  //   }
 
-    this.calculators.forEach((calc) => {
-      calc.postMessage({
-        predatorAttr: this.predatorAttr
-      })
-    })
+  //   this.calculators.forEach((calc) => {
+  //     calc.postMessage({
+  //       predatorAttr: this.predatorAttr
+  //     })
+  //   })
 
-    this.boids.setPredator(this.predatorAttr)
-  }
+  //   this.boids.setPredator(this.predatorAttr)
+  // }
 
   // when resize happens
   changeScreenSize(screen: {width:number, height: number}){
