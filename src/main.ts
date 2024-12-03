@@ -36,6 +36,8 @@ import threads from './renderer/threads/calculator?worker'
   
   // start the ui handler
   ui(method, num)
+
+  // 
   const renderer = new Renderer({
     canvas,
     boidNum: num,
