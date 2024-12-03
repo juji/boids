@@ -1,6 +1,16 @@
 import Predator from '../items/predator'
 import BoidBox from '../items/boidBox'
 
+import {
+  maxVelocity,
+  minVelocity,
+  turnFactor,
+  avoidFactor,
+  protectedRange,
+  matchingfactor,
+  centeringFactor,
+  predatorturnfactor,
+} from '../items/constants'
 
 let predator:Predator
 
@@ -13,27 +23,6 @@ let end = 0
 
 let posCounter: Int8Array;
 let counterIndex: number;
-
-
-const maxVelocity: number = 5
-const minVelocity: number = 2
-
-// on edges
-const turnFactor: number = 0.5
-
-// Separation
-const avoidFactor = 0.05
-const protectedRange = 16
-
-// Alignment
-const matchingfactor = 0.15
-
-// Cohesion
-const centeringFactor = 0.0005
-
-// Predator
-const predatorturnfactor = 0.9
-let predatoryRange = 0
 
 // visible range is a range
 // and visible range should always be > protectedRange
@@ -188,7 +177,7 @@ function calculatePosition(){
         predatorDx**2 + predatorDy**2 + predatorDz**2
       )
 
-      if(predatorDistance < predatoryRange){
+      if(predatorDistance < predator.range){
         acceleration[0] += predatorturnfactor * (predatorDx < 0 ? -1 : 1)
         acceleration[1] += predatorturnfactor * (predatorDy < 0 ? -1 : 1)
         acceleration[2] += predatorturnfactor * (predatorDz < 0 ? -1 : 1)
@@ -285,7 +274,6 @@ self.onmessage = (e: MessageEvent) => {
 
   if(data.predatorAttr){
     predator = data.predatorAttr
-    predatoryRange = (predator.size || 0) * 3
   }
 
   if(data.boidBox)

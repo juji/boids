@@ -31,7 +31,7 @@ import threads from './renderer/threads/calculator?worker'
 
   if(method === 'webgpu' && webgpu) {
     Calculator = taichi
-    calcPerThread = 1000 // basically use one thread
+    calcPerThread = 99999999 // basically use one thread
   }
 
   if(method === 'webgpu' && !webgpu){

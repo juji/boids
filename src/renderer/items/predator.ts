@@ -3,6 +3,7 @@
 export default class Predator {
   size = 40
   exists = true
+  range = 0
   x = 0
   y = 0
   z = 0
@@ -23,12 +24,15 @@ export default class Predator {
       this.z = obj.z
     }
 
+    this.range = (this.size || 0) * 3
+
   }
 
   toObject(){
     return {
       size: this.size,
       exists: this.exists,
+      range: this.range,
       x: this.x,
       y: this.y,
       z: this.z,

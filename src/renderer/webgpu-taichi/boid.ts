@@ -7,7 +7,6 @@ import * as ti from "taichi.js"
 export async function main(par:{
   sharedArray: Float32Array
   sal: number
-  predatoryRange: number
   predator: Predator
   boidBox: BoidBoxObject
   maxVelocity: number
@@ -27,7 +26,6 @@ export async function main(par:{
   const {
     sharedArray,
     sal,
-    predatoryRange,
     predator,
     boidBox,
     maxVelocity,
@@ -47,7 +45,6 @@ export async function main(par:{
   await ti.init();
 
   const N = sharedArray.length / sal
-  const RANGE = end - start + 1
   let boids = ti.field(ti.f32, sharedArray.length)
   
   // writing
@@ -56,7 +53,6 @@ export async function main(par:{
   ti.addToKernelScope({ 
     boids, 
     N,
-    RANGE,
     sal,
     maxVelocity,
     minVelocity,
@@ -68,7 +64,6 @@ export async function main(par:{
     predatorturnfactor,
     visibleRange,
     predator,
-    predatoryRange,
     boidBox,
     maxPartner,
     start,
@@ -84,7 +79,7 @@ export async function main(par:{
           Math.floor((z + boidBox.depth * .5) / (boidBox.depth / boidBox.gridDepth))
       }
 
-      for(let i of ti.range(RANGE)){
+      for(let i of ti.range(N)){
 
         let partners = 0
         const acceleration = [ 0.0, 0.0, 0.0 ]
@@ -217,7 +212,7 @@ export async function main(par:{
             predatorDx**2 + predatorDy**2 + predatorDz**2
           )
 
-          if(predatorDistance < predatoryRange){
+          if(predatorDistance < predator.range){
             let n = 1.0
             if(predatorDx < 0) n = -1.0
             acceleration[0] += predatorturnfactor * n
@@ -299,9 +294,6 @@ export async function main(par:{
     increment: async (): Promise<number[]> => {
       await increment()
       return await boids.toArray()
-    },
-    update: async (sharedArray: Float32Array): Promise<void> => {
-      await boids.fromArray([...sharedArray])
     }
   }
   // const ms = performance.now() - n

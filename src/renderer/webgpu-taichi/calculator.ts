@@ -2,6 +2,17 @@ import Predator from '../items/predator'
 import BoidBox from '../items/boidBox'
 import { main } from './boid'
 
+import {
+  maxVelocity,
+  minVelocity,
+  turnFactor,
+  avoidFactor,
+  protectedRange,
+  matchingfactor,
+  centeringFactor,
+  predatorturnfactor,
+} from '../items/constants'
+
 let predator:Predator
 
 let boidBox: BoidBox
@@ -13,27 +24,6 @@ let end = 0
 
 let posCounter: Int8Array;
 let counterIndex: number;
-
-
-const maxVelocity: number = 5
-const minVelocity: number = 2
-
-// on edges
-const turnFactor: number = 0.5
-
-// Separation
-const avoidFactor = 0.05
-const protectedRange = 16
-
-// Alignment
-const matchingfactor = 0.15
-
-// Cohesion
-const centeringFactor = 0.0005
-
-// Predator
-const predatorturnfactor = 0.9
-let predatoryRange = 0
 
 // visible range is a range
 // and visible range should always be > protectedRange
@@ -48,7 +38,6 @@ const maxPartner = 30 // max is calcPerThread
 // shares array length per boid
 let sal = 0
 let calculatePosition: () => Promise<number[]>
-let updatePosition: (sharedArray:Float32Array) => Promise<void>
 
 function calculate(){
   if(!sharedArray) {
@@ -62,8 +51,7 @@ function calculate(){
 
     posCounter[ counterIndex ] = 1
     calculatePosition().then(res => {
-      sharedArray.set(res.slice(start * sal, sal * (end + 1)), start * sal)
-      updatePosition(sharedArray)
+      sharedArray.set(res)
     })
 
   }
@@ -77,7 +65,6 @@ self.onmessage = (e: MessageEvent) => {
 
   if(data.predatorAttr){
     predator = data.predatorAttr
-    predatoryRange = (predator.size || 0) * 3
   }
 
   if(data.boidBox)
@@ -103,7 +90,6 @@ self.onmessage = (e: MessageEvent) => {
       main({
         sharedArray,
         sal,
-        predatoryRange,
         predator,
         boidBox: boidBox.toObject(),
         maxVelocity,
@@ -120,7 +106,6 @@ self.onmessage = (e: MessageEvent) => {
         end
       }).then(v => {
         calculatePosition = v.increment
-        updatePosition = v.update
         calculate()
       })
 
