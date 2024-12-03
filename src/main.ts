@@ -42,7 +42,7 @@ import { ui } from './ui'
   )
   
   window.addEventListener('resize', () => {
-    renderer.changeBoundingBox({
+    renderer.changeScreenSize({
       width: window.innerWidth,
       height: window.innerHeight
     })

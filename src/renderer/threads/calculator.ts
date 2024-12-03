@@ -1,23 +1,10 @@
-import type { Predator } from '../items/predator'
-import type { BoidBox } from '../items/boids'
+import Predator from '../items/predator'
+import BoidBox from '../items/boidBox'
 
 
-let predatorAttr:Predator = {
-  size: 40,
-  exists: true,
-  x: 0,
-  y: 0,
-  z: 0
-}
+let predator:Predator
 
-let boidBox: BoidBox = {
-  top: 0,
-  left: 0,
-  bottom: 0,
-  right: 0,
-  front: 0,
-  back: 0,
-}
+let boidBox: BoidBox
 
 let calculating = false
 let sharedArray: Float32Array;
@@ -46,35 +33,24 @@ const centeringFactor = 0.0001
 
 // Predator
 const predatorturnfactor = 0.9
-const predatoryRange = (predatorAttr.size || 0) * 3
+let predatoryRange = 0
 
 // visible range is a range
 // and visible range should always be > protectedRange
 const getVisibleRange = () => 40 + Math.random() * 40
 
 // greatly  affects fps
-// but, setting these to low, we will start to see kernels of boid
-// ( group of boids on the same space )
-const maxPartner = 10 // max is calcPerThread
+// but, setting these to low, 
+// we will start to see group of boids on the same space
+const maxPartner = 15 // max is calcPerThread
 //
 
-// share array length per boid
+// shares array length per boid
 let sal = 0
-
-let gridParams: {
-  width: 0,
-  height: 0,
-  depth: 0,
-  gridCol: 0,
-  gridRow: 0,
-  gridDepth: 0,
-}
 
 function calculatePosition(){
 
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
-
-  const predator = predatorAttr
   const visibleRange = getVisibleRange()
 
 
@@ -277,7 +253,7 @@ function calculatePosition(){
     sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
 
     // grid pos
-    sharedArray[ i * sal + 6 ] = getGridNum(
+    sharedArray[ i * sal + 6 ] = boidBox.getGridNum(
       sharedArray[ iPosition[0] ],
       sharedArray[ iPosition[1] ],
       sharedArray[ iPosition[2] ]
@@ -285,12 +261,6 @@ function calculatePosition(){
 
   }
 
-}
-
-function getGridNum(x: number, y: number, z: number){
-  return Math.floor((x + gridParams.width * .5) / (gridParams.width / gridParams.gridCol)) +
-      Math.floor((y + gridParams.height * .5) / (gridParams.height / gridParams.gridRow)) +
-      Math.floor((z + gridParams.depth * .5) / (gridParams.depth / gridParams.gridDepth))
 }
 
 function calculate(){
@@ -313,14 +283,13 @@ self.onmessage = (e: MessageEvent) => {
 
   const { data } = e
 
-  if(data.predatorAttr)
-    predatorAttr = data.predatorAttr
+  if(data.predatorAttr){
+    predator = data.predatorAttr
+    predatoryRange = (predator.size || 0) * 3
+  }
 
   if(data.boidBox)
-    boidBox = data.boidBox
-
-  if(data.gridParams)
-    gridParams = data.gridParams
+    boidBox = new BoidBox(data.boidBox)
 
   if(
     data.sab && data.posCounter && data.sal &&

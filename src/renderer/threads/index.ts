@@ -1,40 +1,13 @@
-import { type Predator } from '../items/predator'
-import Boids, { type BoidBox } from '../items/boids'
+import Predator from '../items/predator'
+import Boids from '../items/boids'
+import BoidBox from '../items/boidBox'
 
 export class Renderer {
 
   boids: Boids
+  boidBox: BoidBox
 
-  screen: {width:number, height: number}
-
-  // the box
-  boxGap = 200 // 
-  width = 800
-  depth = 500
-  height = 500
-
-  // grids
-  // these affects fps
-  gridCol = 40
-  gridRow = 30
-  gridDepth = 30
-  
-  boidBox: BoidBox = {
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    front: 0,
-    back: 0,
-  }
-  
-  predatorAttr: Predator = {
-    size: 40,
-    exists:true,
-    x: 0,
-    y: 0,
-    z: 0
-  }
+  predator: Predator
   
   calculators: Worker[] = []
   calcPerThread = 1000 //
@@ -47,20 +20,18 @@ export class Renderer {
 
   constructor(
     canvas: HTMLCanvasElement,
-    num: number,
+    boidNum: number,
     screen: { width:number, height: number },
     reportFps: (fps: number) => void
   ){
 
-    if(!num) throw new Error('num is falsy')
+    if(!boidNum) throw new Error('boidNum is falsy')
 
-    // let window size set boidNum
-    // this.boidNum = Math.min(screen.width, screen.height) < 768 ? 1000 : 1500
-    this.screen = screen // screen
     this.canvas = canvas
 
-    this.calculatorNum = Math.max(Math.ceil(num / this.calcPerThread), 1)
-    this.boidNum = num
+    this.predator = new Predator()
+    this.calculatorNum = Math.max(Math.ceil(boidNum / this.calcPerThread), 1)
+    this.boidNum = boidNum
 
     let calcNum = this.calculatorNum
     while(calcNum--){
@@ -70,14 +41,7 @@ export class Renderer {
     }
     
     // boidbox
-    this.boidBox = {
-      top: -this.height/2,
-      left: -this.width/2,
-      bottom: this.height/2,
-      right: this.width/2,
-      front: this.depth/2,
-      back: -this.depth/2,
-    }
+    this.boidBox = new BoidBox()
     
     // shared array buffer
     const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
@@ -92,9 +56,9 @@ export class Renderer {
       const position = [
 
         // outside screen
-        Math.random() * this.width * (Math.random()<.5?-1:1),
-        Math.random() * this.height * (Math.random()<.5?-1:1),
-        Math.random() * this.depth * (Math.random()<.5?-1:1),
+        Math.random() * this.boidBox.width * (Math.random()<.5?-1:1),
+        Math.random() * this.boidBox.height * (Math.random()<.5?-1:1),
+        Math.random() * this.boidBox.depth * (Math.random()<.5?-1:1),
 
         // inside screen
         // Math.random() * this.width - (this.width * .5),
@@ -119,7 +83,7 @@ export class Renderer {
       sharedArray[ (i * this.arrLen) + 5 ] = velocity[2]
 
       // grid num
-      sharedArray[ (i * this.arrLen) + 6 ] = this.getGridNum(
+      sharedArray[ (i * this.arrLen) + 6 ] = this.boidBox.getGridNum(
         position[0],
         position[1],  
         position[2],  
@@ -130,15 +94,16 @@ export class Renderer {
       
     })
 
-    this.boids = new Boids(
-      new Float32Array(sab),
-      this.arrLen,
-      new Int8Array(posCounter),
-      canvas,
-      screen,
-      this.boidBox,
-      reportFps
-    )
+    this.boids = new Boids({
+      sharedArray: new Float32Array(sab),
+      arrLen: this.arrLen,
+      posCounter: new Int8Array(posCounter),
+      canvas: canvas,
+      boundingBox: screen,
+      boidBox: this.boidBox,
+      predator: this.predator,
+      sendFps: reportFps
+    })
 
     this.calculators.forEach((calc, i) => {
 
@@ -149,16 +114,8 @@ export class Renderer {
         sal: this.arrLen,
         counterIndex: i,
         posCounter: posCounter,
-        boidBox: this.boidBox,
-        predatorAttr: this.predatorAttr,
-        gridParams: {
-          width: this.width,
-          height: this.height,
-          depth: this.depth,
-          gridCol: this.gridCol,
-          gridRow: this.gridRow,
-          gridDepth: this.gridDepth,
-        }
+        boidBox: this.boidBox.toObject(),
+        predatorAttr: this.predator.toObject(),
       })
 
     })
@@ -166,34 +123,9 @@ export class Renderer {
     this.loop()
   }
 
-  getGridNum(x: number, y: number, z: number){
-    return Math.floor((x + this.width * .5) / (this.width / this.gridCol)) +
-      Math.floor((y + this.height * .5) / (this.height / this.gridRow)) +
-      Math.floor((z + this.depth * .5) / (this.depth / this.gridDepth))
-  }
-
-  // setPredator(x: number, y: number){
-  //   this.predatorAttr = { 
-  //     ...this.predatorAttr,
-  //     x: (x - this.screen.width/2), 
-  //     y: (y - this.screen.height/2) * -1
-  //   }
-
-  //   this.calculators.forEach((calc) => {
-  //     calc.postMessage({
-  //       predatorAttr: this.predatorAttr
-  //     })
-  //   })
-
-  //   this.boids.setPredator(this.predatorAttr)
-  // }
-
   // when resize happens
   changeScreenSize(screen: {width:number, height: number}){
-    
-    this.screen = screen
     this.boids.setScreenSize(screen)
-
   }
 
   loop(){

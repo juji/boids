@@ -1,15 +1,7 @@
-import { type Predator } from './predator'
+import Predator from './predator'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-export type BoidBox = {
-  top: number
-  left: number
-  bottom: number,
-  right: number
-  front: number
-  back: number  
-}
+import BoidBox from './boidBox';
 
 export type BoidInit = {
   position: [number, number, number]
@@ -20,15 +12,9 @@ export default class Boids {
   boids:BoidInit[] = []
   boidsLength: number
 
-  predatorAttr:Predator = {
-    exists: true,
-    size: 40,
-    x: 0,
-    y: 0,
-    z: 0
-  }
+  predator : Predator
 
-  predator: THREE.Mesh
+  predatorBall: THREE.Mesh
   predatorColor = 0x9b0000
 
   boidColor = 0xFFD700
@@ -54,29 +40,32 @@ export default class Boids {
   sendFps: (fps: number) => void;
   arrLen: number = 0
 
-  constructor(
+  constructor(obj: {
     sharedArray: Float32Array,
     arrLen: number,
     posCounter: Int8Array,
     canvas: HTMLCanvasElement,
     boundingBox: { width:number, height: number },
     boidBox: BoidBox,
+    predator: Predator,
     sendFps: (fps: number) => void
-  ){
+  }){
 
-    this.boidBox = boidBox
-    this.sendFps = sendFps
-    this.posCounter = posCounter
+    this.boidBox = obj.boidBox
+    this.sendFps = obj.sendFps
+    this.posCounter = obj.posCounter
     this.hasChanged = new Array(this.posCounter.length).fill(0)
-    this.sharedArray = sharedArray
-    this.boidsLength = sharedArray.length / arrLen
-    this.arrLen = arrLen
+    this.sharedArray = obj.sharedArray
+    this.boidsLength = obj.sharedArray.length / obj.arrLen
+    this.arrLen = obj.arrLen
+
+    this.predator = obj.predator
 
     // scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 
       15, 
-      boundingBox.width / boundingBox.height, 
+      obj.boundingBox.width / obj.boundingBox.height, 
       0.1, 
       10000
     );
@@ -86,15 +75,15 @@ export default class Boids {
     camera.position.y = 1000;
 
     // predator
-    const sphere = new THREE.SphereGeometry( this.predatorAttr.size ); 
+    const sphere = new THREE.SphereGeometry( this.predator.size ); 
     const sphereMaterial = new THREE.MeshPhysicalMaterial({ 
       color: this.predatorColor,
       roughness: 0.5
     }); 
-    const predator = new THREE.Mesh( sphere, sphereMaterial ); 
-    predator.position.x = this.predatorAttr.x
-    predator.position.y = this.predatorAttr.y
-    predator.position.z = 0
+    const predatorBall = new THREE.Mesh( sphere, sphereMaterial ); 
+    predatorBall.position.x = this.predator.x
+    predatorBall.position.y = this.predator.y
+    predatorBall.position.z = this.predator.z
 
     // lights
     const light = new THREE.AmbientLight( 0xffffff );
@@ -104,24 +93,24 @@ export default class Boids {
     dLight2.position.set(-3,5,4)
 
     // renderer
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
-    renderer.setSize( boundingBox.width, boundingBox.height );
+    const renderer = new THREE.WebGLRenderer({ canvas: obj.canvas, alpha: false });
+    renderer.setSize( obj.boundingBox.width, obj.boundingBox.height );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setClearColor( 0x000000, 0 )
 
     // Controls
-    const controls = new OrbitControls( camera, canvas )
+    const controls = new OrbitControls( camera, obj.canvas )
     controls.enableDamping = true
     controls.enablePan = false
 
     // boid
     const geometry = new THREE.BufferGeometry();
     const position = new THREE.Float32BufferAttribute(
-      sharedArray.reduce((a,b,i)=> {
+      obj.sharedArray.reduce((a,b,i)=> {
         if(
-          !(i % arrLen) ||
-          !((i-1) % arrLen) ||
-          !((i-2) % arrLen)
+          !(i % obj.arrLen) ||
+          !((i-1) % obj.arrLen) ||
+          !((i-2) % obj.arrLen)
         ) a.push(b); 
         return a
       },[] as number[]),
@@ -154,7 +143,7 @@ export default class Boids {
     
     
     // adding to scene
-    scene.add( predator );
+    scene.add( predatorBall );
     scene.add( boidPoints );
     scene.add( light );
     scene.add( dLight );
@@ -167,7 +156,7 @@ export default class Boids {
     this.renderer = renderer
     this.camera = camera
     this.scene = scene
-    this.predator = predator
+    this.predatorBall = predatorBall
     this.controls = controls
 
     this.renderer.render( this.scene, this.camera );
@@ -180,16 +169,6 @@ export default class Boids {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.camera.aspect = screenSize.width / screenSize.height
     this.camera.updateProjectionMatrix()
-  }
-
-  setPredator( predatorAttr: Predator ){
-    this.predatorAttr = {
-      ...this.predatorAttr,
-      ...predatorAttr
-    }
-    this.predator.position.x = this.predatorAttr.x
-    this.predator.position.y = this.predatorAttr.y
-    this.predator.position.z = 0
   }
 
   draw(){
