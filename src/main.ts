@@ -31,11 +31,13 @@ import { ui } from './ui'
     script = './renderer/webgpu-taichi'
     calcPerThread = 99999999 // basically use one thread
   }
+
+  console.log(script)
   
   // start the ui handler
   ui(method, num)
   
-  const Renderer = await import(script).then(v => v.Renderer) 
+  const Renderer = await import('./renderer/webgpu-taichi').then(v => v.Renderer) 
   const renderer = new Renderer({
     canvas,
     boidNum: num,
