@@ -10,6 +10,9 @@ import './styles/method-select.css'
 import { ui } from './ui'
 // import { Renderer } from './renderer'
 
+import { Renderer as taichi } from './renderer/webgpu-taichi'
+import { Renderer as threads } from './renderer/threads'
+
 (async function(){
 
   const canvas = document.querySelector('canvas') as HTMLCanvasElement
@@ -24,20 +27,16 @@ import { ui } from './ui'
   const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
   const method = urlParams.get('method') || (webgpu ? 'webgpu' : 'cpu')
   
-  let script = './renderer/threads';
+  let Renderer = threads;
   let calcPerThread = 1000
 
   if(method === 'webgpu') {
-    script = './renderer/webgpu-taichi'
+    Renderer = taichi
     calcPerThread = 99999999 // basically use one thread
   }
-
-  console.log(script)
   
   // start the ui handler
   ui(method, num)
-  
-  const Renderer = await import('./renderer/webgpu-taichi').then(v => v.Renderer) 
   const renderer = new Renderer({
     canvas,
     boidNum: num,
