@@ -6,14 +6,14 @@ import './styles/info-button.css'
 import './styles/num-boids.css'
 import './styles/fps-counter.css'
 
-import { Renderer } from './renderer'
 import { ui } from './ui'
 
+(async function(){
 
-(function(){
+  // start the ui handler
+  ui()
   
   const canvas = document.querySelector('canvas') as HTMLCanvasElement
-  
   if(!canvas) return;
   const urlParams = new URLSearchParams(window.location.search);
   const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
@@ -22,7 +22,13 @@ import { ui } from './ui'
   if(numLink) numLink.classList.add('active')
 
   const fpsVisual = document.querySelector(`.fps-counter`) as HTMLElement
-  
+
+  // check for webgpu support
+  // @ts-ignore
+  const webgpu = navigator.gpu && await navigator.gpu.requestAdapter()
+  console.log('webgpu', webgpu)
+
+  const Renderer = await import('./renderer/threads').then(v => v.Renderer) 
   const renderer = new Renderer(
     canvas,
     num,
@@ -33,11 +39,6 @@ import { ui } from './ui'
     (fps: number) => {
       if(fpsVisual) fpsVisual.innerText = fps + ' fps'
     }
-  )
-  
-  // start the ui handler
-  ui(
-    // renderer, canvas
   )
   
   window.addEventListener('resize', () => {

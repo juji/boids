@@ -1,176 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boids with Three.js</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #stats { position: absolute; bottom: 10px; left: 10px; z-index: 100; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU.js Boids Simulation</title>
+  <script src="https://cdn.jsdelivr.net/npm/gpu.js@2.11.0/dist/gpu-browser.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js"></script>
-    <script>
-        // Set up the scene, camera, and renderer
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+  <canvas id="boidsCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById('boidsCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-        // FPS counter setup
-        const stats = new Stats();
-        stats.showPanel(0); // 0: FPS, 1: MS, 2: Memory
-        document.body.appendChild(stats.dom);
+    // GPU.js setup
+    const GPUJS = GPU.GPU || GPU;
+    const gpu = new GPUJS();
 
-        // Boid class
-        class Boid {
-            constructor(x, y, z) {
-                this.position = new THREE.Vector3(x, y, z);
-                this.velocity = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
-                this.acceleration = new THREE.Vector3(0, 0, 0);
-                this.maxSpeed = 0.1;
-                this.maxForce = 0.02;
+    // Parameters
+    const numBoids = 500;
+    const boundary = 500;
+    const maxSpeed = 4;
+    const perceptionRadius = 50;
 
-                // Create the boid geometry and material
-                const geometry = new THREE.ConeGeometry(0.2, 1, 6);
-                const material = new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff });
-                this.mesh = new THREE.Mesh(geometry, material);
-                this.mesh.rotation.x = Math.PI / 2;
-                scene.add(this.mesh);
+    // Initialize boid positions and velocities
+    const positions = new Float32Array(numBoids * 3);
+    const velocities = new Float32Array(numBoids * 3);
+
+    for (let i = 0; i < numBoids; i++) {
+      positions[i * 3] = Math.random() * boundary * 2 - boundary;
+      positions[i * 3 + 1] = Math.random() * boundary * 2 - boundary;
+      positions[i * 3 + 2] = Math.random() * boundary * 2 - boundary;
+      velocities[i * 3] = Math.random() * 2 - 1;
+      velocities[i * 3 + 1] = Math.random() * 2 - 1;
+      velocities[i * 3 + 2] = Math.random() * 2 - 1;
+    }
+
+    // GPU Kernel to update boids
+    const updateBoidsKernel = gpu
+      .createKernel(function (positions, velocities, numBoids, boundary, maxSpeed, perceptionRadius) {
+        const index = this.thread.x;
+        const px = positions[index * 3];
+        const py = positions[index * 3 + 1];
+        const pz = positions[index * 3 + 2];
+        const vx = velocities[index * 3];
+        const vy = velocities[index * 3 + 1];
+        const vz = velocities[index * 3 + 2];
+
+        let ax = 0, ay = 0, az = 0;
+        let cx = 0, cy = 0, cz = 0;
+        let sx = 0, sy = 0, sz = 0;
+        let count = 0;
+
+        for (let i = 0; i < numBoids; i++) {
+          if (i !== index) {
+            const ox = positions[i * 3];
+            const oy = positions[i * 3 + 1];
+            const oz = positions[i * 3 + 2];
+            const dx = px - ox;
+            const dy = py - oy;
+            const dz = pz - oz;
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+            if (distance < perceptionRadius) {
+              ax += velocities[i * 3];
+              ay += velocities[i * 3 + 1];
+              az += velocities[i * 3 + 2];
+
+              cx += ox;
+              cy += oy;
+              cz += oz;
+
+              sx += dx / distance;
+              sy += dy / distance;
+              sz += dz / distance;
+
+              count++;
             }
-
-            // Update position and velocity based on behavior
-            update(boids) {
-                this.flock(boids);
-                this.velocity.add(this.acceleration);
-                this.velocity.clampLength(0, this.maxSpeed);
-                this.position.add(this.velocity);
-                this.acceleration.set(0, 0, 0);
-
-                // Keep boid inside bounds
-                if (this.position.x > 5) this.position.x = -5;
-                if (this.position.x < -5) this.position.x = 5;
-                if (this.position.y > 5) this.position.y = -5;
-                if (this.position.y < -5) this.position.y = 5;
-                if (this.position.z > 5) this.position.z = -5;
-                if (this.position.z < -5) this.position.z = 5;
-
-                // Update mesh position
-                this.mesh.position.copy(this.position);
-                this.mesh.lookAt(this.position.add(this.velocity));
-            }
-
-            // Flocking behavior
-            flock(boids) {
-                const alignment = this.align(boids);
-                const cohesion = this.cohere(boids);
-                const separation = this.separate(boids);
-
-                alignment.multiplyScalar(1.0);
-                cohesion.multiplyScalar(1.0);
-                separation.multiplyScalar(1.5);
-
-                this.acceleration.add(alignment);
-                this.acceleration.add(cohesion);
-                this.acceleration.add(separation);
-            }
-
-            // Align with neighbors
-            align(boids) {
-                const steering = new THREE.Vector3();
-                let total = 0;
-                for (const boid of boids) {
-                    const distance = this.position.distanceTo(boid.position);
-                    if (boid !== this && distance < 3) {
-                        steering.add(boid.velocity);
-                        total++;
-                    }
-                }
-                if (total > 0) {
-                    steering.divideScalar(total);
-                    steering.normalize();
-                    steering.multiplyScalar(this.maxSpeed);
-                    steering.sub(this.velocity);
-                    steering.clampLength(0, this.maxForce);
-                }
-                return steering;
-            }
-
-            // Move towards the center of mass of neighbors
-            cohere(boids) {
-                const steering = new THREE.Vector3();
-                let total = 0;
-                for (const boid of boids) {
-                    const distance = this.position.distanceTo(boid.position);
-                    if (boid !== this && distance < 3) {
-                        steering.add(boid.position);
-                        total++;
-                    }
-                }
-                if (total > 0) {
-                    steering.divideScalar(total);
-                    steering.sub(this.position);
-                    steering.normalize();
-                    steering.multiplyScalar(this.maxSpeed);
-                    steering.sub(this.velocity);
-                    steering.clampLength(0, this.maxForce);
-                }
-                return steering;
-            }
-
-            // Avoid collisions with neighbors
-            separate(boids) {
-                const steering = new THREE.Vector3();
-                let total = 0;
-                for (const boid of boids) {
-                    const distance = this.position.distanceTo(boid.position);
-                    if (boid !== this && distance < 1) {
-                        const diff = new THREE.Vector3().subVectors(this.position, boid.position);
-                        diff.normalize();
-                        diff.divideScalar(distance);
-                        steering.add(diff);
-                        total++;
-                    }
-                }
-                if (total > 0) {
-                    steering.divideScalar(total);
-                    steering.normalize();
-                    steering.multiplyScalar(this.maxSpeed);
-                    steering.sub(this.velocity);
-                    steering.clampLength(0, this.maxForce);
-                }
-                return steering;
-            }
+          }
         }
 
-        // Create an array of boids
-        const boids = [];
-        for (let i = 0; i < 1000; i++) {
-            boids.push(new Boid(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5));
+        if (count > 0) {
+          ax /= count;
+          ay /= count;
+          az /= count;
+
+          cx /= count;
+          cy /= count;
+          cz /= count;
+
+          cx = (cx - px) * 0.05;
+          cy = (cy - py) * 0.05;
+          cz = (cz - pz) * 0.05;
+
+          sx /= count;
+          sy /= count;
+          sz /= count;
         }
 
-        // Animation loop
-        function animate() {
-            stats.begin(); // Start measuring performance
+        let nvx = vx + ax + cx + sx;
+        let nvy = vy + ay + cy + sy;
+        let nvz = vz + az + cz + sz;
 
-            boids.forEach(boid => boid.update(boids));
-
-            renderer.render(scene, camera);
-
-            stats.end(); // End measuring performance
-
-            requestAnimationFrame(animate);
+        const speed = Math.sqrt(nvx * nvx + nvy * nvy + nvz * nvz);
+        if (speed > maxSpeed) {
+          nvx = (nvx / speed) * maxSpeed;
+          nvy = (nvy / speed) * maxSpeed;
+          nvz = (nvz / speed) * maxSpeed;
         }
 
-        // Set up the camera position
-        camera.position.z = 5;
+        let nx = px + nvx;
+        let ny = py + nvy;
+        let nz = pz + nvz;
 
-        // Start the animation
-        animate();
-    </script>
+        // Boundary wrapping
+        nx = nx < -boundary ? nx + boundary * 2 : nx > boundary ? nx - boundary * 2 : nx;
+        ny = ny < -boundary ? ny + boundary * 2 : ny > boundary ? ny - boundary * 2 : ny;
+        nz = nz < -boundary ? nz + boundary * 2 : nz > boundary ? nz - boundary * 2 : nz;
+
+        // Return updated position and velocity
+        return { nx, ny, nz, nvx, nvy, nvz };
+
+      })
+      .setOutput({ nx: 512, ny: 512, nz: 512, nvx: 512, nvy: 512, nvz: 512 });
+
+    function updateBoids() {
+      // Update boids using GPU.js kernel
+      const results = updateBoidsKernel(positions, velocities, numBoids, boundary, maxSpeed, perceptionRadius);
+
+      // Transfer results back to positions and velocities
+      for (let i = 0; i < numBoids; i++) {
+        positions[i * 3] = results[i][0];
+        positions[i * 3 + 1] = results[i][1];
+        positions[i * 3 + 2] = results[i][2];
+        velocities[i * 3] = results[i][3];
+        velocities[i * 3 + 1] = results[i][4];
+        velocities[i * 3 + 2] = results[i][5];
+      }
+    }
+
+    function drawBoids() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < numBoids; i++) {
+        const x = positions[i * 3] + canvas.width / 2;
+        const y = positions[i * 3 + 1] + canvas.height / 2;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+      }
+    }
+
+    function animate() {
+      updateBoids();
+      drawBoids();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
 </body>
 </html>

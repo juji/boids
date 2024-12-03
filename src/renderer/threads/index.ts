@@ -1,12 +1,11 @@
-import { BoidBox } from './types'
-import { type Predator } from './types'
-import Boids from './boids'
+import { type Predator } from '../items/predator'
+import Boids, { type BoidBox } from '../items/boids'
 
 export class Renderer {
 
   boids: Boids
 
-  boundingBox: {width:number, height: number}
+  screen: {width:number, height: number}
 
   // the box
   boxGap = 200 // 
@@ -31,31 +30,33 @@ export class Renderer {
   
   predatorAttr: Predator = {
     size: 40,
+    exists:true,
     x: 0,
-    y: 0
+    y: 0,
+    z: 0
   }
   
   calculators: Worker[] = []
-  calcPerThread = 500 //
+  calcPerThread = 1000 //
   calculatorNum = 1
   boidNum = 500
   canvas: HTMLCanvasElement
 
   // arrLen per boid
-  arrLen = 13
+  arrLen = 7
 
   constructor(
     canvas: HTMLCanvasElement,
     num: number,
-    boundingBox: { width:number, height: number },
+    screen: { width:number, height: number },
     reportFps: (fps: number) => void
   ){
 
     if(!num) throw new Error('num is falsy')
 
     // let window size set boidNum
-    // this.boidNum = Math.min(boundingBox.width, boundingBox.height) < 768 ? 1000 : 1500
-    this.boundingBox = boundingBox // screen
+    // this.boidNum = Math.min(screen.width, screen.height) < 768 ? 1000 : 1500
+    this.screen = screen // screen
     this.canvas = canvas
 
     this.calculatorNum = Math.max(Math.ceil(num / this.calcPerThread), 1)
@@ -86,16 +87,16 @@ export class Renderer {
     const posCounter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
     new Int8Array(posCounter).fill(0)
 
-    const boids = [...new Array(this.boidNum)].map((_,i) => {
+    ;[...new Array(this.boidNum)].map((_,i) => {
 
       const position = [
 
-        // outside boundingBox
+        // outside screen
         Math.random() * this.width * (Math.random()<.5?-1:1),
         Math.random() * this.height * (Math.random()<.5?-1:1),
         Math.random() * this.depth * (Math.random()<.5?-1:1),
 
-        // inside boundingBox
+        // inside screen
         // Math.random() * this.width - (this.width * .5),
         // Math.random() * this.height - (this.height * .5),
         // Math.random() * this.depth - (this.depth * .5),
@@ -123,15 +124,6 @@ export class Renderer {
         position[1],  
         position[2],  
       )
-
-      // position and velocity at t
-      sharedArray[ (i * this.arrLen) + 7 ] = position[0]
-      sharedArray[ (i * this.arrLen) + 8 ] = position[1]
-      sharedArray[ (i * this.arrLen) + 9 ] = position[2]
-
-      sharedArray[ (i * this.arrLen) + 10 ] = velocity[0]
-      sharedArray[ (i * this.arrLen) + 11 ] = velocity[1]
-      sharedArray[ (i * this.arrLen) + 12 ] = velocity[2]
       
       // return positions
       return { position: position as [number, number, number] }
@@ -142,9 +134,8 @@ export class Renderer {
       new Float32Array(sab),
       this.arrLen,
       new Int8Array(posCounter),
-      boids,
       canvas,
-      boundingBox,
+      screen,
       this.boidBox,
       reportFps
     )
@@ -184,8 +175,8 @@ export class Renderer {
   setPredator(x: number, y: number){
     this.predatorAttr = { 
       ...this.predatorAttr,
-      x: (x - this.boundingBox.width/2), 
-      y: (y - this.boundingBox.height/2) * -1
+      x: (x - this.screen.width/2), 
+      y: (y - this.screen.height/2) * -1
     }
 
     this.calculators.forEach((calc) => {
@@ -198,17 +189,10 @@ export class Renderer {
   }
 
   // when resize happens
-  changeBoundingBox(boundingBox: {width:number, height: number}){
+  changeScreenSize(screen: {width:number, height: number}){
     
-    this.boundingBox = boundingBox
-
-    this.calculators.forEach((calc) => {
-      calc.postMessage({
-        boundingBox: this.boundingBox
-      })
-    })
-
-    this.boids.setBoundingBox(boundingBox)
+    this.screen = screen
+    this.boids.setScreenSize(screen)
 
   }
 

@@ -1,7 +1,19 @@
-import { type Predator, BoidInit, BoidBox } from './types'
+import { type Predator } from './predator'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+export type BoidBox = {
+  top: number
+  left: number
+  bottom: number,
+  right: number
+  front: number
+  back: number  
+}
+
+export type BoidInit = {
+  position: [number, number, number]
+}
 
 export default class Boids {
 
@@ -12,7 +24,8 @@ export default class Boids {
     exists: true,
     size: 40,
     x: 0,
-    y: 0
+    y: 0,
+    z: 0
   }
 
   predator: THREE.Mesh
@@ -45,7 +58,6 @@ export default class Boids {
     sharedArray: Float32Array,
     arrLen: number,
     posCounter: Int8Array,
-    boids: BoidInit[],
     canvas: HTMLCanvasElement,
     boundingBox: { width:number, height: number },
     boidBox: BoidBox,
@@ -57,7 +69,7 @@ export default class Boids {
     this.posCounter = posCounter
     this.hasChanged = new Array(this.posCounter.length).fill(0)
     this.sharedArray = sharedArray
-    this.boidsLength = boids.length
+    this.boidsLength = sharedArray.length / arrLen
     this.arrLen = arrLen
 
     // scene
@@ -105,15 +117,17 @@ export default class Boids {
     // boid
     const geometry = new THREE.BufferGeometry();
     const position = new THREE.Float32BufferAttribute(
-      boids.reduce((a,b) => { 
-        a.push(b.position[0]); 
-        a.push(b.position[1]); 
-        a.push(b.position[2]);
+      sharedArray.reduce((a,b,i)=> {
+        if(
+          !(i % arrLen) ||
+          !((i-1) % arrLen) ||
+          !((i-2) % arrLen)
+        ) a.push(b); 
         return a
-      },[] as number[]), 
+      },[] as number[]),
       3
     )
-    
+
     position.setUsage( THREE.StreamDrawUsage );
     geometry.setAttribute( 'position', position );
 
@@ -160,11 +174,11 @@ export default class Boids {
 
   }
 
-  setBoundingBox( boundingBox: { width:number, height: number }){
+  setScreenSize( screenSize: { width:number, height: number }){
     this.renderer.clear()
-    this.renderer.setSize( boundingBox.width, boundingBox.height);
+    this.renderer.setSize( screenSize.width, screenSize.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    this.camera.aspect = boundingBox.width / boundingBox.height
+    this.camera.aspect = screenSize.width / screenSize.height
     this.camera.updateProjectionMatrix()
   }
 
@@ -199,9 +213,9 @@ export default class Boids {
       while(end--) {
         if(end<start) break;
         this.position.set([
-          this.sharedArray[ end * this.arrLen + 7 ],
-          this.sharedArray[ end * this.arrLen + 8 ],
-          this.sharedArray[ end * this.arrLen + 9 ],  
+          this.sharedArray[ end * this.arrLen + 0 ],
+          this.sharedArray[ end * this.arrLen + 1 ],
+          this.sharedArray[ end * this.arrLen + 2 ],  
         ], end*3)
       }
       

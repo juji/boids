@@ -1,11 +1,13 @@
-import type { Predator, BoidBox } from './types'
+import type { Predator } from '../items/predator'
+import type { BoidBox } from '../items/boids'
 
 
 let predatorAttr:Predator = {
-  exists: true,
   size: 40,
+  exists: true,
   x: 0,
-  y: 0
+  y: 0,
+  z: 0
 }
 
 let boidBox: BoidBox = {
@@ -97,29 +99,6 @@ function calculatePosition(){
     ]
 
     // 6 is for grid pos
-
-    // separating between 0 and t results in higher fps?
-    const iPositionT = [
-      i * sal + 7,
-      i * sal + 8,
-      i * sal + 9,
-    ]
-
-    const iVelocityT = [
-      i * sal + 10,
-      i * sal + 11,
-      i * sal + 12,
-    ]
-
-    // this should be first
-    // so that the result will show before and after
-    sharedArray[ iVelocity[0] ] = sharedArray[ iVelocityT[0] ]
-    sharedArray[ iVelocity[1] ] = sharedArray[ iVelocityT[1] ]
-    sharedArray[ iVelocity[2] ] = sharedArray[ iVelocityT[2] ]
-
-    sharedArray[ iPosition[0] ] = sharedArray[ iPositionT[0] ]
-    sharedArray[ iPosition[1] ] = sharedArray[ iPositionT[1] ]
-    sharedArray[ iPosition[2] ] = sharedArray[ iPositionT[2] ]
 
     // Separation
     let closeDx = 0
@@ -227,7 +206,7 @@ function calculatePosition(){
 
       const predatorDx = sharedArray[ iPosition[0] ] - predator.x
       const predatorDy = sharedArray[ iPosition[1] ] - predator.y
-      const predatorDz = sharedArray[ iPosition[2] ] - 0 // predator z is always 0
+      const predatorDz = sharedArray[ iPosition[2] ] - predator.z
 
       const predatorDistance = Math.sqrt(
         predatorDx**2 + predatorDy**2 + predatorDz**2
@@ -242,66 +221,66 @@ function calculatePosition(){
     }
 
     // calculate position
-    sharedArray[ iVelocityT[0] ] += acceleration[0]
-    sharedArray[ iVelocityT[1] ] += acceleration[1]
-    sharedArray[ iVelocityT[2] ] += acceleration[2]
+    sharedArray[ iVelocity[0] ] += acceleration[0]
+    sharedArray[ iVelocity[1] ] += acceleration[1]
+    sharedArray[ iVelocity[2] ] += acceleration[2]
 
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
     if(sharedArray[ iPosition[0] ] > boidBox.right){
-      sharedArray[ iVelocityT[0] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[0] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[0] ] < boidBox.left){
-      sharedArray[ iVelocityT[0] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[0] ] += turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[1] ] > boidBox.bottom){
-      sharedArray[ iVelocityT[1] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[1] ] < boidBox.top){
-      sharedArray[ iVelocityT[1] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] > boidBox.front){
-      sharedArray[ iVelocityT[2] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random() * 0.6
     }
 
     if(sharedArray[ iPosition[2] ] < boidBox.back){
-      sharedArray[ iVelocityT[2] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[2] ] += turnFactor * Math.random() * 0.6
     }
 
     // limit velocity
     const velocity = Math.sqrt(
-      sharedArray[ iVelocityT[0] ]**2 + 
-      sharedArray[ iVelocityT[1] ]**2 + 
-      sharedArray[ iVelocityT[2] ]**2
+      sharedArray[ iVelocity[0] ]**2 + 
+      sharedArray[ iVelocity[1] ]**2 + 
+      sharedArray[ iVelocity[2] ]**2
     )
 
     if(velocity > maxVelocity){
-      sharedArray[ iVelocityT[0] ] = sharedArray[ iVelocityT[0] ] / velocity * maxVelocity
-      sharedArray[ iVelocityT[1] ] = sharedArray[ iVelocityT[1] ] / velocity * maxVelocity
-      sharedArray[ iVelocityT[2] ] = sharedArray[ iVelocityT[2] ] / velocity * maxVelocity
+      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * maxVelocity
+      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * maxVelocity
+      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * maxVelocity
     }
 
     if(velocity < minVelocity){
-      sharedArray[ iVelocityT[0] ] = sharedArray[ iVelocityT[0] ] / velocity * minVelocity
-      sharedArray[ iVelocityT[1] ] = sharedArray[ iVelocityT[1] ] / velocity * minVelocity
-      sharedArray[ iVelocityT[2] ] = sharedArray[ iVelocityT[2] ] / velocity * minVelocity
+      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * minVelocity
+      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * minVelocity
+      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * minVelocity
     }
 
     //
-    sharedArray[ iPositionT[0] ] += sharedArray[ iVelocityT[0] ]
-    sharedArray[ iPositionT[1] ] += sharedArray[ iVelocityT[1] ]
-    sharedArray[ iPositionT[2] ] += sharedArray[ iVelocityT[2] ]
+    sharedArray[ iPosition[0] ] += sharedArray[ iVelocity[0] ]
+    sharedArray[ iPosition[1] ] += sharedArray[ iVelocity[1] ]
+    sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
 
     // grid pos
     sharedArray[ i * sal + 6 ] = getGridNum(
-      sharedArray[ iPositionT[0] ],
-      sharedArray[ iPositionT[1] ],
-      sharedArray[ iPositionT[2] ]
+      sharedArray[ iPosition[0] ],
+      sharedArray[ iPosition[1] ],
+      sharedArray[ iPosition[2] ]
     )
 
   }
@@ -335,10 +314,7 @@ self.onmessage = (e: MessageEvent) => {
   const { data } = e
 
   if(data.predatorAttr)
-    predatorAttr = {
-      ...predatorAttr,
-      ...data.predatorAttr
-    }
+    predatorAttr = data.predatorAttr
 
   if(data.boidBox)
     boidBox = data.boidBox
