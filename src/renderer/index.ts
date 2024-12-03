@@ -36,7 +36,7 @@ export class Renderer {
     boidNum: number,
     screen: { width:number, height: number },
     calcPerThread: number,
-    calculator: string,
+    Calculator: new () => Worker,
     reportFps: (fps: number) => void
   }){
 
@@ -45,7 +45,7 @@ export class Renderer {
       boidNum,
       screen,
       calcPerThread,
-      calculator,
+      Calculator,
       reportFps,
     } = par
 
@@ -62,9 +62,8 @@ export class Renderer {
     let calcNum = this.calculatorNum
     console.log(`using ${calcNum} thread`)
     while(calcNum--){
-      this.calculators.push(new Worker(new URL(calculator, import.meta.url),{
-        type: 'module'
-      }))
+      // @ts-ignore
+      this.calculators.push(new Calculator())
     }
     
     // boidbox
