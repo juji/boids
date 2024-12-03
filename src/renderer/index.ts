@@ -1,6 +1,6 @@
-import Predator from '../items/predator'
-import Boids from '../items/boids'
-import BoidBox from '../items/boidBox'
+import Predator from './items/predator'
+import Boids from './items/boids'
+import BoidBox from './items/boidBox'
 
 export class Renderer {
 
@@ -10,7 +10,7 @@ export class Renderer {
   predator: Predator
   
   calculators: Worker[] = []
-  calcPerThread = 99999999 // super high basically no multithreading
+  calcPerThread = 0
   calculatorNum = 1
   boidNum = 500
   canvas: HTMLCanvasElement
@@ -31,18 +31,30 @@ export class Renderer {
   fps: number = 0
   setCounter = false
 
-  constructor(
+  constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
     screen: { width:number, height: number },
+    calcPerThread: number,
+    calculator: string,
     reportFps: (fps: number) => void
-  ){
+  }){
+
+    const {
+      canvas,
+      boidNum,
+      screen,
+      calcPerThread,
+      calculator,
+      reportFps,
+    } = par
 
     if(!boidNum) throw new Error('boidNum is falsy')
 
     this.canvas = canvas
     this.reportFps = reportFps
 
+    this.calcPerThread = calcPerThread
     this.predator = new Predator()
     this.calculatorNum = Math.max(Math.ceil(boidNum / this.calcPerThread), 1)
     this.boidNum = boidNum
@@ -50,7 +62,7 @@ export class Renderer {
     let calcNum = this.calculatorNum
     console.log(`using ${calcNum} thread`)
     while(calcNum--){
-      this.calculators.push(new Worker(new URL("./calculator.ts", import.meta.url),{
+      this.calculators.push(new Worker(new URL(calculator, import.meta.url),{
         type: 'module'
       }))
     }

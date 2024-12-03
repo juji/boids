@@ -1,0 +1,25 @@
+.method-select{
+  position: fixed;
+  left: 0;
+  top: 6rem;
+  background-color: black;
+  display: grid;
+  grid-template-columns: auto auto;
+  z-index: 1;
+
+  & > a {
+    padding: 0.5rem 1rem;
+    border: 1px solid #444;
+    text-decoration: none;
+    color: grey;
+
+    &:hover{
+      color: orange;
+    }
+
+    &.active{
+      background-color: rgb(15, 101, 231);
+      color: white;
+    }
+  }
+}

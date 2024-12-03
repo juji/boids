@@ -22,14 +22,14 @@ const minVelocity: number = 2
 const turnFactor: number = 0.5
 
 // Separation
-const avoidFactor = 0.075
+const avoidFactor = 0.05
 const protectedRange = 16
 
 // Alignment
-const matchingfactor = 0.1
+const matchingfactor = 0.15
 
 // Cohesion
-const centeringFactor = 0.0001
+const centeringFactor = 0.0005
 
 // Predator
 const predatorturnfactor = 0.9

@@ -49,8 +49,6 @@ const maxPartner = 30 // max is calcPerThread
 let sal = 0
 let calculatePosition: () => Promise<number[]>
 
-let log = 1
-
 function calculate(){
   if(!sharedArray) {
     throw new Error('sharedArray does not exists')
@@ -64,20 +62,7 @@ function calculate(){
     
 
     calculatePosition().then(res => {
-      if(log && start){
-        log++
-        if(log === 20) log = 0
-        console.log('sal', sal)
-        console.log('start at', start, sal * start)
-        console.log('ends at', end, sal * (end + 1))
-        console.log(start ? 'END': 'START')
-        console.log(res.slice(sal * start, sal * (end + 1)))
-      }
-      const s = sal * start
-      const e = sal * (end + 1)
-      for(let i = s; i < e; i++)
-        sharedArray[i] = res[i]  
-      // sharedArray.set(res)
+      sharedArray.set(res)
     })
 
   }
@@ -110,8 +95,6 @@ self.onmessage = (e: MessageEvent) => {
 
     sharedArray = new Float32Array(data.sab)
     posCounter = new Int8Array(data.posCounter)
-
-    console.log(start ? 'END': 'START', [...sharedArray].slice(sal * start, sal * (end + 1)))
     
     if(!calculating){
 
