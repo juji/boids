@@ -8,7 +8,7 @@ import './styles/fps-counter.css'
 import './styles/method-select.css'
 
 import { ui } from './ui'
-import { Renderer } from './renderer'
+// import { Renderer } from './renderer'
 
 (async function(){
 
@@ -24,18 +24,18 @@ import { Renderer } from './renderer'
   const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
   const method = urlParams.get('method') || (webgpu ? 'webgpu' : 'cpu')
   
-  let script = './threads/calculator';
+  let script = './renderer/threads';
   let calcPerThread = 1000
-  
+
   if(method === 'webgpu') {
-    script = './webgpu-taichi/calculator'
+    script = './renderer/webgpu-taichi'
     calcPerThread = 99999999 // basically use one thread
   }
   
   // start the ui handler
   ui(method, num)
   
-  // const Renderer = await import(script).then(v => v.Renderer) 
+  const Renderer = await import(script).then(v => v.Renderer) 
   const renderer = new Renderer({
     canvas,
     boidNum: num,
@@ -44,7 +44,6 @@ import { Renderer } from './renderer'
       width: window.innerWidth,
       height: window.innerHeight
     },
-    calculator: script,
     reportFps: (fps: number) => {
       const fpsVisual = document.querySelector(`.fps-counter`) as HTMLElement
       if(fpsVisual) fpsVisual.innerText = fps + ' fps'
