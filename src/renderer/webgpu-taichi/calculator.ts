@@ -48,6 +48,7 @@ const maxPartner = 30 // max is calcPerThread
 // shares array length per boid
 let sal = 0
 let calculatePosition: () => Promise<number[]>
+let updatePosition: (sharedArray:Float32Array) => Promise<void>
 
 function calculate(){
   if(!sharedArray) {
@@ -58,11 +59,11 @@ function calculate(){
 
   // loop: calculate acceleration
   if( !posCounter[ counterIndex ] ){
-    posCounter[ counterIndex ] = 1
-    
 
+    posCounter[ counterIndex ] = 1
     calculatePosition().then(res => {
-      sharedArray.set(res)
+      sharedArray.set(res.slice(start * sal, sal * (end + 1)), start * sal)
+      updatePosition(sharedArray)
     })
 
   }
@@ -97,7 +98,7 @@ self.onmessage = (e: MessageEvent) => {
     posCounter = new Int8Array(data.posCounter)
     
     if(!calculating){
-
+      calculating = true
       const visibleRange = getVisibleRange()
       main({
         sharedArray,
@@ -118,8 +119,8 @@ self.onmessage = (e: MessageEvent) => {
         start,
         end
       }).then(v => {
-        calculatePosition = v
-        calculating = true
+        calculatePosition = v.increment
+        updatePosition = v.update
         calculate()
       })
 

@@ -29,13 +29,17 @@ import threads from './renderer/threads/calculator?worker'
   let Calculator = threads;
   let calcPerThread = 1000
 
-  if(method === 'webgpu') {
+  if(method === 'webgpu' && webgpu) {
     Calculator = taichi
-    calcPerThread = 99999999 // basically use one thread
+    calcPerThread = 1000 // basically use one thread
+  }
+
+  if(method === 'webgpu' && !webgpu){
+    location.href = `/?method=cpu&num=${num}`
   }
   
   // start the ui handler
-  ui(method, num)
+  ui(method, num, webgpu)
 
   // 
   const renderer = new Renderer({

@@ -75,9 +75,6 @@ export async function main(par:{
     end
   })
 
-  if(start > 0)
-  console.log('RANGE, start, end', RANGE, start, end)
-
   let increment = ti.kernel(
     `() => {
 
@@ -93,19 +90,19 @@ export async function main(par:{
         const acceleration = [ 0.0, 0.0, 0.0 ]
 
         let iPosition = [
-          i * sal + 0 + start,
-          i * sal + 1 + start,
-          i * sal + 2 + start,
+          (i * sal) + 0 + (start * sal),
+          (i * sal) + 1 + (start * sal),
+          (i * sal) + 2 + (start * sal),
         ]
 
         let iVelocity = [
-          i * sal + 3 + start,
-          i * sal + 4 + start,
-          i * sal + 5 + start,
+          (i * sal) + 3 + (start * sal),
+          (i * sal) + 4 + (start * sal),
+          (i * sal) + 5 + (start * sal),
         ]
 
         // 6 is for grid pos
-        let iGridPos = i * sal + 6 + start
+        let iGridPos = (i * sal) + 6 + (start * sal)
 
         // Separation
         let closeDx = 0.0
@@ -140,9 +137,9 @@ export async function main(par:{
           if(partners >= maxPartner) break;
 
           let jPosition = [
-            j * sal + 0,
-            j * sal + 1,
-            j * sal + 2,
+            (j * sal) + 0,
+            (j * sal) + 1,
+            (j * sal) + 2,
           ]
           
           let distance = ti.sqrt(
@@ -164,9 +161,9 @@ export async function main(par:{
           else if(distance < visibleRange){
 
             let jVelocity = [
-              j * sal + 3,
-              j * sal + 4,
-              j * sal + 5,
+              (j * sal) + 3,
+              (j * sal) + 4,
+              (j * sal) + 5,
             ]
 
             // Alignment
@@ -298,9 +295,14 @@ export async function main(par:{
   )
 
   // const n = performance.now();
-  return async (): Promise<number[]> => {
-    await increment()
-    return await boids.toArray()
+  return {
+    increment: async (): Promise<number[]> => {
+      await increment()
+      return await boids.toArray()
+    },
+    update: async (sharedArray: Float32Array): Promise<void> => {
+      await boids.fromArray([...sharedArray])
+    }
   }
   // const ms = performance.now() - n
   // console.log('N',N)
