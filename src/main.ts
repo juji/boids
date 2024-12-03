@@ -25,10 +25,12 @@ import { ui } from './ui'
 
   // check for webgpu support
   // @ts-ignore
-  const webgpu = navigator.gpu && await navigator.gpu.requestAdapter()
-  console.log('webgpu', webgpu)
+  const webgpu = !!(navigator.gpu && await navigator.gpu.requestAdapter());
 
-  const Renderer = await import('./renderer/threads').then(v => v.Renderer) 
+  let script = './renderer/threads';
+  if(webgpu) script = './renderer/webgpu-taichi'
+
+  const Renderer = await import(script).then(v => v.Renderer) 
   const renderer = new Renderer(
     canvas,
     num,

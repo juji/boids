@@ -66,7 +66,7 @@ export default class BoidBox {
 
   }
 
-  toObject(){
+  toObject(): BoidBoxObject{
     return {
       boxGap: this.boxGap,
       width: this.width,

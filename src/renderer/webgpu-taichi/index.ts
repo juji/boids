@@ -10,7 +10,7 @@ export class Renderer {
   predator: Predator
   
   calculators: Worker[] = []
-  calcPerThread = 1000 //
+  calcPerThread = 99999999 // super high basically no multithreading
   calculatorNum = 1
   boidNum = 500
   canvas: HTMLCanvasElement
@@ -48,6 +48,7 @@ export class Renderer {
     this.boidNum = boidNum
 
     let calcNum = this.calculatorNum
+    console.log(`using ${calcNum} thread`)
     while(calcNum--){
       this.calculators.push(new Worker(new URL("./calculator.ts", import.meta.url),{
         type: 'module'
@@ -174,7 +175,7 @@ export class Renderer {
     }
     
     if( this.hasChanged.findIndex(v => !v) === -1 ){
-
+      
       this.posCounter.fill(0)
       this.hasChanged.fill(0)
       this.setCounter = true
