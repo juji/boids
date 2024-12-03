@@ -10,7 +10,6 @@ export type BoidInit = {
 export default class Boids {
 
   boids:BoidInit[] = []
-  boidsLength: number
 
   predator : Predator
 
@@ -27,37 +26,19 @@ export default class Boids {
   scene: THREE.Scene
   controls: OrbitControls
 
-  sharedArray: Float32Array
-  posCounter: Int8Array
   counterIndex = 0
-
-  hasChanged: number[]
-  prevTime: number = performance.now()
-  frames = 0
-  fps: number = 0
   boidBox: BoidBox
-
-  sendFps: (fps: number) => void;
   arrLen: number = 0
 
   constructor(obj: {
-    sharedArray: Float32Array,
-    arrLen: number,
-    posCounter: Int8Array,
     canvas: HTMLCanvasElement,
     boundingBox: { width:number, height: number },
     boidBox: BoidBox,
     predator: Predator,
-    sendFps: (fps: number) => void
+    initialPos: number[]
   }){
 
     this.boidBox = obj.boidBox
-    this.sendFps = obj.sendFps
-    this.posCounter = obj.posCounter
-    this.hasChanged = new Array(this.posCounter.length).fill(0)
-    this.sharedArray = obj.sharedArray
-    this.boidsLength = obj.sharedArray.length / obj.arrLen
-    this.arrLen = obj.arrLen
 
     this.predator = obj.predator
 
@@ -105,17 +86,7 @@ export default class Boids {
 
     // boid
     const geometry = new THREE.BufferGeometry();
-    const position = new THREE.Float32BufferAttribute(
-      obj.sharedArray.reduce((a,b,i)=> {
-        if(
-          !(i % obj.arrLen) ||
-          !((i-1) % obj.arrLen) ||
-          !((i-2) % obj.arrLen)
-        ) a.push(b); 
-        return a
-      },[] as number[]),
-      3
-    )
+    const position = new THREE.Float32BufferAttribute(obj.initialPos, 3)
 
     position.setUsage( THREE.StreamDrawUsage );
     geometry.setAttribute( 'position', position );
@@ -126,7 +97,6 @@ export default class Boids {
     });
     material.size = this.boidSize
     const boidPoints = new THREE.Points(geometry, material );
-
 
     // helpers
     const axesHelper = new THREE.AxesHelper( 100 );
@@ -140,7 +110,6 @@ export default class Boids {
       ),
     );
     const boxHelper = new THREE.Box3Helper( box, 0x980000 );
-    
     
     // adding to scene
     scene.add( predatorBall );
@@ -174,50 +143,6 @@ export default class Boids {
   draw(){
     this.controls.update()
     this.renderer.render( this.scene, this.camera );
-  }
-
-  setPositions(){
-    
-    let counter = this.posCounter.length
-    let counterLen = Math.ceil(this.boidsLength / counter)
-    while(counter--) {
-
-      if(!this.posCounter[counter]) continue;
-      if(this.hasChanged[counter]) continue;
-      
-      this.hasChanged[counter] = 1
-      let start = counter * counterLen
-      let end = Math.min(start + counterLen, this.boidsLength)
-      
-      while(end--) {
-        if(end<start) break;
-        this.position.set([
-          this.sharedArray[ end * this.arrLen + 0 ],
-          this.sharedArray[ end * this.arrLen + 1 ],
-          this.sharedArray[ end * this.arrLen + 2 ],  
-        ], end*3)
-      }
-      
-      this.geometry.attributes.position.needsUpdate = true
-    }
-    
-    if( this.hasChanged.findIndex(v => !v) === -1 ){
-
-      this.posCounter.fill(0)
-      this.hasChanged.fill(0)
-
-      // fps counter
-      const time = performance.now();
-      this.frames++;
-      if (time > this.prevTime + 1000) {
-        let fps = Math.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
-        this.prevTime = time;
-        this.frames = 0;
-        this.sendFps(fps)
-      }
-
-    }
-
   }
 
 }
