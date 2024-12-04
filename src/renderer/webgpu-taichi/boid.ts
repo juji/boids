@@ -70,7 +70,7 @@ export async function main(par:{
     end
   })
 
-  let increment = ti.kernel(
+  let calculate = ti.kernel(
     `() => {
 
       let getGridNum = (x: number, y: number, z: number) => {
@@ -291,8 +291,8 @@ export async function main(par:{
 
   // const n = performance.now();
   return {
-    increment: async (): Promise<number[]> => {
-      await increment()
+    calculate: async (): Promise<number[]> => {
+      await calculate()
       return await boids.toArray()
     }
   }

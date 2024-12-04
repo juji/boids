@@ -64,6 +64,7 @@ function calculatePosition(){
     ]
 
     // 6 is for grid pos
+    const iGridPos = i * sal + 6
 
     // Separation
     let closeDx = 0
@@ -82,7 +83,7 @@ function calculatePosition(){
     let yPosAvg = 0
     let zPosAvg = 0
 
-    const iGridNum = sharedArray[ i * sal + 6 ]
+    const iGridNum = sharedArray[ iGridPos ]
     
     // calculate neighbour effect
     let j = sharedArray.length / sal
@@ -109,7 +110,7 @@ function calculatePosition(){
       )
 
       if(distance >= visibleRange) continue;
-      partners++;
+      partners = partners + 1;
 
       // Separation
       if(distance < protectedRange){
@@ -136,7 +137,7 @@ function calculatePosition(){
         yPosAvg += sharedArray[ jPosition[1] ]
         zPosAvg += sharedArray[ jPosition[2] ]
 
-        neighboringBoids++
+        neighboringBoids = neighboringBoids + 1
 
       }
 
@@ -242,7 +243,7 @@ function calculatePosition(){
     sharedArray[ iPosition[2] ] += sharedArray[ iVelocity[2] ]
 
     // grid pos
-    sharedArray[ i * sal + 6 ] = boidBox.getGridNum(
+    sharedArray[ iGridPos ] = boidBox.getGridNum(
       sharedArray[ iPosition[0] ],
       sharedArray[ iPosition[1] ],
       sharedArray[ iPosition[2] ]

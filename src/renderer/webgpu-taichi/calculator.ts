@@ -105,7 +105,7 @@ self.onmessage = (e: MessageEvent) => {
         start,
         end
       }).then(v => {
-        calculatePosition = v.increment
+        calculatePosition = v.calculate
         calculate()
       })
 

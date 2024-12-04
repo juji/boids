@@ -1,6 +1,9 @@
 
 
-export function methodSelectButton(method?: string, num?: number, webgpu?: boolean){
+export function methodSelectButton(
+  method?: string, num?: number, 
+  webgpu?: boolean, webgl?: boolean
+){
 
   const buttons = document.querySelectorAll('.method-select a')
   buttons.forEach((button) => {
@@ -9,7 +12,12 @@ export function methodSelectButton(method?: string, num?: number, webgpu?: boole
     const a = button as HTMLAnchorElement
     const met = a.dataset.method
     
-    if(!webgpu && met === 'webgpu'){
+    if(met === 'webgpu' && !webgpu){
+      button.remove()
+      return;
+    }
+
+    if(met === 'webgl' && !webgl){
       button.remove()
       return;
     }

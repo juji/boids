@@ -1,4 +1,5 @@
-// keep them here,so we know it's the same
+// keep them here,
+// so we know it's the same for all
 
 export const maxVelocity: number = 5
 export const minVelocity: number = 2
@@ -18,3 +19,5 @@ export const centeringFactor = 0.0005
 
 // Predator
 export const predatorturnfactor = 0.9
+
+

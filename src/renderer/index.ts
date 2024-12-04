@@ -1,6 +1,7 @@
 import Predator from './items/predator'
 import Boids from './items/boids'
 import BoidBox from './items/boidBox'
+import type { CalculatorPar } from './items/calculator-par'
 
 export class Renderer {
 
@@ -10,6 +11,7 @@ export class Renderer {
   predator: Predator
   
   calculators: Worker[] = []
+  calculator: null | (() => void) = null
   calcPerThread = 0
   calculatorNum = 1
   boidNum = 500
@@ -31,12 +33,15 @@ export class Renderer {
   fps: number = 0
   setCounter = false
 
+  // log
+  log = true
+
   constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
     screen: { width:number, height: number },
     calcPerThread: number,
-    Calculator: new () => Worker,
+    Calculator: (new () => Worker) | ((c: CalculatorPar) => () => void),
     reportFps: (fps: number) => void
   }){
 
@@ -53,14 +58,13 @@ export class Renderer {
 
     this.canvas = canvas
     this.reportFps = reportFps
-
-    this.calcPerThread = calcPerThread
     this.predator = new Predator()
-    this.calculatorNum = Math.max(Math.ceil(boidNum / this.calcPerThread), 1)
     this.boidNum = boidNum
 
+    this.calcPerThread = calcPerThread
+    this.calculatorNum = calcPerThread ? Math.max(Math.ceil(boidNum / this.calcPerThread), 1) : 0
+
     let calcNum = this.calculatorNum
-    console.log(`using ${calcNum} thread`)
     while(calcNum--){
       // @ts-ignore
       this.calculators.push(new Calculator())
@@ -152,7 +156,26 @@ export class Renderer {
 
     this.boidsLength = sharedArray.length / this.arrLen
 
-    this.loop()
+    if(!calcPerThread){
+      try{
+
+        const f = Calculator as ((c: CalculatorPar) => () => void)
+        this.calculator = f({
+          sharedArray,
+          sal: this.arrLen,
+          boidBox: this.boidBox,
+          predator: this.predator,
+          boids: this.boids
+        })
+        this.loop() 
+      }catch(e){
+        console.error(e)
+      }
+
+    }else{
+      this.loop()
+    }
+
   }
 
   // when resize happens
@@ -161,7 +184,7 @@ export class Renderer {
   }
 
   setPositions(){
-    
+
     let counter = this.posCounter.length
     let counterLen = Math.ceil(this.boidsLength / counter)
     while(counter--) {
@@ -202,11 +225,15 @@ export class Renderer {
     }
   
     requestAnimationFrame(() => this.loop())
-  
-    this.setPositions()
+    
+    if(this.calculator) {
+      this.calculator()
+    }
+    else this.setPositions()
+    
     this.boids.draw()
 
-    if(this.setCounter){
+    if(this.setCounter || this.calculator){
       this.setCounter = false
       
       // fps counter
