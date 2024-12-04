@@ -1,6 +1,6 @@
 import BoidBox from '../items/boidBox'
 import Predator from '../items/predator'
-import '/gpu-browser.min.js?url'
+// import '/gpu-browser.min.js?url'
 
 type WebGLBoidPar = {
   len: number
@@ -39,7 +39,7 @@ export function webGLBoid({
   // @ts-ignore
   const GPUJS = GPU.GPU || GPU
   // const gpu = new GPUJS({ mode: 'cpu' })
-  const gpu = new GPUJS({ mode: "webgl2" })
+  const gpu = new GPUJS()
 
   const boidLen = len / sal
 
