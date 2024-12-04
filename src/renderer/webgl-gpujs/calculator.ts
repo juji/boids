@@ -1,5 +1,5 @@
 
-import { webGLBoid } from './boid.js'
+// import { webGLBoid } from './boid.js'
 
 import {
   maxVelocity,
@@ -36,7 +36,9 @@ export function calculator({
 
   const len = sharedArray.length
   const boidLen = len / sal
-  const calc = webGLBoid({
+
+  // @ts-ignore
+  const calc = WebGLBoid({
     len: sharedArray.length,
     sal,
     predator,
