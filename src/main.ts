@@ -36,7 +36,10 @@ import threads from './renderer/threads/calculator?worker'
 
   if(method === 'webgpu' && !webgpu){
     location.href = `/?method=cpu&num=${num}`
+    return;
   }
+
+  
   
   // start the ui handler
   ui(method, num, webgpu)
