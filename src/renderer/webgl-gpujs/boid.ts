@@ -39,7 +39,7 @@ export function webGLBoid({
   // @ts-ignore
   const GPUJS = GPU.GPU || GPU
   // const gpu = new GPUJS({ mode: 'cpu' })
-  const gpu = new GPUJS()
+  const gpu = new GPUJS({ mode: "webgl2" })
 
   const boidLen = len / sal
 
