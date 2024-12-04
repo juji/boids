@@ -36,6 +36,8 @@ export function calculator({
 
   const len = sharedArray.length
   const boidLen = len / sal
+  const unitPerRun = boidLen / 5
+  // const unitPerRun = 1000
 
   // @ts-ignore
   const calc = WebGLBoid({
@@ -53,35 +55,60 @@ export function calculator({
     predatorturnfactor,
     visibleRange,
     maxPartner,
+    unitPerRun,
   })
 
+  const loopNum = boidLen / unitPerRun
+
+  let startIndex = 0
+  let endIndex = unitPerRun
+  let loopRun = loopNum
+
   return () => {
-    const r = calc(sharedArray)
-    for(let n = 0; n < boidLen; n++){
 
-      sharedArray[ n * sal + 0 ] += r[ n ][ 0 ]
-      sharedArray[ n * sal + 1 ] += r[ n ][ 1 ]
-      sharedArray[ n * sal + 2 ] += r[ n ][ 2 ]
+    while(loopRun--){
 
-      boids.position.set([
-        sharedArray[ n * sal + 0 ],
-        sharedArray[ n * sal + 1 ],
-        sharedArray[ n * sal + 2],  
-      ], n*3)
+      const r = calc(startIndex, sharedArray)
+      // console.log({ startIndex, endIndex })
 
-      sharedArray[ n * sal + 3 ] = r[ n ][ 0 ]
-      sharedArray[ n * sal + 4 ] = r[ n ][ 1 ]
-      sharedArray[ n * sal + 5 ] = r[ n ][ 2 ]
+      let n = endIndex
+      while(n-- && n >= startIndex){
+        
+        sharedArray[ n * sal + 0 ] += r[ n - startIndex ][ 0 ]
+        sharedArray[ n * sal + 1 ] += r[ n - startIndex ][ 1 ]
+        sharedArray[ n * sal + 2 ] += r[ n - startIndex ][ 2 ]
+  
+        boids.position.set([
+          sharedArray[ n * sal + 0 ],
+          sharedArray[ n * sal + 1 ],
+          sharedArray[ n * sal + 2],  
+        ], n * 3)
+  
+        sharedArray[ n * sal + 3 ] = r[ n - startIndex ][ 0 ]
+        sharedArray[ n * sal + 4 ] = r[ n - startIndex ][ 1 ]
+        sharedArray[ n * sal + 5 ] = r[ n - startIndex ][ 2 ]
+  
+        sharedArray[ n * sal + 6 ] = boidBox.getGridNum(
+          sharedArray[ n * sal + 0 ],
+          sharedArray[ n * sal + 1 ],
+          sharedArray[ n * sal + 2 ],
+        )
 
-      sharedArray[ n * sal + 6 ] = boidBox.getGridNum(
-        sharedArray[ n * sal + 0 ],
-        sharedArray[ n * sal + 1 ],
-        sharedArray[ n * sal + 2 ],
-      )
+      }
+
+      startIndex = endIndex
+      endIndex = startIndex + unitPerRun
+      if(endIndex > boidLen){
+        startIndex = 0
+        endIndex = unitPerRun
+      }
+
     }
 
+    loopRun = loopNum
     boids.geometry.attributes.position.needsUpdate = true
 
   }
-
+  
+  
 }

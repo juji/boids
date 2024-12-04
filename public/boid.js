@@ -1,23 +1,3 @@
-// import BoidBox from '../items/boidBox'
-// import Predator from '../items/predator'
-// import '/gpu-browser.min.js?url'
-
-// type WebGLBoidPar = {
-//   len: number
-//   sal: number
-//   predator: Predator
-//   boidBox: BoidBox
-//   maxVelocity: number
-//   minVelocity: number
-//   turnFactor: number
-//   avoidFactor: number
-//   protectedRange: number
-//   matchingfactor: number
-//   centeringFactor: number
-//   predatorturnfactor: number
-//   visibleRange: number
-//   maxPartner: number
-// }
 
 function WebGLBoid({
   len,
@@ -34,9 +14,8 @@ function WebGLBoid({
   predatorturnfactor,
   visibleRange,
   maxPartner,
-}
-// :WebGLBoidPar
-){
+  unitPerRun
+}){
 
   // @ts-ignore
   const GPUJS = GPU.GPU || GPU
@@ -46,47 +25,40 @@ function WebGLBoid({
   const boidLen = len / sal
 
   const kernel = gpu.createKernel(function(
-    sharedArray,//: number[],
-    sal,//: number,
-    boidLen,//: number,
-    
-    // predatorSize: number,
-    predatorExists,//: number,
-    predatorRange,//: number,
-    predatorX,//: number,
-    predatorY,//: number,
-    predatorZ,//: number,
-
-    // boidBoxBoxGap: number,
-    // boidBoxWidth: number,
-    // boidBoxDepth: number,
-    // boidBoxHeight: number,
-    // boidBoxGridCol: number,
-    // boidBoxGridRow: number,
-    // boidBoxGridDepth: number,
-
-    boidBoxTop,//: number,
-    boidBoxLeft,//: number,
-    boidBoxBottom,//: number,
-    boidBoxRight,//: number,
-    boidBoxFront,//: number,
-    boidBoxBack,//: number,
-
-    maxVelocity,//: number,
-    minVelocity,//: number,
-    turnFactor,//: number,
-    avoidFactor,//: number,
-    protectedRange,//: number,
-    matchingfactor,//: number,
-    centeringFactor,//: number,
-    predatorturnfactor,//: number,
-    visibleRange,//: number,
-    maxPartner,//: number,
+    startIndex,
+    sharedArray,
   ){
 
+    const {
+      sal,
+      boidLen,
+      
+      predatorExists,
+      predatorRange,
+      predatorX,
+      predatorY,
+      predatorZ,
+  
+      boidBoxTop,
+      boidBoxLeft,
+      boidBoxBottom,
+      boidBoxRight,
+      boidBoxFront,
+      boidBoxBack,
+  
+      maxVelocity,
+      minVelocity,
+      turnFactor,
+      avoidFactor,
+      protectedRange,
+      matchingfactor,
+      centeringFactor,
+      predatorturnfactor,
+      visibleRange,
+      maxPartner,
+    } = this.constants
     
-    // @ts-ignore
-    let i = this.thread.x
+    let i = this.thread.x + startIndex
     
     let partners = 0
     const acceleration = [0,0,0]
@@ -289,47 +261,42 @@ function WebGLBoid({
 
     return velocity
 
-  }).setOutput([boidLen]);
+  }).setConstants({
+    sal: sal,
+    boidLen: boidLen,
 
-  return ( sharedArray
-    // : Float32Array 
+    predatorExists: predator.exists ? 1 : 0,
+    predatorRange: predator.range,
+    predatorX: predator.x,
+    predatorY: predator.y,
+    predatorZ: predator.z,
+
+    boidBoxTop: boidBox.top,
+    boidBoxLeft: boidBox.left,
+    boidBoxBottom: boidBox.bottom,
+    boidBoxRight: boidBox.right,
+    boidBoxFront: boidBox.front,
+    boidBoxBack: boidBox.back,
+
+    maxVelocity: maxVelocity,
+    minVelocity: minVelocity,
+    turnFactor: turnFactor,
+    avoidFactor: avoidFactor,
+    protectedRange: protectedRange,
+    matchingfactor: matchingfactor,
+    centeringFactor: centeringFactor,
+    predatorturnfactor: predatorturnfactor,
+    visibleRange: visibleRange,
+    maxPartner: maxPartner,
+  }).setOutput([unitPerRun])
+
+  return (
+    startIndex,
+    sharedArray,
   ) => {
     return kernel(
+      startIndex,
       sharedArray,
-      sal,
-      boidLen,
-
-      // predator.size,
-      predator.exists ? 1 : 0,
-      predator.range,
-      predator.x,
-      predator.y,
-      predator.z,
-
-      // boidBox.boxGap,
-      // boidBox.width,
-      // boidBox.depth,
-      // boidBox.height,
-      // boidBox.gridCol,
-      // boidBox.gridRow,
-      // boidBox.gridDepth,
-      boidBox.top,
-      boidBox.left,
-      boidBox.bottom,
-      boidBox.right,
-      boidBox.front,
-      boidBox.back,
-      
-      maxVelocity,
-      minVelocity,
-      turnFactor,
-      avoidFactor,
-      protectedRange,
-      matchingfactor,
-      centeringFactor,
-      predatorturnfactor,
-      visibleRange,
-      maxPartner,
     )
   }
 
