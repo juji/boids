@@ -42,7 +42,7 @@ function detectWebGLContext () {
   // check params
   const urlParams = new URLSearchParams(window.location.search);
   const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
-  const method = urlParams.get('method') || (webgl ? 'webgl' : 'cpu')
+  const method = urlParams.get('method') || 'cpu'
   
   let Calculator: (new () => Worker) | ((c:CalculatorPar) => () => void) = threads;
   let calcPerThread = 1000
