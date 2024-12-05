@@ -134,7 +134,7 @@ export default class Boids {
 
   setScreenSize( screenSize: { width:number, height: number }){
     this.renderer.clear()
-    this.renderer.setSize( screenSize.width, screenSize.height);
+    this.renderer.setSize( screenSize.width, screenSize.height );
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.camera.aspect = screenSize.width / screenSize.height
     this.camera.updateProjectionMatrix()

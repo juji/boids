@@ -86,15 +86,18 @@ export class Renderer {
 
       const position = [
 
-        // outside screen
+        /* -> toggle
+        // outside boidBox
         Math.random() * this.boidBox.width * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.height * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.depth * (Math.random()<.5?-1:1),
 
-        // inside screen
-        // Math.random() * this.width - (this.width * .5),
-        // Math.random() * this.height - (this.height * .5),
-        // Math.random() * this.depth - (this.depth * .5),
+        /*/
+        // inside boidBox
+        Math.random() * (this.boidBox.width/2) * (Math.random()<.5?-1:1),
+        Math.random() * (this.boidBox.height/2) * (Math.random()<.5?-1:1),
+        Math.random() * (this.boidBox.depth/2) * (Math.random()<.5?-1:1),
+        //*/
       ]
 
       // give them initial velocity
