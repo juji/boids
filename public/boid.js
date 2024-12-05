@@ -13,8 +13,7 @@ function WebGLBoid({
   centeringFactor,
   predatorturnfactor,
   visibleRange,
-  maxPartner,
-  unitPerRun
+  maxPartner
 }){
 
   // @ts-ignore
@@ -282,7 +281,7 @@ function WebGLBoid({
     predatorturnfactor: predatorturnfactor,
     visibleRange: visibleRange,
     maxPartner: maxPartner,
-  }).setOutput([boidLen])
+  }).setPrecision('single').setOutput([boidLen])
 
   return (sharedArray) => {
     return kernel(sharedArray)
