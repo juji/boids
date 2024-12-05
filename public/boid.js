@@ -25,7 +25,6 @@ function WebGLBoid({
   const boidLen = len / sal
 
   const kernel = gpu.createKernel(function(
-    startIndex,
     sharedArray,
   ){
 
@@ -58,21 +57,22 @@ function WebGLBoid({
       maxPartner,
     } = this.constants
     
-    let i = this.thread.x + startIndex
+    let i = this.thread.x
     
     let partners = 0
     const acceleration = [0,0,0]
+    const iPos = i * sal
     
     const iPosition = [
-      i * sal + 0,
-      i * sal + 1,
-      i * sal + 2,
+      iPos + 0,
+      iPos + 1,
+      iPos + 2,
     ]
     
     const iVelocity = [
-      i * sal + 3,
-      i * sal + 4,
-      i * sal + 5,
+      iPos + 3,
+      iPos + 4,
+      iPos + 5,
     ]
     
     const velocity = [
@@ -83,7 +83,7 @@ function WebGLBoid({
     
     // debugger; // <--NOTICE THIS, IMPORTANT!
     // 6 is for grid pos
-    const iGridPos = i * sal + 6
+    const iGridPos = iPos + 6
     
     // Separation
     let closeDx = 0
@@ -104,24 +104,24 @@ function WebGLBoid({
     
     const iGridNum = sharedArray[ iGridPos ]
     
-    // debugger;
     let j = boidLen
-    while(j >= 0) {
-    // for (let j = 0; j < boidLen; j++) {
-      j -= 1
+    while(j > 0) {
+      j = j - 1
       if(j===i) continue;
+
+      const jPos = j * sal
       
       // grid based neighbour
       // https://ercang.github.io/boids-js/
-      if(sharedArray[ j * sal + 6 ] !== iGridNum) continue;
+      if(sharedArray[ jPos + 6 ] !== iGridNum) continue;
       
       // 
       if(partners >= maxPartner) break;
       
       const jPosition = [
-        j * sal + 0,
-        j * sal + 1,
-        j * sal + 2,
+        jPos + 0,
+        jPos + 1,
+        jPos + 2,
       ]
       
       const distance = Math.sqrt(
@@ -142,16 +142,10 @@ function WebGLBoid({
       
       else if(distance < visibleRange){
         
-        const jVelocity = [
-          j * sal + 3,
-          j * sal + 4,
-          j * sal + 5,
-        ]
-        
         // Alignment
-        xVelAvg += sharedArray[ jVelocity[0] ] 
-        yVelAvg += sharedArray[ jVelocity[1] ] 
-        zVelAvg += sharedArray[ jVelocity[2] ] 
+        xVelAvg += sharedArray[ (j * sal) + 3 ] 
+        yVelAvg += sharedArray[ (j * sal) + 4 ] 
+        zVelAvg += sharedArray[ (j * sal) + 5 ] 
         
         // Cohesion
         xPosAvg += sharedArray[ jPosition[0] ]
@@ -200,8 +194,8 @@ function WebGLBoid({
       )
       
       if(predatorDistance < predatorRange){
-        let turnFactor = 1
-        if(predatorDx < 0) turnFactor = -1
+        let turnFactor = 1.0
+        if(predatorDx < 0) turnFactor = -1.0
         acceleration[0] += predatorturnfactor * turnFactor
         acceleration[1] += predatorturnfactor * turnFactor
         acceleration[2] += predatorturnfactor * turnFactor
@@ -288,16 +282,10 @@ function WebGLBoid({
     predatorturnfactor: predatorturnfactor,
     visibleRange: visibleRange,
     maxPartner: maxPartner,
-  }).setOutput([unitPerRun])
+  }).setOutput([boidLen])
 
-  return (
-    startIndex,
-    sharedArray,
-  ) => {
-    return kernel(
-      startIndex,
-      sharedArray,
-    )
+  return (sharedArray) => {
+    return kernel(sharedArray)
   }
 
 }

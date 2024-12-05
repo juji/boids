@@ -83,21 +83,23 @@ export async function main(par:{
 
         let partners = 0
         const acceleration = [ 0.0, 0.0, 0.0 ]
+        let iPos = i * sal
+        let startPos = start * sal 
 
         let iPosition = [
-          (i * sal) + 0 + (start * sal),
-          (i * sal) + 1 + (start * sal),
-          (i * sal) + 2 + (start * sal),
+          iPos + 0 + startPos,
+          iPos + 1 + startPos,
+          iPos + 2 + startPos,
         ]
 
         let iVelocity = [
-          (i * sal) + 3 + (start * sal),
-          (i * sal) + 4 + (start * sal),
-          (i * sal) + 5 + (start * sal),
+          iPos + 3 + startPos,
+          iPos + 4 + startPos,
+          iPos + 5 + startPos,
         ]
 
         // 6 is for grid pos
-        let iGridPos = (i * sal) + 6 + (start * sal)
+        let iGridPos = iPos + 6 + startPos
 
         // Separation
         let closeDx = 0.0
@@ -120,21 +122,23 @@ export async function main(par:{
         
         // calculate neighbour effect
         let j = N
-        while(j) {
+        while(j > 0 ) {
           j = j - 1
           if(j===i) continue;
 
+          let jPos = j * sal 
+
           // grid based neighbour
           // https://ercang.github.io/boids-js/
-          if(boids[ j * sal + 6 ] !== iGridNum) continue;
+          if(boids[ jPos + 6 ] !== iGridNum) continue;
 
           // 
           if(partners >= maxPartner) break;
 
           let jPosition = [
-            (j * sal) + 0,
-            (j * sal) + 1,
-            (j * sal) + 2,
+            jPos + 0,
+            jPos + 1,
+            jPos + 2,
           ]
           
           let distance = ti.sqrt(
@@ -156,9 +160,9 @@ export async function main(par:{
           else if(distance < visibleRange){
 
             let jVelocity = [
-              (j * sal) + 3,
-              (j * sal) + 4,
-              (j * sal) + 5,
+              jPos + 3,
+              jPos + 4,
+              jPos + 5,
             ]
 
             // Alignment
@@ -213,11 +217,11 @@ export async function main(par:{
           )
 
           if(predatorDistance < predator.range){
-            let n = 1.0
-            if(predatorDx < 0) n = -1.0
-            acceleration[0] += predatorturnfactor * n
-            acceleration[1] += predatorturnfactor * n
-            acceleration[2] += predatorturnfactor * n
+            let turnFactor = 1.0
+            if(predatorDx < 0) turnFactor = -1.0
+            acceleration[0] += predatorturnfactor * turnFactor
+            acceleration[1] += predatorturnfactor * turnFactor
+            acceleration[2] += predatorturnfactor * turnFactor
           }
           
         }
