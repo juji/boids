@@ -86,7 +86,7 @@ export class Renderer {
 
       const position = [
 
-        /* -> toggle
+        // /* -> toggle
         // outside boidBox
         Math.random() * this.boidBox.width * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.height * (Math.random()<.5?-1:1),
