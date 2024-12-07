@@ -85,6 +85,12 @@ export default class BoidBox {
       Math.floor((z + this.depth * .5) / (this.depth / this.gridDepth))
   }
 
+  maxGridNum(){
+    return this.gridCol *
+      this.gridRow * 
+      this.gridDepth
+  }
+
 
 
 }

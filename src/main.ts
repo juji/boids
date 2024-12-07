@@ -10,10 +10,10 @@ import './styles/method-select.css'
 import { ui } from './ui'
 // import { Renderer } from './renderer'
 // import threads from './renderer/threads/calculator?worker'
-import taichi from './renderer/webgpu-taichi/calculator?worker'
-import {calculator as gpujs} from './renderer/webgl-gpujs/calculator'
+// import taichi from './renderer/webgpu-taichi/calculator?worker'
+// import {calculator as gpujs} from './renderer/webgl-gpujs/calculator'
 
-import type { CalculatorPar } from './renderer/items/calculator-par' 
+// import type { CalculatorPar } from './renderer/items/calculator-par' 
 
 function detectWebGLContext () {
   // Create canvas element. The canvas is not added to the
@@ -62,6 +62,15 @@ function detectWebGLContext () {
 
   else if( method === 'webgpu' && webgpu){
     Renderer = await import('./renderer/webgpu-taichi').then(v => v.Renderer)
+  }
+
+  else if( method === 'webgl' && !webgl){
+    location.href = `/?method=cpu&num=${num}`
+    return;  
+  }
+
+  else if( method === 'webgl' && webgl){
+    Renderer = await import('./renderer/webgl').then(v => v.Renderer)
   }
 
   // else if(method === 'webgl' && webgl){

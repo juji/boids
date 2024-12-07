@@ -3,13 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import BoidBox from './boidBox';
 
-export type BoidInit = {
-  position: [number, number, number]
-}
-
 export default class Boids {
-
-  boids:BoidInit[] = []
 
   predator : Predator
 
@@ -25,21 +19,22 @@ export default class Boids {
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
   controls: OrbitControls
+  boidPoints: THREE.Points
 
   counterIndex = 0
   boidBox: BoidBox
-  arrLen: number = 0
 
   constructor(obj: {
     canvas: HTMLCanvasElement,
     boundingBox: { width:number, height: number },
     boidBox: BoidBox,
     predator: Predator,
-    initialPos: number[]
+    initialPos: number[],
+    customShaderMaterial?: THREE.ShaderMaterial
+    geometryAttribute?: { [key:string]: THREE.BufferAttribute | THREE.InterleavedBufferAttribute }
   }){
 
     this.boidBox = obj.boidBox
-
     this.predator = obj.predator
 
     // scene
@@ -87,16 +82,23 @@ export default class Boids {
     // boid
     const geometry = new THREE.BufferGeometry();
     const position = new THREE.Float32BufferAttribute(obj.initialPos, 3)
-
     position.setUsage( THREE.StreamDrawUsage );
     geometry.setAttribute( 'position', position );
+    if(obj.geometryAttribute){
+      Object.keys(obj.geometryAttribute).forEach(key => {
+        if(!obj.geometryAttribute) return;
+        if(!obj.geometryAttribute[key]) return;
+        geometry.setAttribute(key, obj.geometryAttribute[key])
+      })
+    }
 
-    const material = new THREE.PointsMaterial( { 
+    // console.log(obj.customShaderMaterial)
+    const material = obj.customShaderMaterial ? obj.customShaderMaterial : new THREE.PointsMaterial( { 
       color: this.boidColor,
-      transparent: false
+      transparent: false,
+      size: this.boidSize
     });
-    material.size = this.boidSize
-    const boidPoints = new THREE.Points(geometry, material );
+    const boidPoints = new THREE.Points( geometry, material );
 
     // helpers
     const axesHelper = new THREE.AxesHelper( 100 );
@@ -123,11 +125,11 @@ export default class Boids {
     this.geometry = geometry
     this.position = position
     this.renderer = renderer
+    this.boidPoints = boidPoints
     this.camera = camera
     this.scene = scene
     this.predatorBall = predatorBall
     this.controls = controls
-
     this.renderer.render( this.scene, this.camera );
 
   }
