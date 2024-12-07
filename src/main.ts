@@ -8,12 +8,7 @@ import './styles/fps-counter.css'
 import './styles/method-select.css'
 
 import { ui } from './ui'
-// import { Renderer } from './renderer'
-// import threads from './renderer/threads/calculator?worker'
-// import taichi from './renderer/webgpu-taichi/calculator?worker'
-// import {calculator as gpujs} from './renderer/webgl-gpujs/calculator'
 
-// import type { CalculatorPar } from './renderer/items/calculator-par' 
 
 function detectWebGLContext () {
   // Create canvas element. The canvas is not added to the
@@ -72,30 +67,6 @@ function detectWebGLContext () {
   else if( method === 'webgl' && webgl){
     Renderer = await import('./renderer/webgl').then(v => v.Renderer)
   }
-
-  // else if(method === 'webgl' && webgl){
-    
-  //   Calculator = gpujs;
-  //   calcPerThread = 0 // basically use one thread
-
-  // }else if(method === 'webgl' && !webgl){
-
-  //   location.href = `/?method=cpu&num=${num}`
-  //   return;
-
-  // }else if(method === 'webgpu' && webgpu){
-    
-  //   Calculator = taichi
-  //   calcPerThread = 99999999 // basically use one thread
-
-  // }else if(method === 'webgpu' && webgpu){
-
-  //   location.href = `/?method=webgl&num=${num}`
-  //   return;
-
-  // }
-
-  
   
   // start the ui handler
   ui(method, num, webgpu, webgl)
