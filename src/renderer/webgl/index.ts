@@ -33,6 +33,8 @@ export class Renderer {
     compute: () => void
   }
 
+  dotSize = 2
+
   constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
@@ -106,7 +108,6 @@ export class Renderer {
       }
     }
 
-    const dotSize = 1
     this.boids = new Boids({
       canvas: canvas,
       boundingBox: screen,
@@ -126,7 +127,7 @@ export class Renderer {
         fragmentShader: boidFragmentShader,
         transparent: true,
         uniforms: {
-          uSize: new THREE.Uniform(dotSize),
+          uSize: new THREE.Uniform(this.dotSize),
           // @ts-ignore
           uPositionTexture: new THREE.Uniform()
         }
