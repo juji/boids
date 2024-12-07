@@ -119,15 +119,24 @@ export function calculator({
 
   computation.init()
 
-  return () => {
+  let log = true
+
+  return {
+    compute: () => {
 
 
-    // GPGPU Update
-    computation.compute()
+      // GPGPU Update
+      computation.compute()
 
-    ;(boids.boidPoints.material as THREE.ShaderMaterial).uniforms.uPositionTexture.value = 
-    computation.getCurrentRenderTarget(posVar).texture;
+      if(log){
+        console.log(computation.getCurrentRenderTarget(posVar).texture)
+        log = false
+      }
 
+      ;(boids.boidPoints.material as THREE.ShaderMaterial).uniforms.uPositionTexture.value = 
+      computation.getCurrentRenderTarget(posVar).texture;
+
+    },
   }
   
   

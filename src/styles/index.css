@@ -183,3 +183,9 @@ footer{
   background-color: rgb( 21 21 21 / 30% );
 
 }
+
+.offscreen{
+  position: fixed;
+  top: 100%;
+  left: 100%;
+}

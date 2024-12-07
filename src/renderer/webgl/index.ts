@@ -29,7 +29,9 @@ export class Renderer {
   // log = true
 
   //
-  calculator: () => void
+  calculator: {
+    compute: () => void
+  }
 
   constructor(par: {
     canvas: HTMLCanvasElement,
@@ -155,7 +157,7 @@ export class Renderer {
   
     requestAnimationFrame(() => this.loop())
     
-    this.calculator()
+    this.calculator.compute()
     this.boids.draw()
       
     // fps counter
