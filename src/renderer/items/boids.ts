@@ -40,10 +40,10 @@ export default class Boids {
     // scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera( 
-      15, 
+      10, 
       obj.boundingBox.width / obj.boundingBox.height, 
       0.1, 
-      10000
+      100000
     );
 
     camera.position.z = 5000;
