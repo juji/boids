@@ -43,7 +43,7 @@ export function calculator({
 }: CalculatorParams){
 
   const visibleRange = 40 + Math.random() * 40
-  const maxPartner = 20 // max is calcPerThread
+  const maxPartner = 30 // max is calcPerThread
 
   let boidLen = boidArr.length / arrLen
 
@@ -66,31 +66,31 @@ export function calculator({
   const velTexture = computation.createTexture()
   const velVar = computation.addVariable(velocityTextureName, velocityComp, velTexture)
 
-  velVar.material.uniforms.fMaxVelocity = { value: maxVelocity * 1.0}
-  velVar.material.uniforms.fMinVelocity = { value: minVelocity * 1.0 }
-  velVar.material.uniforms.fTurnFactor = { value: turnFactor * 1.0 }
-  velVar.material.uniforms.fAvoidFactor = { value: avoidFactor * 1.0 }
-  velVar.material.uniforms.fProtectedRange = { value: protectedRange * 1.0 }
-  velVar.material.uniforms.fMatchingfactor = { value: matchingfactor * 1.0 }
-  velVar.material.uniforms.fCenteringFactor = { value: centeringFactor * 1.0 }
-  velVar.material.uniforms.fPredatorturnfactor = { value: predatorturnfactor * 1.0 }
-  velVar.material.uniforms.fVisibleRange = { value: visibleRange * 1.0 }
+  velVar.material.uniforms.fMaxVelocity = { value: maxVelocity}
+  velVar.material.uniforms.fMinVelocity = { value: minVelocity }
+  velVar.material.uniforms.fTurnFactor = { value: turnFactor }
+  velVar.material.uniforms.fAvoidFactor = { value: avoidFactor }
+  velVar.material.uniforms.fProtectedRange = { value: protectedRange }
+  velVar.material.uniforms.fMatchingfactor = { value: matchingfactor }
+  velVar.material.uniforms.fCenteringFactor = { value: centeringFactor }
+  velVar.material.uniforms.fPredatorturnfactor = { value: predatorturnfactor }
+  velVar.material.uniforms.fVisibleRange = { value: visibleRange }
   velVar.material.uniforms.iMaxPartner = { value: maxPartner }
   velVar.material.uniforms.iBoidLen = { value: boidLen }
   velVar.material.uniforms.iComputationSize = { value: computationSize }
 
   velVar.material.uniforms.bPredatorExists = { value: predator.exists }
-  velVar.material.uniforms.fPredatorX = { value: predator.x * 1.0 }
-  velVar.material.uniforms.fPredatorY = { value: predator.y * 1.0 }
-  velVar.material.uniforms.fPredatorZ = { value: predator.z * 1.0 }
-  velVar.material.uniforms.fPredatorRange = { value: predator.range * 1.0 }
+  velVar.material.uniforms.fPredatorX = { value: predator.x }
+  velVar.material.uniforms.fPredatorY = { value: predator.y }
+  velVar.material.uniforms.fPredatorZ = { value: predator.z }
+  velVar.material.uniforms.fPredatorRange = { value: predator.range }
 
-  velVar.material.uniforms.fBoidBoxLeft = { value: boidBox.left * 1.0 }
-  velVar.material.uniforms.fBoidBoxRight = { value: boidBox.right * 1.0 }
-  velVar.material.uniforms.fBoidBoxBottom = { value: boidBox.bottom * 1.0 }
-  velVar.material.uniforms.fBoidBoxTop = { value: boidBox.top * 1.0 }
-  velVar.material.uniforms.fBoidBoxFront = { value: boidBox.front * 1.0 }
-  velVar.material.uniforms.fBoidBoxBack = { value: boidBox.back * 1.0 }
+  velVar.material.uniforms.fBoidBoxLeft = { value: boidBox.left }
+  velVar.material.uniforms.fBoidBoxRight = { value: boidBox.right }
+  velVar.material.uniforms.fBoidBoxBottom = { value: boidBox.bottom }
+  velVar.material.uniforms.fBoidBoxTop = { value: boidBox.top }
+  velVar.material.uniforms.fBoidBoxFront = { value: boidBox.front }
+  velVar.material.uniforms.fBoidBoxBack = { value: boidBox.back }
 
 
   computation.setVariableDependencies(posVar, [ posVar, velVar ])

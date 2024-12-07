@@ -130,8 +130,8 @@ void main(){
 
   // Separation
   fAcceleration.x += fCloseDx * fAvoidFactor;
-  fAcceleration.x += fCloseDy * fAvoidFactor;
-  fAcceleration.x += fCloseDz * fAvoidFactor;
+  fAcceleration.y += fCloseDy * fAvoidFactor;
+  fAcceleration.z += fCloseDz * fAvoidFactor;
 
   if(iNeighboringBoids > 0.0){
 
