@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import glsl from 'vite-plugin-glsl';
 
 const viteHeaderPlugin = {
   name: 'add headers',
@@ -13,5 +14,8 @@ const viteHeaderPlugin = {
 
 
 export default defineConfig({
-  plugins: [ viteHeaderPlugin ]
+  plugins: [ 
+    viteHeaderPlugin,
+    glsl() 
+  ]
 })

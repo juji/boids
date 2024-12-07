@@ -14,16 +14,10 @@ import {
 } from '../items/constants'
 
 let predator:Predator
-
 let boidBox: BoidBox
-
-let calculating = false
 let sharedArray: Float32Array;
-let start = 0
-let end = 0
-
-let posCounter: Int8Array;
-let counterIndex: number;
+let calculating = false
+let hasChange = new Int8Array()
 
 // visible range is a range
 // and visible range should always be > protectedRange
@@ -44,17 +38,11 @@ function calculate(){
     throw new Error('sharedArray does not exists')
   }
 
-  requestAnimationFrame(() => calculate())
-
-  // loop: calculate acceleration
-  if( !posCounter[ counterIndex ] ){
-
-    posCounter[ counterIndex ] = 1
-    calculatePosition().then(res => {
-      sharedArray.set(res)
-    })
-
-  }
+  calculatePosition().then(res => {
+    hasChange[0] = 1
+    sharedArray.set(res)
+    requestAnimationFrame(() => calculate())
+  })
 
 }
 
@@ -67,22 +55,21 @@ self.onmessage = (e: MessageEvent) => {
     predator = data.predatorAttr
   }
 
-  if(data.boidBox)
+  if(data.boidBox){
     boidBox = new BoidBox(data.boidBox)
+  }
+
+  if(data.hc){
+    hasChange = new Int8Array(data.hc)
+  }
 
   if(
-    data.sab && data.posCounter && data.sal &&
-    typeof data.start !== 'undefined' &&
-    typeof data.end !== 'undefined'
+    data.sab && data.sal &&
+    typeof data.hc !== 'undefined'
   ){
 
     sal = data.sal
-    start = data.start
-    end = data.end
-    counterIndex = data.counterIndex
-
     sharedArray = new Float32Array(data.sab)
-    posCounter = new Int8Array(data.posCounter)
     
     if(!calculating){
       calculating = true
@@ -102,8 +89,6 @@ self.onmessage = (e: MessageEvent) => {
         predatorturnfactor,
         visibleRange,
         maxPartner,
-        start,
-        end
       }).then(v => {
         calculatePosition = v.calculate
         calculate()

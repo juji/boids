@@ -8,9 +8,9 @@ import './styles/fps-counter.css'
 import './styles/method-select.css'
 
 import { ui } from './ui'
-import { Renderer } from './renderer'
+// import { Renderer } from './renderer'
+// import threads from './renderer/threads/calculator?worker'
 import taichi from './renderer/webgpu-taichi/calculator?worker'
-import threads from './renderer/threads/calculator?worker'
 import {calculator as gpujs} from './renderer/webgl-gpujs/calculator'
 
 import type { CalculatorPar } from './renderer/items/calculator-par' 
@@ -44,30 +44,47 @@ function detectWebGLContext () {
   const num = urlParams.get('num') ? Number(urlParams.get('num')) : 3000;
   const method = urlParams.get('method') || 'cpu'
   
-  let Calculator: (new () => Worker) | ((c:CalculatorPar) => () => void) = threads;
-  let calcPerThread = 1000
 
-  if(method === 'webgl' && webgl){
-    
-    Calculator = gpujs;
-    calcPerThread = 0 // basically use one thread
+  let Renderer: any;
+  // let Calculator: (new () => Worker) | ((c:CalculatorPar) => () => void) = threads;
+  // let calcPerThread = 1000
 
-  }else if(method === 'webgl' && !webgl){
+  if(method === 'cpu'){
 
-    location.href = `/?method=cpu&num=${num}`
-    return;
-
-  }else if(method === 'webgpu' && webgpu){
-    
-    Calculator = taichi
-    calcPerThread = 99999999 // basically use one thread
-
-  }else if(method === 'webgpu' && webgpu){
-
-    location.href = `/?method=webgl&num=${num}`
-    return;
+    Renderer = await import('./renderer/threads').then(v => v.Renderer)
 
   }
+
+  else if( method === 'webgpu' && !webgpu){
+    location.href = `/?method=webgl&num=${num}`
+    return;  
+  }
+
+  else if( method === 'webgpu' && webgpu){
+    Renderer = await import('./renderer/webgpu-taichi').then(v => v.Renderer)
+  }
+
+  // else if(method === 'webgl' && webgl){
+    
+  //   Calculator = gpujs;
+  //   calcPerThread = 0 // basically use one thread
+
+  // }else if(method === 'webgl' && !webgl){
+
+  //   location.href = `/?method=cpu&num=${num}`
+  //   return;
+
+  // }else if(method === 'webgpu' && webgpu){
+    
+  //   Calculator = taichi
+  //   calcPerThread = 99999999 // basically use one thread
+
+  // }else if(method === 'webgpu' && webgpu){
+
+  //   location.href = `/?method=webgl&num=${num}`
+  //   return;
+
+  // }
 
   
   
@@ -78,12 +95,10 @@ function detectWebGLContext () {
   const renderer = new Renderer({
     canvas,
     boidNum: num,
-    calcPerThread,
     screen: {
       width: window.innerWidth,
       height: window.innerHeight
     },
-    Calculator,
     reportFps: (fps: number) => {
       const fpsVisual = document.querySelector(`.fps-counter`) as HTMLElement
       if(fpsVisual) fpsVisual.innerText = fps + ' fps'

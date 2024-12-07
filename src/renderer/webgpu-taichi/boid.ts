@@ -19,8 +19,6 @@ export async function main(par:{
   predatorturnfactor: number
   visibleRange: number
   maxPartner: number
-  start: number
-  end: number
 }){
 
   const {
@@ -38,8 +36,6 @@ export async function main(par:{
     predatorturnfactor,
     visibleRange,
     maxPartner,
-    start,
-    end
   } = par
 
   await ti.init();
@@ -66,8 +62,6 @@ export async function main(par:{
     predator,
     boidBox,
     maxPartner,
-    start,
-    end
   })
 
   let calculate = ti.kernel(
@@ -84,22 +78,21 @@ export async function main(par:{
         let partners = 0
         const acceleration = [ 0.0, 0.0, 0.0 ]
         let iPos = i * sal
-        let startPos = start * sal 
 
         let iPosition = [
-          iPos + 0 + startPos,
-          iPos + 1 + startPos,
-          iPos + 2 + startPos,
+          iPos + 0,
+          iPos + 1,
+          iPos + 2,
         ]
 
         let iVelocity = [
-          iPos + 3 + startPos,
-          iPos + 4 + startPos,
-          iPos + 5 + startPos,
+          iPos + 3,
+          iPos + 4,
+          iPos + 5,
         ]
 
         // 6 is for grid pos
-        let iGridPos = iPos + 6 + startPos
+        let iGridPos = iPos + 6
 
         // Separation
         let closeDx = 0.0

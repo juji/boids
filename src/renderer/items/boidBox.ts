@@ -1,6 +1,5 @@
 
 export type BoidBoxObject = {
-  boxGap: number
   width: number
   depth: number
   height: number
@@ -26,7 +25,6 @@ export default class BoidBox {
   back = 0
 
   // the box
-  boxGap = 200 // 
   width = 800
   depth = 500
   height = 500
@@ -38,7 +36,6 @@ export default class BoidBox {
   gridDepth = 30
 
   constructor( par?: {
-    boxGap: number
     width: number
     depth: number
     height: number
@@ -48,7 +45,6 @@ export default class BoidBox {
   } ){
 
     if(par){
-      this.boxGap  = par.boxGap
       this.width  = par.width
       this.depth  = par.depth
       this.height  = par.height
@@ -68,7 +64,6 @@ export default class BoidBox {
 
   toObject(): BoidBoxObject{
     return {
-      boxGap: this.boxGap,
       width: this.width,
       depth: this.depth,
       height: this.height,
