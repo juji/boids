@@ -11,7 +11,7 @@ export default class Boids {
   predatorColor = 0x9b0000
 
   boidColor = 0xFFD700
-  boidSize = 13
+  boidSize = 16
 
   renderer: THREE.WebGLRenderer
   camera: THREE.PerspectiveCamera
