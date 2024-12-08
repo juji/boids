@@ -46,7 +46,7 @@ export default class Boids {
       100000
     );
 
-    camera.position.z = 5000;
+    camera.position.z = 7000;
     camera.position.x = 4000;
     camera.position.y = 1000;
 
