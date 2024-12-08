@@ -166,16 +166,17 @@ void main(){
     );
 
     if(predatorDistance < fPredatorRange){
+      
       float fTurnX = 1.0; 
-      if(predatorDx < 0.0){ fTurnX = -1.0; }
-      fAcceleration.x += fPredatorturnfactor * fTurnX;
-
       float fTurnY = 1.0; 
-      if(predatorDy < 0.0){ fTurnY = -1.0; }
-      fAcceleration.y += fPredatorturnfactor * fTurnY;
-
       float fTurnZ = 1.0; 
+
+      if(predatorDx < 0.0){ fTurnX = -1.0; }
+      if(predatorDy < 0.0){ fTurnY = -1.0; }
       if(predatorDz < 0.0){ fTurnZ = -1.0; }
+
+      fAcceleration.x += fPredatorturnfactor * fTurnX;
+      fAcceleration.y += fPredatorturnfactor * fTurnY;
       fAcceleration.z += fPredatorturnfactor * fTurnZ;
 
     }
