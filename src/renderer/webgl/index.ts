@@ -33,7 +33,7 @@ export class Renderer {
     compute: () => void
   }
 
-  dotSize = 1.5
+  dotSize = 1.2
 
   constructor(par: {
     canvas: HTMLCanvasElement,
