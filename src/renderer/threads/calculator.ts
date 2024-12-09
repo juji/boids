@@ -17,7 +17,7 @@ let predator:Predator
 let boidBox: BoidBox
 
 let calculating = false
-let sharedArray: Float64Array;
+let sharedArray: Float32Array;
 let start = 0
 let end = 0
 
@@ -291,7 +291,7 @@ self.onmessage = (e: MessageEvent) => {
     end = data.end
     counterIndex = data.counterIndex
 
-    sharedArray = new Float64Array(data.sab)
+    sharedArray = new Float32Array(data.sab)
     posCounter = new Int8Array(data.posCounter)
     
     if(!calculating){
