@@ -67,6 +67,15 @@ function detectWebGLContext () {
   else if( method === 'webgl' && webgl){
     Renderer = await import('./renderer/webgl').then(v => v.Renderer)
   }
+
+  else if( method === 'webgl-worker' && !webgl){
+    location.href = `/?method=cpu&num=${num}`
+    return;  
+  }
+
+  else if( method === 'webgl-worker' && webgl){
+    Renderer = await import('./renderer/webgl-worker').then(v => v.Renderer)
+  }
   
   // start the ui handler
   ui(method, num, webgpu, webgl)
