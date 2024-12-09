@@ -55,7 +55,6 @@ self.onmessage = (e: MessageEvent) => {
   }
 
   if(type === 'event'){
-    console.log( 'event', data )
     // @ts-ignore
     virtualElement.dispatchVirtualEvent(data)
   }

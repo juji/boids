@@ -80,8 +80,6 @@ export class Renderer {
 
   sendEventToWorker(event: Event, isPassive?: boolean) {
 
-    console.log(event)
-
     if(!isPassive) event.preventDefault()
     const message: { type: string, data: Record<string, unknown> } = { 
       type: 'event',
