@@ -2,10 +2,10 @@ import Predator from './predator'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import BoidBox from './boidBox';
-// import CameraControls from 'camera-controls';
+import CameraControls from 'camera-controls';
 import { VirtualElement } from './VirtualElement';
 
-// CameraControls.install( { THREE: THREE } );
+CameraControls.install( { THREE: THREE } );
 
 export default class Boids {
 
@@ -22,9 +22,9 @@ export default class Boids {
   geometry: THREE.BufferGeometry
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
-  controls: OrbitControls
+  controls: OrbitControls | CameraControls
   // controls: CameraControls
-  // clock: THREE.Clock
+  clock: THREE.Clock
   boidPoints: THREE.Points
 
   counterIndex = 0
@@ -89,26 +89,31 @@ export default class Boids {
 
     // Controls
     // /* -> switch
-    const controls = new OrbitControls( 
-      camera, 
-      // obj.canvas as HTMLElement 
-      (obj.virtualElement ? obj.virtualElement : obj.canvas) as HTMLElement 
-    )
-    controls.enableDamping = true
-    controls.enablePan = false
-    controls.minDistance = 3000
-    controls.maxDistance = 20000
+    let controls;
+    if(this.offscreen){
+      controls = new CameraControls(
+        camera, 
+        // @ts-ignore
+        obj.virtualElement ? obj.virtualElement : renderer.domElement
+      )
+      controls.smoothTime = 0
+      controls.minDistance = 2000
+      controls.maxDistance = 20000
+      controls.dollySpeed = 1
+      controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
+    }else{
+      controls = new OrbitControls( 
+        camera, 
+        // obj.canvas as HTMLElement 
+        (obj.virtualElement ? obj.virtualElement : obj.canvas) as HTMLElement 
+      )
+      controls.enableDamping = true
+      controls.enablePan = false
+      controls.minDistance = 3000
+      controls.maxDistance = 20000
+    }
     /*/
-    const controls = new CameraControls(
-      camera, 
-      // @ts-ignore
-      obj.virtualElement ? obj.virtualElement : renderer.domElement
-    )
-    controls.smoothTime = 0
-    controls.minDistance = 2000
-    controls.maxDistance = 20000
-    controls.dollySpeed = 1
-    controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
+    
     //*/
 
     // boid
@@ -154,7 +159,7 @@ export default class Boids {
     scene.add( axesHelper )
     scene.add( boxHelper );
     
-    // this.clock = new THREE.Clock()
+    this.clock = new THREE.Clock()
 
     this.geometry = geometry
     this.position = position
@@ -180,9 +185,13 @@ export default class Boids {
   }
 
   draw(){
-    this.controls.update()
-    // const delta = this.clock.getDelta();
-	  // this.controls.update( delta );
+    if(this.offscreen){
+      const delta = this.clock.getDelta();
+      this.controls.update( delta );
+    }else{
+      // @ts-ignore
+      this.controls.update()
+    }
     this.renderer.render( this.scene, this.camera );
   }
 
