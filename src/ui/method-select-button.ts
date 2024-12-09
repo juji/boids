@@ -22,6 +22,11 @@ export function methodSelectButton(
       return;
     }
 
+    if(met === 'webgl-worker' && !webgl){
+      button.remove()
+      return;
+    }
+
     a.href = `/?method=${met}&num=${num||''}`
 
     if(method === met){
