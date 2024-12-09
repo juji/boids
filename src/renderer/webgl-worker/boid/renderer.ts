@@ -1,66 +1,58 @@
-import Predator from '../items/predator'
-import Boids from '../items/boids'
-import BoidBox from '../items/boidBox'
-import { calculator } from './calculator'
+
+import Predator from '../../items/predator'
+import Boids from '../../items/boids'
+import BoidBox from '../../items/boidBox'
+import * as THREE from 'three'
 
 import boidVertexShader from './boidVertex.glsl'
 import boidFragmentShader from './boidFragment.glsl'
-import * as THREE from 'three';
+import { calculator } from './calculator'
+import { VirtualElement } from "../../items/VirtualElement"
 
-export class Renderer {
+export class BoidRenderer{
 
   boids: Boids
   boidBox: BoidBox
   predator: Predator
   
   boidNum = 500
-  canvas: HTMLCanvasElement
+  canvas: OffscreenCanvas
 
   // arrLen per boid
   arrLen = 7
 
   //
-  reportFps: (fps: number) => void
-  prevTime: number = performance.now()
-  frames = 0
-  setCounter = false
+  reportTick: () => void
 
-  // log
-  // log = true
-
-  //
-  calculator: {
-    compute: () => void
-  }
+  compute: () => void
 
   dotSize = 1.5
 
-  constructor(par: {
-    canvas: HTMLCanvasElement,
-    boidNum: number,
-    screen: { width:number, height: number },
-    reportFps: (fps: number) => void
+
+  constructor({
+    canvas,
+    virtualElement,
+    devicePixelRatio,
+    screen,
+    boidNum,
+    reportTick,
+  }:{
+    canvas: OffscreenCanvas
+    virtualElement: VirtualElement
+    devicePixelRatio: number
+    screen: { width: number, height: number }
+    boidNum: number
+    reportTick: () => void
   }){
 
-    const {
-      canvas,
-      boidNum,
-      screen,
-      reportFps,
-    } = par
-
-    if(!boidNum) throw new Error('boidNum is falsy')
-
-    const computationSize = Math.ceil(Math.sqrt(boidNum))
-    this.boidNum = computationSize ** 2
-
+    this.reportTick = reportTick
+    this.boidNum = boidNum
     this.canvas = canvas
-    this.reportFps = reportFps
-    this.predator = new Predator()
-    
-    // boidbox
-    this.boidBox = new BoidBox()
 
+    this.boidBox = new BoidBox()
+    this.predator = new Predator()
+
+    const computationSize = Math.sqrt(this.boidNum)
     let boidArr: number[] = []
     ;[...new Array(this.boidNum)].map((_,i) => {
 
@@ -109,8 +101,10 @@ export class Renderer {
     }
 
     this.boids = new Boids({
+      offscreen: true,
       canvas: canvas,
-      devicePixelRatio: window.devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+      virtualElement: virtualElement,
       boundingBox: screen,
       boidBox: this.boidBox,
       predator: this.predator,
@@ -135,7 +129,7 @@ export class Renderer {
       })
     })
 
-    this.calculator = calculator({
+    this.compute = calculator({
       boidArr,
       arrLen: this.arrLen,
       boidBox: this.boidBox,
@@ -145,33 +139,23 @@ export class Renderer {
       velocityTextureName: 'uVelocityTexture'
     })
 
-    this.prevTime = performance.now()
-    this.loop() 
-
-  }
-
-  // when resize happens
-  changeScreenSize(screen: {width:number, height: number}){
-    this.boids.setScreenSize(screen, window.devicePixelRatio)
   }
 
   loop(){
   
     requestAnimationFrame(() => this.loop())
     
-    this.calculator.compute()
+    this.compute()
     this.boids.draw()
-      
-    // fps counter
-    const time = performance.now();
-    this.frames++;
-    if (time > this.prevTime + 1000) {
-      let fps = Math.round( ( this.frames * 1000 ) / ( time - this.prevTime ) );
-      this.prevTime = time;
-      this.frames = 0;
-      this.reportFps(fps)
-    }
+    this.reportTick()
   
+  }
+
+  onScreenChange(
+    screen: { width: number, height: number }, 
+    devicePixelRatio: number
+  ){
+    this.boids.setScreenSize(screen, devicePixelRatio)
   }
 
 }

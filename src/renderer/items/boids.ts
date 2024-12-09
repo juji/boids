@@ -1,7 +1,11 @@
 import Predator from './predator'
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import BoidBox from './boidBox';
+import CameraControls from 'camera-controls';
+import { VirtualElement } from './VirtualElement';
+
+CameraControls.install( { THREE: THREE } );
 
 export default class Boids {
 
@@ -18,24 +22,33 @@ export default class Boids {
   geometry: THREE.BufferGeometry
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
-  controls: OrbitControls
+  // controls: OrbitControls
+  controls: CameraControls
+  clock: THREE.Clock
   boidPoints: THREE.Points
 
   counterIndex = 0
   boidBox: BoidBox
 
+  offscreen = false
+
+
   constructor(obj: {
-    canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
     boundingBox: { width:number, height: number },
     boidBox: BoidBox,
     predator: Predator,
     initialPos: number[],
+    devicePixelRatio: number,
     customShaderMaterial?: THREE.ShaderMaterial
-    geometryAttribute?: { [key:string]: THREE.BufferAttribute | THREE.InterleavedBufferAttribute }
+    geometryAttribute?: { [key:string]: THREE.BufferAttribute | THREE.InterleavedBufferAttribute },
+    offscreen?: boolean
+    virtualElement? : VirtualElement
   }){
 
     this.boidBox = obj.boidBox
     this.predator = obj.predator
+    this.offscreen = !!obj.offscreen
 
     // scene
     const scene = new THREE.Scene();
@@ -70,14 +83,30 @@ export default class Boids {
 
     // renderer
     const renderer = new THREE.WebGLRenderer({ canvas: obj.canvas, alpha: false });
-    renderer.setSize( obj.boundingBox.width, obj.boundingBox.height );
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(obj.devicePixelRatio, 2))
+    renderer.setSize( obj.boundingBox.width, obj.boundingBox.height, !this.offscreen );
     renderer.setClearColor( 0x000000, 0 )
 
     // Controls
-    const controls = new OrbitControls( camera, obj.canvas )
-    controls.enableDamping = true
-    controls.enablePan = false
+    // const controls = new OrbitControls( 
+    //   camera, 
+    //   // obj.canvas as HTMLElement 
+    //   (obj.virtualElement ? obj.virtualElement : obj.canvas) as HTMLElement 
+    // )
+    // controls.enableDamping = true
+    // controls.enablePan = false
+    // controls.minDistance = 3000
+    // controls.maxDistance = 20000
+    const controls = new CameraControls(
+      camera, 
+      // @ts-ignore
+      obj.virtualElement ? obj.virtualElement : renderer.domElement
+    )
+    controls.smoothTime = 0
+    controls.minDistance = 2000
+    controls.maxDistance = 20000
+    controls.dollySpeed = 1
+    controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
 
     // boid
     const geometry = new THREE.BufferGeometry();
@@ -119,9 +148,11 @@ export default class Boids {
     scene.add( light );
     scene.add( dLight );
     scene.add( dLight2 );
-    scene.add(axesHelper)
+    scene.add( axesHelper )
     scene.add( boxHelper );
     
+    this.clock = new THREE.Clock()
+
     this.geometry = geometry
     this.position = position
     this.renderer = renderer
@@ -134,16 +165,21 @@ export default class Boids {
 
   }
 
-  setScreenSize( screenSize: { width:number, height: number }){
+  setScreenSize( 
+    screenSize: { width:number, height: number },
+    devicePixelRatio: number
+  ){
     this.renderer.clear()
     this.renderer.setSize( screenSize.width, screenSize.height );
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
     this.camera.aspect = screenSize.width / screenSize.height
     this.camera.updateProjectionMatrix()
   }
 
   draw(){
-    this.controls.update()
+    // this.controls.update()
+    const delta = this.clock.getDelta();
+	  this.controls.update( delta );
     this.renderer.render( this.scene, this.camera );
   }
 

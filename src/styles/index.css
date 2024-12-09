@@ -83,7 +83,7 @@ a{
 }
 
 #app{
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -166,10 +166,18 @@ main canvas{
   will-change: width, height;
   cursor: grab;
   /* cursor: none; */
+  display: block;
 
   &:active{
     cursor: grabbing;
   }
+}
+
+canvas{
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
 }
 
 footer{

@@ -116,6 +116,7 @@ export class Renderer {
 
     this.boids = new Boids({
       canvas: canvas,
+      devicePixelRatio: window.devicePixelRatio,
       boundingBox: screen,
       boidBox: this.boidBox,
       predator: this.predator,
@@ -153,7 +154,7 @@ export class Renderer {
 
   // when resize happens
   changeScreenSize(screen: {width:number, height: number}){
-    this.boids.setScreenSize(screen)
+    this.boids.setScreenSize(screen, window.devicePixelRatio)
   }
 
   setPositions(){
