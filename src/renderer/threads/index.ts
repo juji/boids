@@ -24,7 +24,7 @@ export class Renderer {
 
   //
   posCounter: Int8Array
-  sharedArray: Float32Array
+  sharedArray: Float64Array
   hasChanged: number[]
   boidsLength: number
 
@@ -68,8 +68,8 @@ export class Renderer {
     this.boidBox = new BoidBox()
     
     // shared array buffer
-    const sab = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
-    const sharedArray = new Float32Array(sab)
+    const sab = new SharedArrayBuffer(Float64Array.BYTES_PER_ELEMENT * this.boidNum * this.arrLen);
+    const sharedArray = new Float64Array(sab)
 
     // position Counter
     const counter = new SharedArrayBuffer(Int8Array.BYTES_PER_ELEMENT * this.calculatorNum);
