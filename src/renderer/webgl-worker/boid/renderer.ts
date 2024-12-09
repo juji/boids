@@ -4,8 +4,8 @@ import Boids from '../../items/boids'
 import BoidBox from '../../items/boidBox'
 import * as THREE from 'three'
 
-import boidVertexShader from './boidVertex.glsl'
-import boidFragmentShader from './boidFragment.glsl'
+import boidVertexShader from './boidVertex.glsl?raw'
+import boidFragmentShader from './boidFragment.glsl?raw'
 import { calculator } from './calculator'
 import { VirtualElement } from "../../items/VirtualElement"
 

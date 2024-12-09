@@ -16,6 +16,6 @@ const viteHeaderPlugin = {
 export default defineConfig({
   plugins: [ 
     viteHeaderPlugin,
-    glsl() 
+    glsl(),
   ]
 })
