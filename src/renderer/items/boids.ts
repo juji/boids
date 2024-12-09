@@ -24,7 +24,7 @@ export default class Boids {
   scene: THREE.Scene
   controls: OrbitControls
   // controls: CameraControls
-  clock: THREE.Clock
+  // clock: THREE.Clock
   boidPoints: THREE.Points
 
   counterIndex = 0
@@ -154,7 +154,7 @@ export default class Boids {
     scene.add( axesHelper )
     scene.add( boxHelper );
     
-    this.clock = new THREE.Clock()
+    // this.clock = new THREE.Clock()
 
     this.geometry = geometry
     this.position = position
@@ -180,9 +180,9 @@ export default class Boids {
   }
 
   draw(){
-    // this.controls.update()
-    const delta = this.clock.getDelta();
-	  this.controls.update( delta );
+    this.controls.update()
+    // const delta = this.clock.getDelta();
+	  // this.controls.update( delta );
     this.renderer.render( this.scene, this.camera );
   }
 
