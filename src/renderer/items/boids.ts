@@ -1,11 +1,11 @@
 import Predator from './predator'
 import * as THREE from 'three';
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import BoidBox from './boidBox';
-import CameraControls from 'camera-controls';
+// import CameraControls from 'camera-controls';
 import { VirtualElement } from './VirtualElement';
 
-CameraControls.install( { THREE: THREE } );
+// CameraControls.install( { THREE: THREE } );
 
 export default class Boids {
 
@@ -22,8 +22,8 @@ export default class Boids {
   geometry: THREE.BufferGeometry
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
-  // controls: OrbitControls
-  controls: CameraControls
+  controls: OrbitControls
+  // controls: CameraControls
   clock: THREE.Clock
   boidPoints: THREE.Points
 
@@ -88,15 +88,17 @@ export default class Boids {
     renderer.setClearColor( 0x000000, 0 )
 
     // Controls
-    // const controls = new OrbitControls( 
-    //   camera, 
-    //   // obj.canvas as HTMLElement 
-    //   (obj.virtualElement ? obj.virtualElement : obj.canvas) as HTMLElement 
-    // )
-    // controls.enableDamping = true
-    // controls.enablePan = false
-    // controls.minDistance = 3000
-    // controls.maxDistance = 20000
+    // /* -> switch
+    const controls = new OrbitControls( 
+      camera, 
+      // obj.canvas as HTMLElement 
+      (obj.virtualElement ? obj.virtualElement : obj.canvas) as HTMLElement 
+    )
+    controls.enableDamping = true
+    controls.enablePan = false
+    controls.minDistance = 3000
+    controls.maxDistance = 20000
+    /*/
     const controls = new CameraControls(
       camera, 
       // @ts-ignore
@@ -107,6 +109,7 @@ export default class Boids {
     controls.maxDistance = 20000
     controls.dollySpeed = 1
     controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
+    //*/
 
     // boid
     const geometry = new THREE.BufferGeometry();

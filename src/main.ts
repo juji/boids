@@ -65,7 +65,7 @@ function detectWebGLContext () {
   }
 
   else if( method === 'webgl' && webgl){
-    Renderer = await import('./renderer/webgl-worker').then(v => v.Renderer)
+    Renderer = await import('./renderer/webgl').then(v => v.Renderer)
   }
   
   // start the ui handler

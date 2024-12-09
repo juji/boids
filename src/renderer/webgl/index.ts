@@ -3,8 +3,8 @@ import Boids from '../items/boids'
 import BoidBox from '../items/boidBox'
 import { calculator } from './calculator'
 
-import boidVertexShader from './boidVertex.glsl'
-import boidFragmentShader from './boidFragment.glsl'
+import boidVertexShader from './boidVertex.glsl?raw'
+import boidFragmentShader from './boidFragment.glsl?raw'
 import * as THREE from 'three';
 
 export class Renderer {
