@@ -9,7 +9,6 @@ import boidFragmentShader from '../../webgl/boidFragment.glsl?raw'
 import { calculator } from './calculator'
 import { VirtualElement } from "../../items/VirtualElement"
 import CameraControls from 'camera-controls';
-import { Renderer } from '../../webgl/index'
 
 CameraControls.install( { THREE: THREE } );
 
