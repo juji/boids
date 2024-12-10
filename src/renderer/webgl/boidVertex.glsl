@@ -9,7 +9,7 @@ void main(){
   vec4 mvPosition = viewMatrix * modelMatrix * vec4(particle.xyz, 1.0);
   
   // https://github.com/mrdoob/three.js/blob/master/examples/webgl_custom_attributes_points.html
-  // 
+  // set size-attenuation like https://threejs.org/examples/?q=particle#webgl_points_billboards
   gl_PointSize = uSize * ( uPointDenom / -mvPosition.z );
   gl_Position = projectionMatrix * mvPosition;
 }
