@@ -4,8 +4,9 @@ uniform sampler2D uPositionTexture;
 attribute vec2 aParticlesUv;
 
 void main(){
-  gl_PointSize = uSize;
-  // gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position,1.0);
   vec4 particle = texture(uPositionTexture, aParticlesUv);
-  gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(particle.xyz, 1.0);
+  vec4 mvPosition = viewMatrix * modelMatrix * vec4(particle.xyz, 1.0);
+  
+  gl_PointSize = uSize * ( 300.0 / -mvPosition.z );
+  gl_Position = projectionMatrix * mvPosition;
 }
