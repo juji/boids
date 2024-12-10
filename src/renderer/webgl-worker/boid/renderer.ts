@@ -8,6 +8,10 @@ import boidVertexShader from './boidVertex.glsl?raw'
 import boidFragmentShader from './boidFragment.glsl?raw'
 import { calculator } from './calculator'
 import { VirtualElement } from "../../items/VirtualElement"
+import CameraControls from 'camera-controls';
+
+
+CameraControls.install( { THREE: THREE } );
 
 export class BoidRenderer{
 
@@ -100,8 +104,34 @@ export class BoidRenderer{
       }
     }
 
+    const clock = new THREE.Clock()
+    const customControls = {
+      create: ( camera: THREE.PerspectiveCamera, elm: VirtualElement | HTMLCanvasElement ) => {
+
+        const controls = new CameraControls(
+          camera ,
+          // @ts-ignore
+          elm
+        )
+        controls.smoothTime = 0
+        controls.minDistance = 2000
+        controls.maxDistance = 20000
+        controls.dollySpeed = 1
+        controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
+
+        return controls
+
+      },
+      update: ( controls: any ) => {
+        const delta = clock.getDelta();
+        controls.update( delta );
+      }
+    }
+
+
     this.boids = new Boids({
       offscreen: true,
+      customControls: customControls,
       canvas: canvas,
       devicePixelRatio: devicePixelRatio,
       virtualElement: virtualElement,

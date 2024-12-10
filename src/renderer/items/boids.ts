@@ -2,10 +2,13 @@ import Predator from './predator'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import BoidBox from './boidBox';
-import CameraControls from 'camera-controls';
 import { VirtualElement } from './VirtualElement';
 
-CameraControls.install( { THREE: THREE } );
+
+type CustomControls = {
+  create: ( camera: THREE.PerspectiveCamera, elm: VirtualElement | HTMLCanvasElement ) => any
+  update: ( control: any ) => void
+}
 
 export default class Boids {
 
@@ -22,9 +25,8 @@ export default class Boids {
   geometry: THREE.BufferGeometry
   position: THREE.Float32BufferAttribute
   scene: THREE.Scene
-  controls: OrbitControls | CameraControls
-  // controls: CameraControls
-  clock: THREE.Clock
+  controls: OrbitControls
+  customControls: CustomControls | null = null
   boidPoints: THREE.Points
 
   counterIndex = 0
@@ -44,6 +46,7 @@ export default class Boids {
     geometryAttribute?: { [key:string]: THREE.BufferAttribute | THREE.InterleavedBufferAttribute },
     offscreen?: boolean
     virtualElement? : VirtualElement
+    customControls? : CustomControls
   }){
 
     this.boidBox = obj.boidBox
@@ -90,17 +93,13 @@ export default class Boids {
     // Controls
     // /* -> switch
     let controls;
-    if(this.offscreen){
-      controls = new CameraControls(
-        camera, 
+    if(obj.customControls){
+      this.customControls = obj.customControls
+      controls = obj.customControls.create(
+        camera ,
         // @ts-ignore
         obj.virtualElement ? obj.virtualElement : renderer.domElement
       )
-      controls.smoothTime = 0
-      controls.minDistance = 2000
-      controls.maxDistance = 20000
-      controls.dollySpeed = 1
-      controls.touches.two = CameraControls.ACTION.TOUCH_DOLLY
     }else{
       controls = new OrbitControls( 
         camera, 
@@ -159,7 +158,7 @@ export default class Boids {
     scene.add( axesHelper )
     scene.add( boxHelper );
     
-    this.clock = new THREE.Clock()
+    // this.clock = new THREE.Clock()
 
     this.geometry = geometry
     this.position = position
@@ -185,9 +184,8 @@ export default class Boids {
   }
 
   draw(){
-    if(this.offscreen){
-      const delta = this.clock.getDelta();
-      this.controls.update( delta );
+    if(this.customControls){
+      this.customControls.update( this.controls )
     }else{
       // @ts-ignore
       this.controls.update()
