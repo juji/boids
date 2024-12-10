@@ -33,7 +33,8 @@ export class Renderer {
     compute: () => void
   }
 
-  dotSize = 42
+  dotSize = 21
+  uPointDenom = 400
 
   constructor(par: {
     canvas: HTMLCanvasElement,
@@ -128,7 +129,8 @@ export class Renderer {
         fragmentShader: boidFragmentShader,
         transparent: true,
         uniforms: {
-          uSize: new THREE.Uniform(this.dotSize),
+          uSize: new THREE.Uniform(this.dotSize * window.devicePixelRatio),
+          uPointDenom: new THREE.Uniform(this.uPointDenom),
           // @ts-ignore
           uPositionTexture: new THREE.Uniform()
         }
