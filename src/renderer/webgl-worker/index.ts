@@ -1,3 +1,6 @@
+// this not performant
+// better find another way
+
 // import Predator from '../items/predator'
 // import Boids from '../items/boids'
 // import BoidBox from '../items/boidBox'

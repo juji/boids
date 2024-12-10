@@ -29,7 +29,8 @@ export class BoidRenderer {
 
   compute: () => void
 
-  dotSize = 42
+  dotSize = 21
+  uPointDenom = 400
 
   constructor({
     canvas,
@@ -54,10 +55,9 @@ export class BoidRenderer {
     this.boidBox = new BoidBox()
     this.predator = new Predator()
 
-    const computationSize = Math.sqrt(this.boidNum)
     let boidArr: number[] = []
     ;[...new Array(this.boidNum)].map((_,i) => {
-
+      
       const position = [
         // /* -> toggle
         // outside boidBox
@@ -65,17 +65,17 @@ export class BoidRenderer {
         Math.random() * this.boidBox.height * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.depth * (Math.random()<.5?-1:1),
       ]
-
+      
       // set sharedArray
       boidArr[ (i * this.arrLen) + 0 ] = position[0]
       boidArr[ (i * this.arrLen) + 1 ] = position[1]
       boidArr[ (i * this.arrLen) + 2 ] = position[2]
-
+      
       // veolocity
       boidArr[ (i * this.arrLen) + 3 ] = Math.random() < 0.5 ? -1 : 1
       boidArr[ (i * this.arrLen) + 4 ] = Math.random() < 0.5 ? -1 : 1
       boidArr[ (i * this.arrLen) + 5 ] = Math.random() < 0.5 ? -1 : 1
-
+      
       // grid num
       boidArr[ (i * this.arrLen) + 6 ] = this.boidBox.getGridNum(
         position[0],
@@ -84,7 +84,8 @@ export class BoidRenderer {
       )
       
     })
-
+    
+    const computationSize = Math.sqrt(this.boidNum)
     const particlesUvArray = new Float32Array(this.boidNum * 2)
     for(let y = 0; y < computationSize; y++){
       for(let x = 0; x < computationSize; x++){
@@ -150,7 +151,8 @@ export class BoidRenderer {
         fragmentShader: boidFragmentShader,
         transparent: true,
         uniforms: {
-          uSize: new THREE.Uniform(this.dotSize),
+          uSize: new THREE.Uniform(this.dotSize * devicePixelRatio),
+          uPointDenom: new THREE.Uniform(this.uPointDenom),
           // @ts-ignore
           uPositionTexture: new THREE.Uniform()
         }
