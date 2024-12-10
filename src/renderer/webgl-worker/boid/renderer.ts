@@ -4,16 +4,16 @@ import Boids from '../../items/boids'
 import BoidBox from '../../items/boidBox'
 import * as THREE from 'three'
 
-import boidVertexShader from './boidVertex.glsl?raw'
-import boidFragmentShader from './boidFragment.glsl?raw'
+import boidVertexShader from '../../webgl/boidVertex.glsl?raw'
+import boidFragmentShader from '../../webgl/boidFragment.glsl?raw'
 import { calculator } from './calculator'
 import { VirtualElement } from "../../items/VirtualElement"
 import CameraControls from 'camera-controls';
-
+import { Renderer } from '../../webgl/index'
 
 CameraControls.install( { THREE: THREE } );
 
-export class BoidRenderer{
+export class BoidRenderer {
 
   boids: Boids
   boidBox: BoidBox
@@ -30,8 +30,7 @@ export class BoidRenderer{
 
   compute: () => void
 
-  dotSize = 1.5
-
+  dotSize = 42
 
   constructor({
     canvas,

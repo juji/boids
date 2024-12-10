@@ -15,8 +15,8 @@ import {
 import * as THREE from 'three';
 import { GPUComputationRenderer } from 'three/examples/jsm/Addons.js'
 
-import positionComp from './positionComp.glsl?raw'
-import velocityComp from './velocityComp.glsl?raw'
+import positionComp from '../../webgl/positionComp.glsl?raw'
+import velocityComp from '../../webgl/velocityComp.glsl?raw'
 
 import BoidBox from '../../items/boidBox.js';
 import Predator from '../../items/predator.js';
