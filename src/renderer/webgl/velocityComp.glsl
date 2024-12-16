@@ -192,27 +192,27 @@ void main(){
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
   if(position.x > fBoidBoxRight){
-    velocity.x -= fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.x -= fTurnFactor;
   }
 
   if(position.x < fBoidBoxLeft){
-    velocity.x += fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.x += fTurnFactor;
   }
 
   if(position.y > fBoidBoxBottom){
-    velocity.y -= fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.y -= fTurnFactor;
   }
 
   if(position.y < fBoidBoxTop){
-    velocity.y += fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.y += fTurnFactor;
   }
 
   if(position.z > fBoidBoxFront){
-    velocity.z -= fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.z -= fTurnFactor;
   }
 
   if(position.z < fBoidBoxBack){
-    velocity.z += fTurnFactor * rand(vec2(0.0,1.0)) * 0.6;
+    velocity.z += fTurnFactor;
   }
 
   // limit velocity

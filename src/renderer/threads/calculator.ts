@@ -195,27 +195,27 @@ function calculatePosition(){
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
     if(sharedArray[ iPosition[0] ] > boidBox.right){
-      sharedArray[ iVelocity[0] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[0] ] -= turnFactor
     }
 
     if(sharedArray[ iPosition[0] ] < boidBox.left){
-      sharedArray[ iVelocity[0] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[0] ] += turnFactor
     }
 
     if(sharedArray[ iPosition[1] ] > boidBox.bottom){
-      sharedArray[ iVelocity[1] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[1] ] -= turnFactor
     }
 
     if(sharedArray[ iPosition[1] ] < boidBox.top){
-      sharedArray[ iVelocity[1] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[1] ] += turnFactor
     }
 
     if(sharedArray[ iPosition[2] ] > boidBox.front){
-      sharedArray[ iVelocity[2] ] -= turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[2] ] -= turnFactor
     }
 
     if(sharedArray[ iPosition[2] ] < boidBox.back){
-      sharedArray[ iVelocity[2] ] += turnFactor * Math.random() * 0.6
+      sharedArray[ iVelocity[2] ] += turnFactor
     }
 
     // limit velocity

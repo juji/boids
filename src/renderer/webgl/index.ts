@@ -66,8 +66,6 @@ export class Renderer {
     ;[...new Array(this.boidNum)].map((_,i) => {
 
       const position = [
-        // /* -> toggle
-        // outside boidBox
         Math.random() * this.boidBox.width * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.height * (Math.random()<.5?-1:1),
         Math.random() * this.boidBox.depth * (Math.random()<.5?-1:1),
@@ -78,10 +76,10 @@ export class Renderer {
       boidArr[ (i * this.arrLen) + 1 ] = position[1]
       boidArr[ (i * this.arrLen) + 2 ] = position[2]
 
-      // veolocity
-      boidArr[ (i * this.arrLen) + 3 ] = Math.random() < 0.5 ? -1 : 1
-      boidArr[ (i * this.arrLen) + 4 ] = Math.random() < 0.5 ? -1 : 1
-      boidArr[ (i * this.arrLen) + 5 ] = Math.random() < 0.5 ? -1 : 1
+      // velocity
+      boidArr[ (i * this.arrLen) + 3 ] = 0
+      boidArr[ (i * this.arrLen) + 4 ] = 0
+      boidArr[ (i * this.arrLen) + 5 ] = 0
 
       // grid num
       boidArr[ (i * this.arrLen) + 6 ] = this.boidBox.getGridNum(

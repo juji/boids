@@ -210,11 +210,17 @@ export async function main(par:{
           )
 
           if(predatorDistance < predator.range){
-            let turnFactor = 1.0
-            if(predatorDx < 0) turnFactor = -1.0
-            acceleration[0] += predatorturnfactor * turnFactor
-            acceleration[1] += predatorturnfactor * turnFactor
-            acceleration[2] += predatorturnfactor * turnFactor
+            let tFactorX = 1.0
+            if(predatorDx < 0) tFactorX = -1.0
+            acceleration[0] += predatorturnfactor * tFactorX
+            
+            let tFactorY = 1.0
+            if(predatorDy < 0) tFactorY = -1.0
+            acceleration[1] += predatorturnfactor * tFactorY
+
+            let tFactorZ = 1.0
+            if(predatorDz < 0) tFactorZ = -1.0
+            acceleration[2] += predatorturnfactor * tFactorZ
           }
           
         }
@@ -228,27 +234,27 @@ export async function main(par:{
         // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
         if(boids[ iPosition[0] ] > boidBox.right){
-          boids[ iVelocity[0] ] -= turnFactor * Math.random() * 0.6
+          boids[ iVelocity[0] ] -= turnFactor
         }
 
         if(boids[ iPosition[0] ] < boidBox.left){
-          boids[ iVelocity[0] ] += turnFactor * Math.random() * 0.6
+          boids[ iVelocity[0] ] += turnFactor
         }
 
         if(boids[ iPosition[1] ] > boidBox.bottom){
-          boids[ iVelocity[1] ] -= turnFactor * Math.random() * 0.6
+          boids[ iVelocity[1] ] -= turnFactor
         }
 
         if(boids[ iPosition[1] ] < boidBox.top){
-          boids[ iVelocity[1] ] += turnFactor * Math.random() * 0.6
+          boids[ iVelocity[1] ] += turnFactor
         }
 
         if(boids[ iPosition[2] ] > boidBox.front){
-          boids[ iVelocity[2] ] -= turnFactor * Math.random() * 0.6
+          boids[ iVelocity[2] ] -= turnFactor
         }
 
         if(boids[ iPosition[2] ] < boidBox.back){
-          boids[ iVelocity[2] ] += turnFactor * Math.random() * 0.6
+          boids[ iVelocity[2] ] += turnFactor
         }
 
         // limit velocity

@@ -89,9 +89,10 @@ export class Renderer {
       sharedArray[ (i * this.arrLen) + 1 ] = position[1]
       sharedArray[ (i * this.arrLen) + 2 ] = position[2]
 
-      sharedArray[ (i * this.arrLen) + 3 ] = Math.random() < 0.5 ? -1 : 1
-      sharedArray[ (i * this.arrLen) + 4 ] = Math.random() < 0.5 ? -1 : 1
-      sharedArray[ (i * this.arrLen) + 5 ] = Math.random() < 0.5 ? -1 : 1
+      // velocity
+      sharedArray[ (i * this.arrLen) + 3 ] = 0
+      sharedArray[ (i * this.arrLen) + 4 ] = 0
+      sharedArray[ (i * this.arrLen) + 5 ] = 0
 
       // grid num
       sharedArray[ (i * this.arrLen) + 6 ] = this.boidBox.getGridNum(
