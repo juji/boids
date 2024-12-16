@@ -121,16 +121,16 @@ function calculatePosition(){
 
       else if(distance < visibleRange){
 
-        const jVelocity = [
-          j * sal + 3,
-          j * sal + 4,
-          j * sal + 5,
-        ]
+        // const jVelocity = [
+        //   j * sal + 3,
+        //   j * sal + 4,
+        //   j * sal + 5,
+        // ]
 
         // Alignment
-        xVelAvg += sharedArray[ jVelocity[0] ] 
-        yVelAvg += sharedArray[ jVelocity[1] ] 
-        zVelAvg += sharedArray[ jVelocity[2] ] 
+        xVelAvg += sharedArray[ j * sal + 3 ] 
+        yVelAvg += sharedArray[ j * sal + 4 ] 
+        zVelAvg += sharedArray[ j * sal + 5 ] 
 
         // Cohesion
         xPosAvg += sharedArray[ jPosition[0] ]

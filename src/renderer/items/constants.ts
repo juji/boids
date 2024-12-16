@@ -5,7 +5,7 @@ export const maxVelocity: number = 5
 export const minVelocity: number = 2
 
 // on edges
-export const turnFactor: number = 0.5 * Math.random() * 0.6
+export const turnFactor: number = 0.1
 
 // Separation
 export const avoidFactor = 0.05

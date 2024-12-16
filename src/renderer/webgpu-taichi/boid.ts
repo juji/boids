@@ -152,16 +152,16 @@ export async function main(par:{
 
           else if(distance < visibleRange){
 
-            let jVelocity = [
-              jPos + 3,
-              jPos + 4,
-              jPos + 5,
-            ]
+            // let jVelocity = [
+            //   jPos + 3,
+            //   jPos + 4,
+            //   jPos + 5,
+            // ]
 
             // Alignment
-            xVelAvg += boids[ jVelocity[0] ] 
-            yVelAvg += boids[ jVelocity[1] ] 
-            zVelAvg += boids[ jVelocity[2] ] 
+            xVelAvg += boids[ jPos + 3 ] 
+            yVelAvg += boids[ jPos + 4 ] 
+            zVelAvg += boids[ jPos + 5 ] 
 
             // Cohesion
             xPosAvg += boids[ jPosition[0] ]
