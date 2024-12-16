@@ -18,6 +18,6 @@ export const matchingfactor = 0.15
 export const centeringFactor = 0.0005
 
 // Predator
-export const predatorturnfactor = 0.9
+export const predatorturnfactor = 0.2
 
 

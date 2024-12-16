@@ -167,7 +167,12 @@ function calculatePosition(){
       acceleration[2] += (zPosAvg - sharedArray[ iPosition[2] ]) * centeringFactor
 
     }
-
+    
+    // calculate velocity
+    sharedArray[ iVelocity[0] ] += acceleration[0]
+    sharedArray[ iVelocity[1] ] += acceleration[1]
+    sharedArray[ iVelocity[2] ] += acceleration[2]
+    
     if(predator.exists){
 
       const predatorDx = sharedArray[ iPosition[0] ] - predator.x
@@ -179,17 +184,19 @@ function calculatePosition(){
       )
 
       if(predatorDistance < predator.range){
-        acceleration[0] += predatorturnfactor * (predatorDx < 0 ? -1 : 1)
-        acceleration[1] += predatorturnfactor * (predatorDy < 0 ? -1 : 1)
-        acceleration[2] += predatorturnfactor * (predatorDz < 0 ? -1 : 1)
+
+        const velX = Math.abs(sharedArray[ iVelocity[0] ])
+        const velY = Math.abs(sharedArray[ iVelocity[1] ])
+        const velZ = Math.abs(sharedArray[ iVelocity[2] ])
+        const sumVel = velX + velY + velZ
+
+        sharedArray[ iVelocity[0] ] += predatorturnfactor * ((predatorDx < 0 ? -1 : 1) * (1 - (velX/sumVel)))
+        sharedArray[ iVelocity[1] ] += predatorturnfactor * ((predatorDy < 0 ? -1 : 1) * (1 - (velY/sumVel)))
+        sharedArray[ iVelocity[2] ] += predatorturnfactor * ((predatorDz < 0 ? -1 : 1) * (1 - (velZ/sumVel)))
       }
       
     }
 
-    // calculate position
-    sharedArray[ iVelocity[0] ] += acceleration[0]
-    sharedArray[ iVelocity[1] ] += acceleration[1]
-    sharedArray[ iVelocity[2] ] += acceleration[2]
 
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges

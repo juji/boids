@@ -193,11 +193,19 @@ function WebGLBoid({
       )
       
       if(predatorDistance < predatorRange){
-        let turnFactor = 1.0
-        if(predatorDx < 0) turnFactor = -1.0
-        acceleration[0] += predatorturnfactor * turnFactor
-        acceleration[1] += predatorturnfactor * turnFactor
-        acceleration[2] += predatorturnfactor * turnFactor
+
+        let turnFactorX = 1.0
+        if(predatorDx < 0) turnFactorX = -1.0
+        acceleration[0] += predatorturnfactor * turnFactorX
+
+        let turnFactorY = 1.0
+        if(predatorDy < 0) turnFactorY = -1.0
+        acceleration[1] += predatorturnfactor * turnFactorY
+
+        let turnFactorZ = 1.0
+        if(predatorDz < 0) turnFactorZ = -1.0
+        acceleration[2] += predatorturnfactor * turnFactorZ
+        
       }
       
     }
@@ -209,28 +217,35 @@ function WebGLBoid({
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
+    let isTurning = false
     if(sharedArray[ iPosition[0] ] > boidBoxRight){
-      velocity[0] -= turnFactor * Math.random() * 0.6
+      velocity[0] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[0] ] < boidBoxLeft){
-      velocity[0] += turnFactor * Math.random() * 0.6
+      velocity[0] += turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[1] ] > boidBoxBottom){
-      velocity[1] -= turnFactor * Math.random() * 0.6
+      velocity[1] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[1] ] < boidBoxTop){
-      velocity[1] += turnFactor * Math.random() * 0.6
+      velocity[1] += turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[2] ] > boidBoxFront){
-      velocity[2] -= turnFactor * Math.random() * 0.6
+      velocity[2] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[2] ] < boidBoxBack){
-      velocity[2] += turnFactor * Math.random() * 0.6
+      velocity[2] += turnFactor
+      isTurning = true
     }
 
     // limit velocity
@@ -246,7 +261,7 @@ function WebGLBoid({
       velocity[2] = velocity[2] / vel * maxVelocity
     }
 
-    if(vel < minVelocity){
+    if(vel < minVelocity && !isTurning){
       velocity[0] = velocity[0] / vel * minVelocity
       velocity[1] = velocity[1] / vel * minVelocity
       velocity[2] = velocity[2] / vel * minVelocity
