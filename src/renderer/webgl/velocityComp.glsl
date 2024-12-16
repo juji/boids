@@ -153,11 +153,8 @@ void main(){
 
   }
 
-  // calculate position
-  velocity.x += fAcceleration.x;
-  velocity.y += fAcceleration.y;
-  velocity.z += fAcceleration.z;
-
+  // calculate predatory turn factor using accell instead of velocity
+  // makes things faster
   if(bPredatorExists){
 
     float predatorDx = position.x - fPredatorX;
@@ -171,11 +168,6 @@ void main(){
     );
 
     if(predatorDistance < fPredatorRange){
-
-      float velX = abs(velocity.x);
-      float velY = abs(velocity.y);
-      float velZ = abs(velocity.z);
-      float sumVel = velX + velY + velZ;
       
       float fTurnX = 1.0; 
       float fTurnY = 1.0; 
@@ -185,14 +177,18 @@ void main(){
       if(predatorDy < 0.0){ fTurnY = -1.0; }
       if(predatorDz < 0.0){ fTurnZ = -1.0; }
 
-      velocity.x += fPredatorturnfactor * fTurnX * (1.0 - (velX/sumVel));
-      velocity.y += fPredatorturnfactor * fTurnY * (1.0 - (velY/sumVel));
-      velocity.z += fPredatorturnfactor * fTurnZ * (1.0 - (velZ/sumVel));
+      fAcceleration.x += fPredatorturnfactor * fTurnX;
+      fAcceleration.y += fPredatorturnfactor * fTurnY;
+      fAcceleration.z += fPredatorturnfactor * fTurnZ;
 
     }
 
   }
   
+  // calculate position
+  velocity.x += fAcceleration.x;
+  velocity.y += fAcceleration.y;
+  velocity.z += fAcceleration.z;
 
   // turn factor
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges

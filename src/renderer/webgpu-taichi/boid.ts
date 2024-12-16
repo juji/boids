@@ -199,11 +199,6 @@ export async function main(par:{
 
         }
 
-        // calculate position
-        boids[ iVelocity[0] ] += acceleration[0]
-        boids[ iVelocity[1] ] += acceleration[1]
-        boids[ iVelocity[2] ] += acceleration[2]
-
         if(predator.exists){
 
           let predatorDx = boids[ iPosition[0] ] - predator.x
@@ -215,28 +210,25 @@ export async function main(par:{
           )
 
           if(predatorDistance < predator.range){
-
-            const velX = Math.abs(boids[ iVelocity[0] ])
-            const velY = Math.abs(boids[ iVelocity[1] ])
-            const velZ = Math.abs(boids[ iVelocity[2] ])
-            const sumVel = velX + velY + velZ
-
             let tFactorX = 1.0
             if(predatorDx < 0) tFactorX = -1.0
+            acceleration[0] += predatorturnfactor * tFactorX
+            
             let tFactorY = 1.0
             if(predatorDy < 0) tFactorY = -1.0
+            acceleration[1] += predatorturnfactor * tFactorY
+
             let tFactorZ = 1.0
             if(predatorDz < 0) tFactorZ = -1.0
-
-            boids[ iVelocity[0] ] += predatorturnfactor * tFactorX * (1 - (velX/sumVel))
-            boids[ iVelocity[1] ] += predatorturnfactor * tFactorY * (1 - (velY/sumVel))
-            boids[ iVelocity[2] ] += predatorturnfactor * tFactorZ * (1 - (velZ/sumVel))
-            
+            acceleration[2] += predatorturnfactor * tFactorZ
           }
           
         }
 
-        
+        // calculate position
+        boids[ iVelocity[0] ] += acceleration[0]
+        boids[ iVelocity[1] ] += acceleration[1]
+        boids[ iVelocity[2] ] += acceleration[2]
 
         // turn factor
         // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
