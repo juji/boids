@@ -194,28 +194,35 @@ function calculatePosition(){
     // turn factor
     // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
+    let isTurning = false;
     if(sharedArray[ iPosition[0] ] > boidBox.right){
       sharedArray[ iVelocity[0] ] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[0] ] < boidBox.left){
       sharedArray[ iVelocity[0] ] += turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[1] ] > boidBox.bottom){
       sharedArray[ iVelocity[1] ] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[1] ] < boidBox.top){
       sharedArray[ iVelocity[1] ] += turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[2] ] > boidBox.front){
       sharedArray[ iVelocity[2] ] -= turnFactor
+      isTurning = true
     }
 
     if(sharedArray[ iPosition[2] ] < boidBox.back){
       sharedArray[ iVelocity[2] ] += turnFactor
+      isTurning = true
     }
 
     // limit velocity
@@ -231,10 +238,12 @@ function calculatePosition(){
       sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * maxVelocity
     }
 
-    if(velocity < minVelocity){
-      sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * minVelocity
-      sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * minVelocity
-      sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * minVelocity
+    if(!isTurning){
+      if(velocity < minVelocity){
+        sharedArray[ iVelocity[0] ] = sharedArray[ iVelocity[0] ] / velocity * minVelocity
+        sharedArray[ iVelocity[1] ] = sharedArray[ iVelocity[1] ] / velocity * minVelocity
+        sharedArray[ iVelocity[2] ] = sharedArray[ iVelocity[2] ] / velocity * minVelocity
+      }
     }
 
     //

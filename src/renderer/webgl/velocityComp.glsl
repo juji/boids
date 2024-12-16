@@ -191,28 +191,35 @@ void main(){
   // turn factor
   // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
+  bool bIsTurning = false;
   if(position.x > fBoidBoxRight){
     velocity.x -= fTurnFactor;
+    bIsTurning = true;
   }
 
   if(position.x < fBoidBoxLeft){
     velocity.x += fTurnFactor;
+    bIsTurning = true;
   }
 
   if(position.y > fBoidBoxBottom){
     velocity.y -= fTurnFactor;
+    bIsTurning = true;
   }
 
   if(position.y < fBoidBoxTop){
     velocity.y += fTurnFactor;
+    bIsTurning = true;
   }
 
   if(position.z > fBoidBoxFront){
     velocity.z -= fTurnFactor;
+    bIsTurning = true;
   }
 
   if(position.z < fBoidBoxBack){
     velocity.z += fTurnFactor;
+    bIsTurning = true;
   }
 
   // limit velocity
@@ -228,11 +235,14 @@ void main(){
     velocity.z = velocity.z / fVelocitySqrt * fMaxVelocity;
   }
 
-  if(fVelocitySqrt < fMinVelocity){
-    velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
-    velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
-    velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
+  if(!bIsTurning){
+    if(fVelocitySqrt < fMinVelocity){
+      velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
+      velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
+      velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
+    }
   }
+
   
   gl_FragColor = velocity;
 

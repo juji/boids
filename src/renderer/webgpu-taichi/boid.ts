@@ -233,28 +233,35 @@ export async function main(par:{
         // turn factor
         // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
+        let isTurning = false
         if(boids[ iPosition[0] ] > boidBox.right){
           boids[ iVelocity[0] ] -= turnFactor
+          isTurning = true
         }
 
         if(boids[ iPosition[0] ] < boidBox.left){
           boids[ iVelocity[0] ] += turnFactor
+          isTurning = true
         }
 
         if(boids[ iPosition[1] ] > boidBox.bottom){
           boids[ iVelocity[1] ] -= turnFactor
+          isTurning = true
         }
 
         if(boids[ iPosition[1] ] < boidBox.top){
           boids[ iVelocity[1] ] += turnFactor
+          isTurning = true
         }
 
         if(boids[ iPosition[2] ] > boidBox.front){
           boids[ iVelocity[2] ] -= turnFactor
+          isTurning = true
         }
 
         if(boids[ iPosition[2] ] < boidBox.back){
           boids[ iVelocity[2] ] += turnFactor
+          isTurning = true
         }
 
         // limit velocity
@@ -269,12 +276,14 @@ export async function main(par:{
           boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * maxVelocity
           boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * maxVelocity
         }
-
-        if(velocity < minVelocity){
-          boids[ iVelocity[0] ] = boids[ iVelocity[0] ] / velocity * minVelocity
-          boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * minVelocity
-          boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * minVelocity
+        if(!isTurning){
+          if(velocity < minVelocity){
+            boids[ iVelocity[0] ] = boids[ iVelocity[0] ] / velocity * minVelocity
+            boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * minVelocity
+            boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * minVelocity
+          }
         }
+
 
         //
         boids[ iPosition[0] ] += boids[ iVelocity[0] ]
