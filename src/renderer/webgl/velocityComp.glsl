@@ -235,14 +235,12 @@ void main(){
     velocity.z = velocity.z / fVelocitySqrt * fMaxVelocity;
   }
 
-  if(!bIsTurning){
-    if(fVelocitySqrt < fMinVelocity){
-      velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
-      velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
-      velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
-    }
+  // limit min vel, only do this when not turning
+  if(fVelocitySqrt < fMinVelocity && !bIsTurning){
+    velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
+    velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
+    velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
   }
-
   
   gl_FragColor = velocity;
 

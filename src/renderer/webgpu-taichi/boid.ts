@@ -276,12 +276,11 @@ export async function main(par:{
           boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * maxVelocity
           boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * maxVelocity
         }
-        if(!isTurning){
-          if(velocity < minVelocity){
-            boids[ iVelocity[0] ] = boids[ iVelocity[0] ] / velocity * minVelocity
-            boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * minVelocity
-            boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * minVelocity
-          }
+
+        if(velocity < minVelocity && !isTurning){
+          boids[ iVelocity[0] ] = boids[ iVelocity[0] ] / velocity * minVelocity
+          boids[ iVelocity[1] ] = boids[ iVelocity[1] ] / velocity * minVelocity
+          boids[ iVelocity[2] ] = boids[ iVelocity[2] ] / velocity * minVelocity
         }
 
 
