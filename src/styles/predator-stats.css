@@ -10,5 +10,9 @@
   & > p{
     line-height: 5px;
     padding: 0 1rem;
+
+    &.remaining{
+      margin-top: 21px;
+    }
   }
 }

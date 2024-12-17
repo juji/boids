@@ -197,9 +197,10 @@ export class Renderer {
         this.frames = 0;
         this.reportFps(fps)
       }
+
+      this.reportStats( this.getRemainingBoid() )
     }
 
-    this.reportStats( this.getRemainingBoid() )
   
   }
 

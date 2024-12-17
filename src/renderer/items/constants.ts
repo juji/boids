@@ -1,7 +1,7 @@
 // keep them here,
 // so we know it's the same for all
 
-export const maxVelocity: number = 3
+export const maxVelocity: number = 5
 export const minVelocity: number = 2
 
 // on edges
@@ -18,7 +18,7 @@ export const matchingfactor = 0.15
 export const centeringFactor = 0.0005
 
 // Predator
-export const predatorturnfactor = 0.1
+export const predatorturnfactor = 0.2
 
 // grave yard
 // at y

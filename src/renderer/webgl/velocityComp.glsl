@@ -51,218 +51,217 @@ void main(){
   vec4 position = texture(uPositionTexture, index);
   vec4 velocity = texture(uVelocityTexture, index);
 
-  // is dead
-  if(velocity.w == 0.0){
-    gl_FragColor = velocity;
-    return;
-  }
+  // is not dead
+  if(velocity.w == 1.0){
+  
+    vec3 fAcceleration = vec3(0.0, 0.0, 0.0);
+    int iGridNum = int(position.w);
 
-  vec3 fAcceleration = vec3(0.0, 0.0, 0.0);
-  int iGridNum = int(position.w);
+    //
+    float fCloseDx = 0.0;
+    float fCloseDy = 0.0;
+    float fCloseDz = 0.0;
 
-  //
-  float fCloseDx = 0.0;
-  float fCloseDy = 0.0;
-  float fCloseDz = 0.0;
+    float fXVelAvg = 0.0;
+    float fYVelAvg = 0.0;
+    float fZVelAvg = 0.0;
 
-  float fXVelAvg = 0.0;
-  float fYVelAvg = 0.0;
-  float fZVelAvg = 0.0;
+    float fXPosAvg = 0.0;
+    float fYPosAvg = 0.0;
+    float fZPosAvg = 0.0;
 
-  float fXPosAvg = 0.0;
-  float fYPosAvg = 0.0;
-  float fZPosAvg = 0.0;
+    float iNeighboringBoids = 0.0;
+    //
 
-  float iNeighboringBoids = 0.0;
-  //
+    int j = iBoidLen;
+    int r = 0;
+    int l = 0;
+    int iPartners = 0;
+    while(j > 0){
+      j -= 1;
+      vec2 jIndex = vec2( r, l ) / resolution.xy;
+      vec4 jPosition = texture(uPositionTexture, jIndex);
+      vec4 jVelocity = texture(uVelocityTexture, jIndex);
 
-  int j = iBoidLen;
-  int r = 0;
-  int l = 0;
-  int iPartners = 0;
-  while(j > 0){
-    j -= 1;
-    vec2 jIndex = vec2( r, l ) / resolution.xy;
-    vec4 jPosition = texture(uPositionTexture, jIndex);
-    vec4 jVelocity = texture(uVelocityTexture, jIndex);
+      r += 1;
+      if(r == iComputationSize){
+        r = 0;
+        l += 1;
+      }
 
-    r += 1;
-    if(r == iComputationSize){
-      r = 0;
-      l += 1;
+      if(jVelocity.w == 0.0) continue;
+      if(jIndex == index) continue;
+
+      int jGridNum = int(jPosition.w);
+      if(jGridNum != iGridNum) continue;
+
+      if(iPartners >= iMaxPartner) continue;
+
+      float fDistance = sqrt(
+        pow(jPosition.x - position.x, 2.0) +
+        pow(jPosition.y - position.y, 2.0) +
+        pow(jPosition.z - position.z, 2.0) 
+      );
+
+      if(fDistance >= fVisibleRange) continue;
+
+      iPartners += 1;
+
+      // Separation
+      if(fDistance < fProtectedRange){
+        fCloseDx += position.x - jPosition.x;
+        fCloseDy += position.y - jPosition.y;
+        fCloseDz += position.z - jPosition.z;
+      }
+
+      else if(fDistance < fVisibleRange){
+
+        // Alignment
+        fXVelAvg += jVelocity.x;
+        fYVelAvg += jVelocity.y;
+        fZVelAvg += jVelocity.z;
+
+        // Cohesion
+        fXPosAvg += jPosition.x;
+        fYPosAvg += jPosition.y;
+        fZPosAvg += jPosition.z;
+
+        iNeighboringBoids += 1.0;
+
+      }
+
+
     }
 
-    if(jVelocity.w == 0.0) continue;
-    if(jIndex == index) continue;
-
-    int jGridNum = int(jPosition.w);
-    if(jGridNum != iGridNum) continue;
-
-    if(iPartners >= iMaxPartner) continue;
-
-    float fDistance = sqrt(
-      pow(jPosition.x - position.x, 2.0) +
-      pow(jPosition.y - position.y, 2.0) +
-      pow(jPosition.z - position.z, 2.0) 
-    );
-
-    if(fDistance >= fVisibleRange) continue;
-
-    iPartners += 1;
 
     // Separation
-    if(fDistance < fProtectedRange){
-      fCloseDx += position.x - jPosition.x;
-      fCloseDy += position.y - jPosition.y;
-      fCloseDz += position.z - jPosition.z;
-    }
+    fAcceleration.x += fCloseDx * fAvoidFactor;
+    fAcceleration.y += fCloseDy * fAvoidFactor;
+    fAcceleration.z += fCloseDz * fAvoidFactor;
 
-    else if(fDistance < fVisibleRange){
+    if(iNeighboringBoids > 0.0){
 
       // Alignment
-      fXVelAvg += jVelocity.x;
-      fYVelAvg += jVelocity.y;
-      fZVelAvg += jVelocity.z;
+      fXVelAvg /= iNeighboringBoids;
+      fYVelAvg /= iNeighboringBoids;
+      fZVelAvg /= iNeighboringBoids;
+      fAcceleration.x += (fXVelAvg - velocity.x) * fMatchingfactor;
+      fAcceleration.y += (fYVelAvg - velocity.y) * fMatchingfactor;
+      fAcceleration.z += (fZVelAvg - velocity.z) * fMatchingfactor;
 
       // Cohesion
-      fXPosAvg += jPosition.x;
-      fYPosAvg += jPosition.y;
-      fZPosAvg += jPosition.z;
-
-      iNeighboringBoids += 1.0;
+      fXPosAvg /= iNeighboringBoids;
+      fYPosAvg /= iNeighboringBoids;
+      fZPosAvg /= iNeighboringBoids;
+      fAcceleration.x += (fXPosAvg - position.x) * fCenteringFactor;
+      fAcceleration.y += (fYPosAvg - position.y) * fCenteringFactor;
+      fAcceleration.z += (fZPosAvg - position.z) * fCenteringFactor;
 
     }
 
+    // calculate position
+    velocity.x += fAcceleration.x;
+    velocity.y += fAcceleration.y;
+    velocity.z += fAcceleration.z;
 
-  }
+    if(bPredatorExists){
 
+      float predatorDx = position.x - fPredatorX;
+      float predatorDy = position.y - fPredatorY;
+      float predatorDz = position.z - fPredatorZ;
 
-  // Separation
-  fAcceleration.x += fCloseDx * fAvoidFactor;
-  fAcceleration.y += fCloseDy * fAvoidFactor;
-  fAcceleration.z += fCloseDz * fAvoidFactor;
+      float predatorDistance = sqrt(
+        pow(predatorDx,2.0) + 
+        pow(predatorDy,2.0) + 
+        pow(predatorDz,2.0)
+      );
 
-  if(iNeighboringBoids > 0.0){
+      if(predatorDistance <= fPredatorSize){
+        velocity.w = 0.0;
+      }
 
-    // Alignment
-    fXVelAvg /= iNeighboringBoids;
-    fYVelAvg /= iNeighboringBoids;
-    fZVelAvg /= iNeighboringBoids;
-    fAcceleration.x += (fXVelAvg - velocity.x) * fMatchingfactor;
-    fAcceleration.y += (fYVelAvg - velocity.y) * fMatchingfactor;
-    fAcceleration.z += (fZVelAvg - velocity.z) * fMatchingfactor;
+      else if(predatorDistance < fPredatorRange){
 
-    // Cohesion
-    fXPosAvg /= iNeighboringBoids;
-    fYPosAvg /= iNeighboringBoids;
-    fZPosAvg /= iNeighboringBoids;
-    fAcceleration.x += (fXPosAvg - position.x) * fCenteringFactor;
-    fAcceleration.y += (fYPosAvg - position.y) * fCenteringFactor;
-    fAcceleration.z += (fZPosAvg - position.z) * fCenteringFactor;
+        float velX = abs(velocity.x);
+        float velY = abs(velocity.y);
+        float velZ = abs(velocity.z);
+        float sumVel = velX + velY + velZ;
+        
+        float fTurnX = 1.0; 
+        float fTurnY = 1.0; 
+        float fTurnZ = 1.0; 
 
-  }
+        if(predatorDx < 0.0){ fTurnX = -1.0; }
+        if(predatorDy < 0.0){ fTurnY = -1.0; }
+        if(predatorDz < 0.0){ fTurnZ = -1.0; }
 
-  // calculate position
-  velocity.x += fAcceleration.x;
-  velocity.y += fAcceleration.y;
-  velocity.z += fAcceleration.z;
+        velocity.x += fPredatorturnfactor * fTurnX * (1.0 - (velX/sumVel));
+        velocity.y += fPredatorturnfactor * fTurnY * (1.0 - (velY/sumVel));
+        velocity.z += fPredatorturnfactor * fTurnZ * (1.0 - (velZ/sumVel));
 
-  if(bPredatorExists){
+      }
 
-    float predatorDx = position.x - fPredatorX;
-    float predatorDy = position.y - fPredatorY;
-    float predatorDz = position.z - fPredatorZ;
-
-    float predatorDistance = sqrt(
-      pow(predatorDx,2.0) + 
-      pow(predatorDy,2.0) + 
-      pow(predatorDz,2.0)
-    );
-
-    if(predatorDistance <= fPredatorSize){
-      velocity.w = 0.0;
     }
 
-    else if(predatorDistance < fPredatorRange){
-
-      float velX = abs(velocity.x);
-      float velY = abs(velocity.y);
-      float velZ = abs(velocity.z);
-      float sumVel = velX + velY + velZ;
+    // is not dead
+    if(velocity.w == 1.0){
       
-      float fTurnX = 1.0; 
-      float fTurnY = 1.0; 
-      float fTurnZ = 1.0; 
+      // turn factor
+      // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
 
-      if(predatorDx < 0.0){ fTurnX = -1.0; }
-      if(predatorDy < 0.0){ fTurnY = -1.0; }
-      if(predatorDz < 0.0){ fTurnZ = -1.0; }
+      bool bIsTurning = false;
+      if(position.x > fBoidBoxRight){
+        velocity.x -= fTurnFactor;
+        bIsTurning = true;
+      }
 
-      velocity.x += fPredatorturnfactor * fTurnX * (1.0 - (velX/sumVel));
-      velocity.y += fPredatorturnfactor * fTurnY * (1.0 - (velY/sumVel));
-      velocity.z += fPredatorturnfactor * fTurnZ * (1.0 - (velZ/sumVel));
+      if(position.x < fBoidBoxLeft){
+        velocity.x += fTurnFactor;
+        bIsTurning = true;
+      }
 
+      if(position.y > fBoidBoxBottom){
+        velocity.y -= fTurnFactor;
+        bIsTurning = true;
+      }
+
+      if(position.y < fBoidBoxTop){
+        velocity.y += fTurnFactor;
+        bIsTurning = true;
+      }
+
+      if(position.z > fBoidBoxFront){
+        velocity.z -= fTurnFactor;
+        bIsTurning = true;
+      }
+
+      if(position.z < fBoidBoxBack){
+        velocity.z += fTurnFactor;
+        bIsTurning = true;
+      }
+
+      // limit velocity
+      float fVelocitySqrt = sqrt(
+        pow( velocity.x, 2.0 ) + 
+        pow( velocity.y, 2.0 ) + 
+        pow( velocity.z, 2.0 )
+      );
+
+      if(fVelocitySqrt > fMaxVelocity){
+        velocity.x = velocity.x / fVelocitySqrt * fMaxVelocity;
+        velocity.y = velocity.y / fVelocitySqrt * fMaxVelocity;
+        velocity.z = velocity.z / fVelocitySqrt * fMaxVelocity;
+      }
+
+      // limit min vel, only do this when not turning
+      if(fVelocitySqrt < fMinVelocity && !bIsTurning){
+        velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
+        velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
+        velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
+      }
+      
     }
 
-  }
-
-  if(velocity.w == 0.0){
-    gl_FragColor = velocity;
-    return;
-  }
-
-  // turn factor
-  // https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Screen-edges
-
-  bool bIsTurning = false;
-  if(position.x > fBoidBoxRight){
-    velocity.x -= fTurnFactor;
-    bIsTurning = true;
-  }
-
-  if(position.x < fBoidBoxLeft){
-    velocity.x += fTurnFactor;
-    bIsTurning = true;
-  }
-
-  if(position.y > fBoidBoxBottom){
-    velocity.y -= fTurnFactor;
-    bIsTurning = true;
-  }
-
-  if(position.y < fBoidBoxTop){
-    velocity.y += fTurnFactor;
-    bIsTurning = true;
-  }
-
-  if(position.z > fBoidBoxFront){
-    velocity.z -= fTurnFactor;
-    bIsTurning = true;
-  }
-
-  if(position.z < fBoidBoxBack){
-    velocity.z += fTurnFactor;
-    bIsTurning = true;
-  }
-
-  // limit velocity
-  float fVelocitySqrt = sqrt(
-    pow( velocity.x, 2.0 ) + 
-    pow( velocity.y, 2.0 ) + 
-    pow( velocity.z, 2.0 )
-  );
-
-  if(fVelocitySqrt > fMaxVelocity){
-    velocity.x = velocity.x / fVelocitySqrt * fMaxVelocity;
-    velocity.y = velocity.y / fVelocitySqrt * fMaxVelocity;
-    velocity.z = velocity.z / fVelocitySqrt * fMaxVelocity;
-  }
-
-  // limit min vel, only do this when not turning
-  if(fVelocitySqrt < fMinVelocity && !bIsTurning){
-    velocity.x = velocity.x / fVelocitySqrt * fMinVelocity;
-    velocity.y = velocity.y / fVelocitySqrt * fMinVelocity;
-    velocity.z = velocity.z / fVelocitySqrt * fMinVelocity;
   }
   
   gl_FragColor = velocity;

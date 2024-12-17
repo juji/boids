@@ -17,21 +17,24 @@ void main(){
   // position
 
   if(velocity.w == 0.0){
+    
     if(position.y > fGraveYardY){
       position.y -= 5.0;
     }
-    gl_FragColor = position;
-    return;  
+
   }else{
+
     position.x += velocity.x;
     position.y += velocity.y;
     position.z += velocity.z;
+
+    // grid num
+    position.w = floor((position.x + iWidth * .5) / (iWidth / iGridCol)) +
+        floor((position.y + iHeight * .5) / (iHeight / iGridRow)) +
+        floor((position.z + iDepth * .5) / (iDepth / iGridDepth));
+        
   }
 
-  // grid num
-  position.w = floor((position.x + iWidth * .5) / (iWidth / iGridCol)) +
-      floor((position.y + iHeight * .5) / (iHeight / iGridRow)) +
-      floor((position.z + iDepth * .5) / (iDepth / iGridDepth));
   
   gl_FragColor = position;
 
