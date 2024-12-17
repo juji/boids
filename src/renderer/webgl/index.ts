@@ -17,7 +17,7 @@ export class Renderer {
   canvas: HTMLCanvasElement
 
   // arrLen per boid
-  arrLen = 7
+  arrLen = 8
 
   //
   reportFps: (fps: number) => void
@@ -36,11 +36,15 @@ export class Renderer {
   dotSize = 21
   uPointDenom = 400
 
+  // track
+  // reportStats: (obj: { remaining: number, eaten: number }) => void
+
   constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
     screen: { width:number, height: number },
-    reportFps: (fps: number) => void
+    reportFps: (fps: number) => void,
+    reportStats: (obj: { remaining: number, eaten: number }) => void,
   }){
 
     const {
@@ -48,6 +52,7 @@ export class Renderer {
       boidNum,
       screen,
       reportFps,
+      reportStats
     } = par
 
     if(!boidNum) throw new Error('boidNum is falsy')
@@ -57,6 +62,7 @@ export class Renderer {
 
     this.canvas = canvas
     this.reportFps = reportFps
+    // this.reportStats = reportStats
     this.predator = new Predator()
     
     // boidbox
@@ -87,6 +93,9 @@ export class Renderer {
         position[1],  
         position[2],  
       )
+
+      // is alive
+      boidArr[ (i * this.arrLen) + 7 ] = 1
       
     })
 
@@ -142,7 +151,8 @@ export class Renderer {
       predator: this.predator,
       boids: this.boids,
       positionTextureName: 'uPositionTexture',
-      velocityTextureName: 'uVelocityTexture'
+      velocityTextureName: 'uVelocityTexture',
+      reportStats: reportStats
     })
 
     this.prevTime = performance.now()

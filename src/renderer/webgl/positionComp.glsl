@@ -5,6 +5,7 @@ uniform float iDepth;
 uniform float iGridCol;
 uniform float iGridRow;
 uniform float iGridDepth;
+uniform float fGraveYardY;
 
 void main(){
 
@@ -14,9 +15,18 @@ void main(){
   vec4 velocity = texture(uVelocityTexture, index);
 
   // position
-  position.x += velocity.x;
-  position.y += velocity.y;
-  position.z += velocity.z;
+
+  if(velocity.w == 0.0){
+    if(position.y > fGraveYardY){
+      position.y -= 5.0;
+    }
+    gl_FragColor = position;
+    return;  
+  }else{
+    position.x += velocity.x;
+    position.y += velocity.y;
+    position.z += velocity.z;
+  }
 
   // grid num
   position.w = floor((position.x + iWidth * .5) / (iWidth / iGridCol)) +

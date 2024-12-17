@@ -15,7 +15,7 @@ export class Renderer {
   canvas: HTMLCanvasElement
 
   // arrLen per boid
-  arrLen = 7
+  arrLen = 8
 
   //
   sharedArray: Float32Array
@@ -31,11 +31,15 @@ export class Renderer {
   log = true
   hasChange: Int8Array
 
+  // track
+  reportStats: (obj: { remaining: number, eaten: number }) => void
+
   constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
     screen: { width:number, height: number },
-    reportFps: (fps: number) => void
+    reportFps: (fps: number) => void,
+    reportStats: (obj: { remaining: number, eaten: number }) => void
   }){
 
     const {
@@ -43,12 +47,14 @@ export class Renderer {
       boidNum,
       screen,
       reportFps,
+      reportStats
     } = par
 
     if(!boidNum) throw new Error('boidNum is falsy')
 
     this.canvas = canvas
     this.reportFps = reportFps
+    this.reportStats = reportStats
     this.predator = new Predator()
     this.boidNum = boidNum
 
@@ -100,6 +106,9 @@ export class Renderer {
         position[1],  
         position[2],  
       )
+
+      // is alive
+      sharedArray[ (i * this.arrLen) + 7 ] = 1
       
     })
 
@@ -156,6 +165,19 @@ export class Renderer {
 
   }
 
+  getRemainingBoid(){
+    let len = this.boidNum
+    let remaining = this.boidNum
+    while(len--){
+      if(this.sharedArray[ len * this.arrLen + 7 ] === 0)
+        remaining--;
+    }
+    return {
+      remaining,
+      eaten: this.boidNum - remaining
+    }
+  }
+
   loop(){
   
     requestAnimationFrame(() => this.loop())
@@ -176,6 +198,8 @@ export class Renderer {
         this.reportFps(fps)
       }
     }
+
+    this.reportStats( this.getRemainingBoid() )
   
   }
 

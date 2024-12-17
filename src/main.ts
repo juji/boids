@@ -6,6 +6,7 @@ import './styles/info-button.css'
 import './styles/num-boids.css'
 import './styles/fps-counter.css'
 import './styles/method-select.css'
+import './styles/predator-stats.css'
 
 import { ui } from './ui'
 
@@ -91,6 +92,15 @@ function detectWebGLContext () {
     reportFps: (fps: number) => {
       const fpsVisual = document.querySelector(`.fps-counter`) as HTMLElement
       if(fpsVisual) fpsVisual.innerText = fps + ' fps'
+    },
+    reportStats: ( par: {
+      remaining: number
+      eaten: number
+    }) => {
+      const remainingSpan = document.querySelector(`.predator-stats .remaining span`) as HTMLElement
+      if(remainingSpan) remainingSpan.innerText = par.remaining + ''
+      const eatenSpan = document.querySelector(`.predator-stats .eaten span`) as HTMLElement
+      if(eatenSpan) eatenSpan.innerText = par.eaten + ''
     }
   })
   

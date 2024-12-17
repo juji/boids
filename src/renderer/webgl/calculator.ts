@@ -10,6 +10,7 @@ import {
   matchingfactor,
   centeringFactor,
   predatorturnfactor,
+  graveYardY,
 } from '../items/constants'
 
 import * as THREE from 'three';
@@ -29,7 +30,8 @@ type CalculatorParams = {
   predator: Predator
   boids: Boids,
   positionTextureName: string,
-  velocityTextureName: string
+  velocityTextureName: string,
+  reportStats: (obj: { remaining: number, eaten: number }) => void,
 }
 
 export function calculator({
@@ -39,7 +41,8 @@ export function calculator({
   predator,
   boids,
   positionTextureName,
-  velocityTextureName
+  velocityTextureName,
+  reportStats,
 }: CalculatorParams){
 
   const visibleRange = 40 + Math.random() * 40
@@ -61,6 +64,7 @@ export function calculator({
   posVar.material.uniforms.iGridCol = { value: boidBox.gridCol };
   posVar.material.uniforms.iGridRow = { value: boidBox.gridRow };
   posVar.material.uniforms.iGridDepth = { value: boidBox.gridDepth };
+  posVar.material.uniforms.fGraveYardY = { value: graveYardY }
 
   
   const velTexture = computation.createTexture()
@@ -84,6 +88,7 @@ export function calculator({
   velVar.material.uniforms.fPredatorY = { value: predator.y }
   velVar.material.uniforms.fPredatorZ = { value: predator.z }
   velVar.material.uniforms.fPredatorRange = { value: predator.range }
+  velVar.material.uniforms.fPredatorSize = { value: predator.size }
 
   velVar.material.uniforms.fBoidBoxLeft = { value: boidBox.left }
   velVar.material.uniforms.fBoidBoxRight = { value: boidBox.right }
@@ -91,7 +96,6 @@ export function calculator({
   velVar.material.uniforms.fBoidBoxTop = { value: boidBox.top }
   velVar.material.uniforms.fBoidBoxFront = { value: boidBox.front }
   velVar.material.uniforms.fBoidBoxBack = { value: boidBox.back }
-
 
   computation.setVariableDependencies(posVar, [ posVar, velVar ])
   computation.setVariableDependencies(velVar, [ posVar, velVar ])
@@ -113,11 +117,45 @@ export function calculator({
     velTexture.image.data[ i4 + 0 ] = boidArr[ iArrLen + 3 ]
     velTexture.image.data[ i4 + 1 ] = boidArr[ iArrLen + 4 ]
     velTexture.image.data[ i4 + 2 ] = boidArr[ iArrLen + 5 ]
-    velTexture.image.data[ i4 + 3 ] = 0
+
+    // is alive
+    velTexture.image.data[ i4 + 3 ] = boidArr[ iArrLen + 7 ]
 
   }
 
   computation.init()
+
+  const readVelocity = new Float32Array( boidArr.length / 2 );
+  let drawReport = 0
+
+  async function getReport(){
+
+    drawReport++;
+    if(drawReport < 60) return;
+    drawReport = 0
+
+    // get body count
+    // @ts-ignore
+    await boids.renderer.readRenderTargetPixelsAsync(
+      computation.getCurrentRenderTarget(velVar), 
+      0, 0, computationSize, computationSize, 
+      readVelocity
+    // @ts-ignore
+    )
+
+    let eaten = 0
+    let len = readVelocity.length / 4
+    while(len--){
+      if(!readVelocity[ len * 4 + 3 ]){
+        eaten += 1
+      }
+    }
+    reportStats({ 
+      remaining: (readVelocity.length / 4) - eaten, 
+      eaten 
+    })
+
+  }
 
   return {
     compute: () => {
@@ -128,6 +166,9 @@ export function calculator({
 
       ;(boids.boidPoints.material as THREE.ShaderMaterial).uniforms.uPositionTexture.value = 
       computation.getCurrentRenderTarget(posVar).texture;
+
+      getReport()
+
 
     },
   }

@@ -128,7 +128,6 @@ export default class Boids {
       })
     }
 
-    // console.log(obj.customShaderMaterial)
     const material = obj.customShaderMaterial ? obj.customShaderMaterial : new THREE.PointsMaterial( { 
       color: this.boidColor,
       transparent: false,

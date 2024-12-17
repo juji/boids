@@ -1,0 +1,14 @@
+
+
+.predator-stats{
+  position: fixed;
+  bottom: 62px;
+  left: 0;
+  /* border: 1px solid red; */
+  background: red;
+
+  & > p{
+    line-height: 5px;
+    padding: 0 1rem;
+  }
+}

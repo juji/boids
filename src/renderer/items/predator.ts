@@ -3,7 +3,7 @@
 export default class Predator {
   size = 40
   exists = true
-  range = 0
+  range = 60
   x = 0
   y = 0
   z = 0

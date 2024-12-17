@@ -19,6 +19,7 @@ export async function main(par:{
   predatorturnfactor: number
   visibleRange: number
   maxPartner: number
+  graveYardY: number
 }){
 
   const {
@@ -36,6 +37,7 @@ export async function main(par:{
     predatorturnfactor,
     visibleRange,
     maxPartner,
+    graveYardY
   } = par
 
   await ti.init();
@@ -62,6 +64,7 @@ export async function main(par:{
     predator,
     boidBox,
     maxPartner,
+    graveYardY
   })
 
   let calculate = ti.kernel(
@@ -84,6 +87,14 @@ export async function main(par:{
           iPos + 1,
           iPos + 2,
         ]
+
+        const iIsAlive = iPos + 7;
+        if(boids[ iIsAlive ] === 0){
+          if(boids[ iPosition[1] ] > graveYardY){
+            boids[ iPosition[1] ] -= 5
+          }
+          continue;
+        }
 
         let iVelocity = [
           iPos + 3,
@@ -118,8 +129,10 @@ export async function main(par:{
         while(j > 0 ) {
           j = j - 1
           if(j===i) continue;
-
           let jPos = j * sal 
+
+          if(boids[ jPos + 7 ] === 0) continue;
+
 
           // grid based neighbour
           // https://ercang.github.io/boids-js/
@@ -214,7 +227,9 @@ export async function main(par:{
             predatorDx**2 + predatorDy**2 + predatorDz**2
           )
 
-          if(predatorDistance < predator.range){
+          if(predatorDistance <= predator.size){
+            boids[ iIsAlive ] = 0
+          } else if(predatorDistance < predator.range){
 
             const velX = Math.abs(boids[ iVelocity[0] ])
             const velY = Math.abs(boids[ iVelocity[1] ])
@@ -234,6 +249,10 @@ export async function main(par:{
             
           }
           
+        }
+
+        if(boids[ iIsAlive ] === 0){
+          continue;
         }
 
         

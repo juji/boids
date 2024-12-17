@@ -24,6 +24,7 @@ uniform float fPredatorX;
 uniform float fPredatorY;
 uniform float fPredatorZ;
 uniform float fPredatorRange;
+uniform float fPredatorSize;
 
 uniform float fBoidBoxLeft;
 uniform float fBoidBoxRight;
@@ -41,6 +42,7 @@ uniform float fBoidBoxBack;
 //   return fract(sin(sn) * c);
 // }
 
+// velocity.w is isAlive
 
 void main(){
 
@@ -48,6 +50,12 @@ void main(){
 
   vec4 position = texture(uPositionTexture, index);
   vec4 velocity = texture(uVelocityTexture, index);
+
+  // is dead
+  if(velocity.w == 0.0){
+    gl_FragColor = velocity;
+    return;
+  }
 
   vec3 fAcceleration = vec3(0.0, 0.0, 0.0);
   int iGridNum = int(position.w);
@@ -84,6 +92,7 @@ void main(){
       l += 1;
     }
 
+    if(jVelocity.w == 0.0) continue;
     if(jIndex == index) continue;
 
     int jGridNum = int(jPosition.w);
@@ -170,7 +179,11 @@ void main(){
       pow(predatorDz,2.0)
     );
 
-    if(predatorDistance < fPredatorRange){
+    if(predatorDistance <= fPredatorSize){
+      velocity.w = 0.0;
+    }
+
+    else if(predatorDistance < fPredatorRange){
 
       float velX = abs(velocity.x);
       float velY = abs(velocity.y);
@@ -191,6 +204,11 @@ void main(){
 
     }
 
+  }
+
+  if(velocity.w == 0.0){
+    gl_FragColor = velocity;
+    return;
   }
 
   // turn factor

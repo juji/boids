@@ -11,6 +11,7 @@ import {
   matchingfactor,
   centeringFactor,
   predatorturnfactor,
+  graveYardY,
 } from '../items/constants'
 
 let predator:Predator
@@ -89,6 +90,7 @@ self.onmessage = (e: MessageEvent) => {
         predatorturnfactor,
         visibleRange,
         maxPartner,
+        graveYardY
       }).then(v => {
         calculatePosition = v.calculate
         calculate()

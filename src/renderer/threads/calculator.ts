@@ -10,6 +10,7 @@ import {
   matchingfactor,
   centeringFactor,
   predatorturnfactor,
+  graveYardY  
 } from '../items/constants'
 
 let predator:Predator
@@ -48,14 +49,22 @@ function calculatePosition(){
 
     if(i<start) break;
 
-    let partners = 0
-    const acceleration = [0,0,0]
-
     const iPosition = [
       i * sal + 0,
       i * sal + 1,
       i * sal + 2,
     ]
+
+    const iIsAlive = i * sal + 7;
+    if(sharedArray[ iIsAlive ] === 0){
+      if(sharedArray[ iPosition[1] ] > graveYardY)
+        sharedArray[ iPosition[1] ] -= 5
+      continue;
+    }
+
+
+    let partners = 0
+    const acceleration = [0,0,0]
 
     const iVelocity = [
       i * sal + 3,
@@ -89,6 +98,9 @@ function calculatePosition(){
     let j = sharedArray.length / sal
     while(j--) {
       if(j===i) continue;
+
+      // is alive ?
+      if(sharedArray[ j * sal + 7 ] === 0) continue;
 
       // grid based neighbour
       // https://ercang.github.io/boids-js/
@@ -183,7 +195,9 @@ function calculatePosition(){
         predatorDx**2 + predatorDy**2 + predatorDz**2
       )
 
-      if(predatorDistance < predator.range){
+      if(predatorDistance <= predator.size){
+        sharedArray[ iIsAlive ] = 0
+      } else if(predatorDistance < predator.range){
 
         const velX = Math.abs(sharedArray[ iVelocity[0] ])
         const velY = Math.abs(sharedArray[ iVelocity[1] ])
@@ -194,7 +208,12 @@ function calculatePosition(){
         sharedArray[ iVelocity[1] ] += predatorturnfactor * ((predatorDy < 0 ? -1 : 1) * (1 - (velY/sumVel)))
         sharedArray[ iVelocity[2] ] += predatorturnfactor * ((predatorDz < 0 ? -1 : 1) * (1 - (velZ/sumVel)))
       }
+
       
+    }
+
+    if(sharedArray[ iIsAlive ] === 0){
+      continue;
     }
 
 

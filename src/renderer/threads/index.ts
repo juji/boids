@@ -20,7 +20,7 @@ export class Renderer {
   canvas: HTMLCanvasElement
 
   // arrLen per boid
-  arrLen = 7
+  arrLen = 8
 
   //
   posCounter: Int8Array
@@ -36,11 +36,15 @@ export class Renderer {
   // log
   log = true
 
+  // track
+  reportStats: (obj: { remaining: number, eaten: number }) => void
+
   constructor(par: {
     canvas: HTMLCanvasElement,
     boidNum: number,
     screen: { width:number, height: number },
-    reportFps: (fps: number) => void
+    reportFps: (fps: number) => void,
+    reportStats: (obj: { remaining: number, eaten: number }) => void
   }){
 
     const {
@@ -48,6 +52,7 @@ export class Renderer {
       boidNum,
       screen,
       reportFps,
+      reportStats
     } = par
 
     if(!boidNum) throw new Error('boidNum is falsy')
@@ -56,6 +61,7 @@ export class Renderer {
     this.reportFps = reportFps
     this.predator = new Predator()
     this.boidNum = boidNum
+    this.reportStats = reportStats
 
     this.calculatorNum = this.calcPerThread ? Math.max(Math.ceil(boidNum / this.calcPerThread), 1) : 0
 
@@ -109,6 +115,9 @@ export class Renderer {
         position[1],  
         position[2],  
       )
+
+      // is alive
+      sharedArray[ (i * this.arrLen) + 7 ] = 1
       
     })
 
@@ -184,13 +193,26 @@ export class Renderer {
 
   }
 
+  getRemainingBoid(){
+    let len = this.boidNum
+    let remaining = this.boidNum
+    while(len--){
+      if(this.sharedArray[ len * this.arrLen + 7 ] === 0)
+        remaining--;
+    }
+    return {
+      remaining,
+      eaten: this.boidNum - remaining
+    }
+  }
+
   loop(){
   
     requestAnimationFrame(() => this.loop())
     
     this.setPositions()
     this.boids.draw()
-
+    
     if(this.hasChanged.findIndex(v => !v) === -1){
       this.posCounter.fill(0)
       this.hasChanged.fill(0)
@@ -205,6 +227,8 @@ export class Renderer {
         this.reportFps(fps)
       }
     }
+
+    this.reportStats( this.getRemainingBoid() )
   
   }
 
