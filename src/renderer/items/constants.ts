@@ -2,7 +2,7 @@
 // so we know it's the same for all
 
 export const maxVelocity: number = 5
-export const minVelocity: number = 3
+export const minVelocity: number = 2
 
 // on edges
 export const turnFactor: number = 0.1
